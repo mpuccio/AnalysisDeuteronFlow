@@ -237,7 +237,7 @@ Int_t AliAnalysisTaskFlowd::SetupEvent()
 void AliAnalysisTaskFlowd::UserCreateOutputObjects()
 {
   // Creation of the histograms, this is called once
-  fOutputContainer = new TObjArray();
+  fOutputContainer = new TObjArray(1);
   fOutputContainer->SetOwner(kTRUE);
   TString s = GetName();
   s.Append("_results");
