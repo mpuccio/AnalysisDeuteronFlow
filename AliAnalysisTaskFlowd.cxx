@@ -445,7 +445,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     SetBBParameters(runNumber);
     
     //define expected signals for the various species
-    Float_t deutExp = AliExternalTrackParam::BetheBlochAleph(ptot/(0.938*2),1.45802,27.4992,4.00313e-15,2.48485,8.31768);
+    //Float_t deutExp = AliExternalTrackParam::BetheBlochAleph(ptot/(0.938*2),1.45802,27.4992,4.00313e-15,2.48485,8.31768);
     Double_t expSignalDeuteron = AliExternalTrackParam::BetheBlochAleph(ptot/1.875612,fBBParametersLightParticles[0],fBBParametersLightParticles[1],fBBParametersLightParticles[2],fBBParametersLightParticles[3],fBBParametersLightParticles[4]);
        
     //
