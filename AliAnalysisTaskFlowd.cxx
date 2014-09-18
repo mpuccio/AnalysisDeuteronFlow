@@ -280,20 +280,20 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fHistDeDxSharp->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
   BinLogAxis(fHistDeDxSharp);
   
-  fHistDeuteronSignal  = new TH1F("fHistDeuteronSignal", "Deuteron", 22, 1.12, 4.31);
+  fHistDeuteronSignal  = new TH1F("fHistDeuteronSignal", "Deuteron", 38, 1.12, 6.63);
   fHistDeuteronSignal->GetYaxis()->SetTitle("Counts");
   fHistDeuteronSignal->GetXaxis()->SetTitle("#frac{m^{2}}{z^{2}} (GeV^{2}/c^{4})");
   
   fGraphDeuteronSignal = new TGraph(20);
   
   // TOF performance
-  fHistTOF2D = new TH2F("fHistTOF2D", "TOF2D; #beta; p (GeV/c)", 500, 0.0, 10., 2250, 0.2, 1.1);
+  fHistTOF2D = new TH2F("fHistTOF2D", "TOF2D; #frac{p}{z} (GeV/c); #beta", 500, 0.0, 10., 2250, 0.2, 1.1);
   //
-  fHistTOFnuclei = new TH2F("fHistTOFnuclei","TOF; #beta; #frac{p}{z} (GeV/c)",
+  fHistTOFnuclei = new TH2F("fHistTOFnuclei","TOF; #frac{p}{z} (GeV/c); #beta",
                             500,0.,10.,2250,0.7,1.);
 
     //alphas
-  fHistDeuteron = new TH1F("fHistDeuteron", "Deuteron", 22, 1.12, 4.31);
+  fHistDeuteron = new TH1F("fHistDeuteron", "Deuteron", 38, 1.12, 6.63);
   fHistDeuteron->GetYaxis()->SetTitle("Counts");
   fHistDeuteron->GetXaxis()->SetTitle("#frac{m^{2}}{z^{2}} (GeV^{2}/c^{4})");
   
@@ -516,28 +516,29 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     //
     // alpha TOF plot
     //
-    if((track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron > -0.15 &&
-       (track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron < 0.15) {
-      //TOF
-      hasTOFout  = status&AliESDtrack::kTOFout;
-      hasTOFtime = status&AliESDtrack::kTIME;
-      Bool_t hasTOF     = kFALSE;
-      
-      if (hasTOFout && hasTOFtime) hasTOF = kTRUE;
-      //
-      if (length < 350.) hasTOF = kFALSE;
-      
-      Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
-      //                              
-      if (length > 350. &&  hasTOF == kTRUE && ptot < 4) {
-        time = track->GetTOFsignal() - time0;
-        if (time > 0) {
-          beta = length / (2.99792457999999984e-02 * time);
-          if (beta < 0.975) {
-            gamma = 1/TMath::Sqrt(1 - beta*beta);
-            mass = ptot/TMath::Sqrt(gamma*gamma - 1); // using inner TPC mom. as approx.
-            if (TMath::Sqrt(track->GetTOFsignalDz() * track->GetTOFsignalDz() +
-                            track->GetTOFsignalDx()*track->GetTOFsignalDx()) < 5.) {
+
+    //TOF
+    hasTOFout  = status&AliESDtrack::kTOFout;
+    hasTOFtime = status&AliESDtrack::kTIME;
+    Bool_t hasTOF     = kFALSE;
+    
+    if (hasTOFout && hasTOFtime) hasTOF = kTRUE;
+    //
+    if (length < 350.) hasTOF = kFALSE;
+    
+    Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
+    //
+    if (length > 350. &&  hasTOF == kTRUE && ptot < 4) {
+      time = track->GetTOFsignal() - time0;
+      if (time > 0) {
+        beta = length / (2.99792457999999984e-02 * time);
+        if (beta < 0.975) {
+          gamma = 1/TMath::Sqrt(1 - beta*beta);
+          mass = ptot/TMath::Sqrt(gamma*gamma - 1); // using inner TPC mom. as approx.
+          if (TMath::Sqrt(track->GetTOFsignalDz() * track->GetTOFsignalDz() +
+                          track->GetTOFsignalDx()*track->GetTOFsignalDx()) < 5.) {
+            if((track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron > -0.15 &&
+               (track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron < 0.15) {
               fHistDeuteron->Fill(mass*mass);
               if (mass * mass > 3. && mass * mass < 4.) {
                 fHistDeuteronSignal->Fill(mass*mass);
@@ -548,8 +549,10 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
             }
           }
         }
+        fHistTOF2D->Fill(ptot,beta);
       }
     }
+    
     
   }//end loop over tracks
   
