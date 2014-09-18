@@ -206,7 +206,7 @@ void AliAnalysisTaskFlowd::SetBBParameters(Int_t runNumber)
 //    fBBParametersNuclei[4]  = 8.31768;
     
   }
-  1.45802,27.4992,4.00313e-15,2.48485,8.31768);
+  
   if(runNumber > 166500){ //LHC11h
     
     fBBParametersLightParticles[0]   = 1.45802;//4.69637;//1.11243;
