@@ -26,3 +26,15 @@
 *.exe
 *.out
 *.app
+
+# Root files
+*.root
+*.par
+*.d
+
+# Emacs backup copies
+*~
+
+# Results and logs
+*.log
+*.png
