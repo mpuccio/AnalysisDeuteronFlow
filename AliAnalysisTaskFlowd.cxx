@@ -206,14 +206,14 @@ void AliAnalysisTaskFlowd::SetBBParameters(Int_t runNumber)
 //    fBBParametersNuclei[4]  = 8.31768;
     
   }
-  
+  1.45802,27.4992,4.00313e-15,2.48485,8.31768);
   if(runNumber > 166500){ //LHC11h
     
-    fBBParametersLightParticles[0]   = 4.69637;//1.11243;
-    fBBParametersLightParticles[1]   = 7.51827;//26.1144;
-    fBBParametersLightParticles[2]   = 0.0183746;//4.00313e-15;
-    fBBParametersLightParticles[3]   = 2.60;//2.72969;
-    fBBParametersLightParticles[4]   = 2.7;//9.15038;
+    fBBParametersLightParticles[0]   = 1.45802;//4.69637;//1.11243;
+    fBBParametersLightParticles[1]   = 27.4992;//7.51827;//26.1144;
+    fBBParametersLightParticles[2]   = 4.00313e-15;//0.0183746;//4.00313e-15;
+    fBBParametersLightParticles[3]   = 2.48485;//2.72969;
+    fBBParametersLightParticles[4]   = 8.31768;//;2.7;//9.15038;
     
 //    fBBParametersNuclei[0]  = 1.4906;
 //    fBBParametersNuclei[1]  = 27.9758;
@@ -445,6 +445,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     SetBBParameters(runNumber);
     
     //define expected signals for the various species
+    Float_t deutExp = AliExternalTrackParam::BetheBlochAleph(ptot/(0.938*2),1.45802,27.4992,4.00313e-15,2.48485,8.31768);
     Double_t expSignalDeuteron = AliExternalTrackParam::BetheBlochAleph(ptot/1.875612,fBBParametersLightParticles[0],fBBParametersLightParticles[1],fBBParametersLightParticles[2],fBBParametersLightParticles[3],fBBParametersLightParticles[4]);
        
     //
