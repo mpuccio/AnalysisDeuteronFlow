@@ -45,7 +45,6 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fESDtrackCuts(0x0)
 ,fESDtrackCutsSharp(0x0)
 ,fEventHandler(0x0)
-,fGraphDeuteronSignal(0x0)
 ,fHistCentralityClass10(0x0)
 ,fHistCentralityPercentile(0x0)
 ,fHistDeDx(0x0)
@@ -88,7 +87,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   fESDtrackCutsSharp  = new AliESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts");
   fESDtrackCutsSharp->SetAcceptKinkDaughters(kFALSE);
   fESDtrackCutsSharp->SetMinNClustersTPC(80);
-  fESDtrackCutsSharp->SetMaxChi2PerClusterITS(10);// TO BE INVESTIGATED !!!!!!!!!!!!!!
+  fESDtrackCutsSharp->SetMaxChi2PerClusterITS(10);
   fESDtrackCutsSharp->SetMaxChi2PerClusterTPC(5);
   fESDtrackCutsSharp->SetRequireTPCRefit(kTRUE);
   fESDtrackCutsSharp->SetRequireITSRefit(kTRUE);
@@ -284,8 +283,6 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fHistDeuteronSignal->GetYaxis()->SetTitle("Counts");
   fHistDeuteronSignal->GetXaxis()->SetTitle("#frac{m^{2}}{z^{2}} (GeV^{2}/c^{4})");
   
-  fGraphDeuteronSignal = new TGraph(20);
-  
   // TOF performance
   fHistTOF2D = new TH2F("fHistTOF2D", "TOF2D; #frac{p}{z} (GeV/c); #beta", 500, 0.0, 10., 2250, 0.2, 1.1);
   //
@@ -308,7 +305,6 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistDeDxSharp);
   fOutputContainer->Add(fHistDeuteron);
   fOutputContainer->Add(fHistDeuteronSignal);
-  fOutputContainer->Add(fGraphDeuteronSignal);
   fOutputContainer->Add(fHistTOF2D);
   fOutputContainer->Add(fHistTOFnuclei);
   PostData(1,fOutputContainer);
@@ -542,7 +538,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
               fHistDeuteron->Fill(mass*mass);
               if (mass * mass > 3. && mass * mass < 4.) {
                 fHistDeuteronSignal->Fill(mass*mass);
-                fGraphDeuteronSignal->SetPoint(fNCounter, ptot, track->GetTPCsignal());
                 fNCounter++;
               }
               fHistTOFnuclei->Fill(ptot,beta);

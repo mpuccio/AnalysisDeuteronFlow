@@ -51,7 +51,6 @@ private:
   AliESDtrackCuts      *fESDtrackCuts;                      //! basic cut variables
   AliESDtrackCuts      *fESDtrackCutsSharp;                 //! sharp cut variables -> final results
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
-  TGraph               *fGraphDeuteronSignal;               //! TGraph with d / dE/dx vs. mom
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
   TH2F                 *fHistDeDx;                          //! Histo for a dE/dx
