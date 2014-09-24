@@ -42,8 +42,8 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fBBParametersLightParticles()
 ,fESD(0x0)
 ,fESDpid(0x0)
-,fESDtrackCuts(0x0)
-,fESDtrackCutsSharp(0x0)
+,fESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts")
+,fESDtrackCutsSharp("AliESDtrackCutsSharp","AliESDtrackCutsSharp")
 ,fEventHandler(0x0)
 ,fHistCentralityClass10(0x0)
 ,fHistCentralityPercentile(0x0)
@@ -71,30 +71,28 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 //  DefineOutput(2, TTree::Class());
   
   // cuts for candidates
-  fESDtrackCuts = new AliESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts");
   //
-  fESDtrackCuts->SetAcceptKinkDaughters(kFALSE);
-  fESDtrackCuts->SetMinNClustersTPC(70);
-  fESDtrackCuts->SetMaxChi2PerClusterTPC(6);
-  fESDtrackCuts->SetMaxDCAToVertexXY(3);
-  fESDtrackCuts->SetMaxDCAToVertexZ(2);
-  fESDtrackCuts->SetRequireTPCRefit(kTRUE);
-  //fESDtrackCuts->SetRequireITSRefit(kTRUE);
-  fESDtrackCuts->SetMinNClustersITS(1);
-  fESDtrackCuts->SetEtaRange(-1.0,1.0);
+  fESDtrackCuts.SetAcceptKinkDaughters(kFALSE);
+  fESDtrackCuts.SetMinNClustersTPC(70);
+  fESDtrackCuts.SetMaxChi2PerClusterTPC(6);
+  fESDtrackCuts.SetMaxDCAToVertexXY(3);
+  fESDtrackCuts.SetMaxDCAToVertexZ(2);
+  fESDtrackCuts.SetRequireTPCRefit(kTRUE);
+  //fESDtrackCuts.SetRequireITSRefit(kTRUE);
+  fESDtrackCuts.SetMinNClustersITS(1);
+  fESDtrackCuts.SetEtaRange(-1.0,1.0);
   
   // Cuts for final plots
-  fESDtrackCutsSharp  = new AliESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts");
-  fESDtrackCutsSharp->SetAcceptKinkDaughters(kFALSE);
-  fESDtrackCutsSharp->SetMinNClustersTPC(80);
-  fESDtrackCutsSharp->SetMaxChi2PerClusterITS(10);
-  fESDtrackCutsSharp->SetMaxChi2PerClusterTPC(5);
-  fESDtrackCutsSharp->SetRequireTPCRefit(kTRUE);
-  fESDtrackCutsSharp->SetRequireITSRefit(kTRUE);
-  fESDtrackCutsSharp->SetMinNClustersITS(2);
-  fESDtrackCutsSharp->SetMaxDCAToVertexXY(0.1);
-  fESDtrackCutsSharp->SetMaxDCAToVertexZ(0.5);
-  fESDtrackCutsSharp->SetEtaRange(-0.8,0.8);
+  fESDtrackCutsSharp.SetAcceptKinkDaughters(kFALSE);
+  fESDtrackCutsSharp.SetMinNClustersTPC(80);
+  fESDtrackCutsSharp.SetMaxChi2PerClusterITS(10);
+  fESDtrackCutsSharp.SetMaxChi2PerClusterTPC(5);
+  fESDtrackCutsSharp.SetRequireTPCRefit(kTRUE);
+  fESDtrackCutsSharp.SetRequireITSRefit(kTRUE);
+  fESDtrackCutsSharp.SetMinNClustersITS(2);
+  fESDtrackCutsSharp.SetMaxDCAToVertexXY(0.1);
+  fESDtrackCutsSharp.SetMaxDCAToVertexZ(0.5);
+  fESDtrackCutsSharp.SetEtaRange(-0.8,0.8);
 
 }
 
@@ -402,7 +400,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
   {
     AliESDtrack* track = fESD->GetTrack(iTracks);
-    if (!fESDtrackCuts->AcceptTrack(track)) continue;
+    if (!fESDtrackCuts.AcceptTrack(track)) continue;
     //
     Double_t nClustersTPCPID = track->GetTPCsignalN();
     if(nClustersTPCPID < 60) continue;
@@ -486,7 +484,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     //
     // fill final histograms
     //
-    if (!fESDtrackCutsSharp->AcceptTrack(track) || shared.CountBits() > 1 ||
+    if (!fESDtrackCutsSharp.AcceptTrack(track) || shared.CountBits() > 1 ||
         track->GetTPCsignalN() < 80 || track->GetKinkIndex(0) != 0 || track->GetTPCNclsIter1() < 80)
       continue;
 

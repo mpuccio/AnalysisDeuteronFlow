@@ -48,8 +48,8 @@ private:
   Double_t              fBBParametersLightParticles[5];     //! Bethe Bloch params light particles
   AliESDEvent          *fESD;                               //! ESD object
   AliESDpid            *fESDpid;                            //! basic TPC object for n-sigma cuts
-  AliESDtrackCuts      *fESDtrackCuts;                      //! basic cut variables
-  AliESDtrackCuts      *fESDtrackCutsSharp;                 //! sharp cut variables -> final results
+  AliESDtrackCuts       fESDtrackCuts;                      //  basic cut variables
+  AliESDtrackCuts       fESDtrackCutsSharp;                 //  sharp cut variables -> final results
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
