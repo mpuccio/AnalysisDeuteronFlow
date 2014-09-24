@@ -67,7 +67,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   // Input slot #0 works with a TChain
   DefineInput(0, TChain::Class());
   // Output slot #0 writes into a TH1 container
-  DefineOutput(1, TObjArray::Class());
+  DefineOutput(1, List::Class());
 //  DefineOutput(2, TTree::Class());
   
   // cuts for candidates
@@ -236,7 +236,7 @@ Int_t AliAnalysisTaskFlowd::SetupEvent()
 void AliAnalysisTaskFlowd::UserCreateOutputObjects()
 {
   // Creation of the histograms, this is called once
-  fOutputContainer = new TObjArray(1);
+  fOutputContainer = new TList();
   fOutputContainer->SetOwner(kTRUE);
   TString s = GetName();
   s.Append("_results");

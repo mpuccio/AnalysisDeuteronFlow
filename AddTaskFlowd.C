@@ -45,7 +45,7 @@ AliAnalysisTask *AddTaskFlowd(){
 
   //define output containers, please use 'username'_'somename'
   AliAnalysisDataContainer *coutput1 = 
-      mgr->CreateContainer("mpuccio_Flowd", TObjArray::Class(),AliAnalysisManager::kOutputContainer,"mpuccio_Flowd.root");
+      mgr->CreateContainer("mpuccio_Flowd", TList::Class(),AliAnalysisManager::kOutputContainer,"mpuccio_Flowd.root");
 
   //connect containers
   mgr->ConnectInput  (task,  0,  mgr->GetCommonInputContainer());

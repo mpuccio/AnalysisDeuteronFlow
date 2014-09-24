@@ -63,7 +63,7 @@ private:
   TH1F                 *fHistTriggerStat;                   //! Trigger statistic
   TH1F                 *fHistTriggerStatAfterEventSelection;//! Trigger statistic after selection
   Int_t                 fNCounter;                          //  # points in the signal graph
-  TObjArray            *fOutputContainer;                   //! Output data container
+  TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
   
   // Constants
