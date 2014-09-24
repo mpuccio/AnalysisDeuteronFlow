@@ -67,7 +67,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   // Input slot #0 works with a TChain
   DefineInput(0, TChain::Class());
   // Output slot #0 writes into a TH1 container
-  DefineOutput(1, List::Class());
+  DefineOutput(1, TList::Class());
 //  DefineOutput(2, TTree::Class());
   
   // cuts for candidates
