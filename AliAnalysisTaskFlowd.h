@@ -13,10 +13,10 @@ class TH1F;
 class TH2F;
 class TH3F;
 class AliESDEvent;
-class AliESDtrackCuts;
 class AliESDVertex;
 class AliESDpid;
 
+#include "AliESDtrackCuts.h"
 #include "AliAnalysisTaskSE.h"
 #include "TH3F.h"
 #include "TGraph.h"
