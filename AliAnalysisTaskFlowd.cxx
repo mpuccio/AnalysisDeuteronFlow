@@ -359,7 +359,14 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     fESDpid = ((AliESDInputHandler*)(AliAnalysisManager::GetAnalysisManager()->
                                      GetInputEventHandler()))->GetESDpid();
   }
-  //
+  if (!fESDpid)
+  {
+    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
+    fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
+                                                      TMath::Exp(-3.16327e+01), 1.87901e+00,
+                                                      6.41583e+00);
+  }
+    //
 //  Bool_t fillTree = kFALSE;
   // Track loop to fill the spectram
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
@@ -401,7 +408,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     Bool_t hasTOFtime = status & AliESDtrack::kTIME;
     Float_t length = track->GetIntegratedLength();
     Bool_t hasTOF = (hasTOFout & hasTOFtime) && length > 350.f;
-    if (hasTOF == kTRUE && ptot < 4) {
+    if (hasTOF == kTRUE && ptot < 5) {
       Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
       time = track->GetTOFsignal() - time0;
       if (time > 0) {
@@ -411,8 +418,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
           mass = ptot/TMath::Sqrt(gamma*gamma - 1); // using inner TPC mom. as approx.
           if (TMath::Sqrt(track->GetTOFsignalDz() * track->GetTOFsignalDz() +
                           track->GetTOFsignalDx()*track->GetTOFsignalDx()) < 5.) {
-            if((track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron > -0.15 &&
-               (track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron < 0.15) {
+            if((track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron > -0.3 &&
+               (track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron < 0.3) {
               fHistDeuteron->Fill(mass*mass);
               fHistTOFnuclei->Fill(ptot,beta);
             }
