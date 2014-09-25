@@ -374,15 +374,15 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     AliESDtrack* track = fESD->GetTrack(iTracks);
     if (!fESDtrackCuts.AcceptTrack(track)) continue;
     UInt_t  status = track->GetStatus();
-    Double_t ptot = track->GetP();
-//    Double_t ptotInc = track->GetP(); // total momentum of the incoming particle
+    Double_t ptot = track->GetInnerParam()->GetP();
+    Double_t ptotInc = track->GetP(); // total momentum of the incoming particle
     Double_t sign = track->GetSign();
 
     Double_t expSignalDeuteron = DeuteronTPC(ptot);
 
     // fill final histograms
     if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit)) {
-      fHistDeDxITSsa->Fill(ptot,track->GetITSsignal());
+      fHistDeDxITSsa->Fill(ptotInc,track->GetITSsignal());
     }
     if(!fESDtrackCutsStrict.AcceptTrack(track))
       continue;
