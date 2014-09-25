@@ -245,23 +245,23 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fHistDeDx->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
   BinLogAxis(fHistDeDx);
   
-  fHistDeDxITS = new TH2F("fHistDeDxITS", "dE/dx ITS", 677, 0.01, 4.0, 1000, 0.0, 1000);
+  fHistDeDxITS = new TH2F("fHistDeDxITS", "dE/dx ITS", 676, 0.1, 4.0, 1000, 0.0, 1000);
   fHistDeDxITS->GetYaxis()->SetTitle("ITS dE/dx signal (a.u.)");
   fHistDeDxITS->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
   BinLogAxis(fHistDeDxITS);
 
   
-  fHistDeDxITSsa = new TH2F("fHistDeDxITSsa", "dE/dx ITSsa", 677, 0.01, 4.0, 1000, 0.0, 1000);
+  fHistDeDxITSsa = new TH2F("fHistDeDxITSsa", "dE/dx ITSsa", 676, 0.1, 4.0, 1000, 0.0, 1000);
   fHistDeDxITSsa->GetYaxis()->SetTitle("ITS dE/dx signal (a.u.)");
   fHistDeDxITSsa->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
   BinLogAxis(fHistDeDxITSsa);
 
   
   // TOF performance
-  fHistTOF2D = new TH2F("fHistTOF2D", "TOF2D; #frac{p}{z} (GeV/c); #beta", 500, 0.0, 10., 2250, 0.2, 1.1);
+  fHistTOF2D = new TH2F("fHistTOF2D", "TOF2D; #frac{p}{z} (GeV/c); #beta", 500, 0.01, 10., 2250, 0.2, 1.1);
   //
   fHistTOFnuclei = new TH2F("fHistTOFnuclei","TOF; #frac{p}{z} (GeV/c); #beta",
-                            500,0.,10.,2250,0.7,1.);
+                            500,0.01,10.,2250,0.7,1.);
 
     //alphas
   fHistDeuteron = new TH1F("fHistDeuteron", "Deuteron", 38, 1.12, 6.63);
