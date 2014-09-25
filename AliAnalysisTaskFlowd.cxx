@@ -354,7 +354,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
   {
     AliESDtrack* track = fESD->GetTrack(iTracks);
-    if (!fESDtrackCuts.AcceptTrack(track)) continue;
+    if (!fESDtrackCuts.AcceptTrack(track) || track->GetP() < 1e-5) continue;
     //
     Double_t nClustersTPCPID = track->GetTPCsignalN();
     if(nClustersTPCPID < 60) continue;
