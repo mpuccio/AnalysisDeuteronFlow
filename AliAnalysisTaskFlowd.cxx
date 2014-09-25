@@ -60,6 +60,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fESD(0x0)
 ,fESDpid(0x0)
 ,fESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts")
+,fESDtrackCutsStrict("AliESDtrackCuts","AliESDtrackCuts")
 ,fEventHandler(0x0)
 ,fHistCentralityClass10(0x0)
 ,fHistCentralityPercentile(0x0)
@@ -96,6 +97,16 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   fESDtrackCuts.SetRequireITSRefit(kTRUE);
   fESDtrackCuts.SetMinNClustersITS(1);
   fESDtrackCuts.SetEtaRange(-1.0,1.0);
+  
+  fESDtrackCutsStrict.SetAcceptKinkDaughters(kFALSE);
+  fESDtrackCutsStrict.SetMinNClustersTPC(70);
+  fESDtrackCutsStrict.SetMaxChi2PerClusterTPC(6);
+  fESDtrackCutsStrict.SetMaxDCAToVertexXY(3);
+  fESDtrackCutsStrict.SetMaxDCAToVertexZ(2);
+  fESDtrackCutsStrict.SetRequireTPCRefit(kTRUE);
+  fESDtrackCutsStrict.SetRequireITSRefit(kTRUE);
+  fESDtrackCutsStrict.SetMinNClustersITS(1);
+  fESDtrackCutsStrict.SetEtaRange(-1.0,1.0);
 
 }
 
@@ -354,7 +365,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
   {
     AliESDtrack* track = fESD->GetTrack(iTracks);
-    if (!fESDtrackCuts.AcceptTrack(track) || track->GetP() < 1e-5) continue;
+    if (!fESDtrackCuts.AcceptTrack(track)) continue;
     UInt_t  status = track->GetStatus();
     Double_t ptot = track->GetP();
 //    Double_t ptotInc = track->GetP(); // total momentum of the incoming particle
@@ -366,12 +377,11 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit)) {
       fHistDeDxITSsa->Fill(ptot,track->GetITSsignal());
     }
-    
+    if(!fESDtrackCutsStrict.AcceptTrack(track))
+      continue;
     Double_t nClustersTPCPID = track->GetTPCsignalN();
-    if(track->GetTPCchi2() / track->GetNcls(1) > 6 && track->GetNcls(1) < 70) continue;
-    
     TBits shared = track->GetTPCSharedMap();
-    if (shared.CountBits() > 1 || !(status & AliVTrack::kTPCrefit) ||
+    if (shared.CountBits() > 1 ||
         nClustersTPCPID < 80 || track->GetKinkIndex(0) != 0 || track->GetTPCNclsIter1() < 80)
       continue;
     
