@@ -376,17 +376,21 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     Double_t expSignalDeuteron = DeuteronTPC(ptot);
        
     //
+    UInt_t  status = track->GetStatus();
     Float_t mass = 0;
     Float_t time = -1;
     Float_t beta = 0;
     Float_t gamma = -1;
-    Bool_t  hasTOFout  = kFALSE;
-    Bool_t  hasTOFtime = kFALSE;
+    Bool_t hasTOFout  = status & AliESDtrack::kTOFout;
+    Bool_t hasTOFtime = status & AliESDtrack::kTIME;
+    Bool_t hasTOF     = hasTOFout & hasTOFtime;
     Float_t length = track->GetIntegratedLength();
-    UInt_t  status = track->GetStatus();
-//    Bool_t  isAssociated = kFALSE;
     
-    if (length > 350) {
+    if (length < 350.f) {
+      hasTOF = kFALSE;
+    }
+    
+    if (hasTOF) {
       time = track->GetTOFsignal() - fESDpid->GetTOFResponse().GetStartTime(track->P());
       if (time > 0) {
         beta = length / (2.99792457999999984e-02 * time);
@@ -394,27 +398,15 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
         mass = ptot/TMath::Sqrt(gamma * gamma - 1); // using inner TPC mom. as approx.
       }
     }
-    //
-    // fill tree and print candidates (for short list)
-    //
-//    Float_t cut = 4*AliExternalTrackParam::BetheBlochAleph(2*ptot/(0.938*3),1.1931,
-//                                                           31.9806,
-//                                                           5.04114e-11,
-//                                                           2.13096,
-//                                                           2.38541);
-      //
-    // do pid fill histogram for raw ratios
-    //
-    //                       (0.) dca, (1.) sign, (2.) particle Type, (3.) p_tot
+    
     Int_t id = -1;
     if (ptot > 0.3 && TMath::Abs(tpcSignal - expSignalDeuteron)/expSignalDeuteron < 0.2) id = 1;
     //
     // fill final histograms
-    TBits shared = track->GetTPCSharedMap();
     if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit)) {
       fHistDeDxITSsa->Fill(ptot,track->GetITSsignal());
     }
-
+    TBits shared = track->GetTPCSharedMap();
     if (shared.CountBits() > 1 || !(status & AliVTrack::kTPCrefit) ||
         track->GetTPCsignalN() < 80 || track->GetKinkIndex(0) != 0 || track->GetTPCNclsIter1() < 80)
       continue;
@@ -427,21 +419,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     }
     
     //
-    // alpha TOF plot
-    //
-
-    //TOF
-    hasTOFout  = status&AliESDtrack::kTOFout;
-    hasTOFtime = status&AliESDtrack::kTIME;
-    Bool_t hasTOF     = kFALSE;
-    
-    if (hasTOFout && hasTOFtime) hasTOF = kTRUE;
-    //
-    if (length < 350.) hasTOF = kFALSE;
-    
-    Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
-    //
-    if (length > 350. &&  hasTOF == kTRUE && ptot < 4) {
+    if (hasTOF == kTRUE && ptot < 4) {
+      Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
       time = track->GetTOFsignal() - time0;
       if (time > 0) {
         beta = length / (2.99792457999999984e-02 * time);
