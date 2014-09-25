@@ -26,7 +26,7 @@ void RunPoD(
   // Check the dataset before running the analysis!
   gProof->ShowDataSet( dataset.Data() );
   //return;
-  gProof->SetParameter("PROOF_UseMergers", (Int_t)0)
+  gProof->SetParameter("PROOF_UseMergers", (Int_t)0);
   // Not needed on the VAF
   //gProof->EnablePackage("VO_ALICE@AliRoot::v5-04-81-AN", list);
 
