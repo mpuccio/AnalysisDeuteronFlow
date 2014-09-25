@@ -42,22 +42,18 @@ private:
   void BinLogAxis(const TH1 *h);
   void BinLogAxis(const TH3 *h, Int_t axisNumber);
   Bool_t IsTriggered();
-  void SetBBParameters(Int_t runNumber);
   
   // Private variables
-  Double_t              fBBParametersLightParticles[5];     //! Bethe Bloch params light particles
   AliESDEvent          *fESD;                               //! ESD object
   AliESDpid            *fESDpid;                            //! basic TPC object for n-sigma cuts
   AliESDtrackCuts       fESDtrackCuts;                      //  basic cut variables
-  AliESDtrackCuts       fESDtrackCutsSharp;                 //  sharp cut variables -> final results
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
   TH2F                 *fHistDeDx;                          //! Histo for a dE/dx
-  TH3F                 *fHistDeDxRegion;                    //! Histo for a dE/dx per Region
-  TH2F                 *fHistDeDxSharp;                     //! Histo for a dE/dx with sharp cuts
+  TH2F                 *fHistDeDxITS;                       //! Histo for a dE/dx ITS
+  TH2F                 *fHistDeDxITSsa;                     //! Histo for a dE/dx ITSsa
   TH1F                 *fHistDeuteron;                      //! d plot TOF mass
-  TH1F                 *fHistDeuteronSignal;                //! d TOF mass for signal candidates
   TH2F                 *fHistTOF2D;                         //! Histo for a TOF
   TH2F                 *fHistTOFnuclei;                     //! Histo for a TOF nuclei
   TH1F                 *fHistTriggerStat;                   //! Trigger statistic
