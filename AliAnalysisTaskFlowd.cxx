@@ -88,8 +88,8 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   // cuts for candidates
   //
   fESDtrackCuts.SetAcceptKinkDaughters(kFALSE);
-  fESDtrackCuts.SetMinNClustersTPC(70);
-  fESDtrackCuts.SetMaxChi2PerClusterTPC(6);
+//  fESDtrackCuts.SetMinNClustersTPC(70);
+//  fESDtrackCuts.SetMaxChi2PerClusterTPC(6);
   fESDtrackCuts.SetMaxDCAToVertexXY(3);
   fESDtrackCuts.SetMaxDCAToVertexZ(2);
   //fESDtrackCuts.SetRequireTPCRefit(kTRUE);
@@ -355,60 +355,24 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   {
     AliESDtrack* track = fESD->GetTrack(iTracks);
     if (!fESDtrackCuts.AcceptTrack(track) || track->GetP() < 1e-5) continue;
-    //
-    Double_t nClustersTPCPID = track->GetTPCsignalN();
-    if(nClustersTPCPID < 60) continue;
-    //
-    if (!track->GetInnerParam()) continue;
-    //
-
-    Double_t ptot = track->GetInnerParam()->GetP();
+    UInt_t  status = track->GetStatus();
+    Double_t ptot = track->GetP();
 //    Double_t ptotInc = track->GetP(); // total momentum of the incoming particle
     Double_t sign = track->GetSign();
 
-    Double_t cov1[15];
-    track->GetExternalCovariance(cov1);//->GetSigmaQoverP();
-    //
-    Double_t tpcSignal = track->GetTPCsignal();
-    
-    //define expected signals for the various species
-    //Float_t deutExp = AliExternalTrackParam::BetheBlochAleph(ptot/(0.938*2),1.45802,27.4992,4.00313e-15,2.48485,8.31768);
     Double_t expSignalDeuteron = DeuteronTPC(ptot);
-       
-    //
-    UInt_t  status = track->GetStatus();
-    Float_t mass = 0;
-    Float_t time = -1;
-    Float_t beta = 0;
-    Float_t gamma = -1;
-    Bool_t hasTOFout  = status & AliESDtrack::kTOFout;
-    Bool_t hasTOFtime = status & AliESDtrack::kTIME;
-    Bool_t hasTOF     = hasTOFout & hasTOFtime;
-    Float_t length = track->GetIntegratedLength();
-    
-    if (length < 350.f) {
-      hasTOF = kFALSE;
-    }
-    
-    if (hasTOF) {
-      time = track->GetTOFsignal() - fESDpid->GetTOFResponse().GetStartTime(track->P());
-      if (time > 0) {
-        beta = length / (2.99792457999999984e-02 * time);
-        gamma = 1/TMath::Sqrt(1 - beta*beta);
-        mass = ptot/TMath::Sqrt(gamma * gamma - 1); // using inner TPC mom. as approx.
-      }
-    }
-    
-    Int_t id = -1;
-    if (ptot > 0.3 && TMath::Abs(tpcSignal - expSignalDeuteron)/expSignalDeuteron < 0.2) id = 1;
-    //
+
     // fill final histograms
     if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit)) {
       fHistDeDxITSsa->Fill(ptot,track->GetITSsignal());
     }
+    
+    Double_t nClustersTPCPID = track->GetTPCsignalN();
+    if(track->GetTPCchi2() / track->GetNcls(1) > 6 && track->GetNcls(1) < 70) continue;
+    
     TBits shared = track->GetTPCSharedMap();
     if (shared.CountBits() > 1 || !(status & AliVTrack::kTPCrefit) ||
-        track->GetTPCsignalN() < 80 || track->GetKinkIndex(0) != 0 || track->GetTPCNclsIter1() < 80)
+        nClustersTPCPID < 80 || track->GetKinkIndex(0) != 0 || track->GetTPCNclsIter1() < 80)
       continue;
     
     //
@@ -419,6 +383,14 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     }
     
     //
+    Float_t mass = 0;
+    Float_t time = -1;
+    Float_t beta = 0;
+    Float_t gamma = -1;
+    Bool_t hasTOFout  = status & AliESDtrack::kTOFout;
+    Bool_t hasTOFtime = status & AliESDtrack::kTIME;
+    Float_t length = track->GetIntegratedLength();
+    Bool_t hasTOF = (hasTOFout & hasTOFtime) && length > 350.f;
     if (hasTOF == kTRUE && ptot < 4) {
       Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
       time = track->GetTOFsignal() - time0;
