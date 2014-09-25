@@ -385,7 +385,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     Double_t expSignalDeuteron = DeuteronTPC(ptot);
 
     // fill final histograms
-    if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit)) {
+    if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit) &&
+        track->GetITSchi2() / track->GetNcls(0) < 36.) {
       fHistDeDxITSsa->Fill(ptotInc,track->GetITSsignal());
     }
     if(!fESDtrackCutsStrict.AcceptTrack(track))
