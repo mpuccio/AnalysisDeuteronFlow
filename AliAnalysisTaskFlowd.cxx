@@ -386,9 +386,11 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
 
     // fill final histograms
     if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCrefit) &&
-        track->GetITSchi2() / track->GetNcls(0) < 36.) {
+        track->GetITSchi2() / track->GetNcls(0) < 36. &&
+        (track->GetNcls(0) - NumberOfPIDClustersITS(track)) > 0) {
       fHistDeDxITSsa->Fill(ptotInc,track->GetITSsignal());
     }
+    
     if(!fESDtrackCutsStrict.AcceptTrack(track))
       continue;
     Double_t nClustersTPCPID = track->GetTPCsignalN();
