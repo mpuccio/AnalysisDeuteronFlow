@@ -15,6 +15,7 @@ class TH3F;
 class AliESDEvent;
 class AliESDVertex;
 class AliESDpid;
+class TTree;
 
 #include "AliESDtrackCuts.h"
 #include "AliAnalysisTaskSE.h"
@@ -42,6 +43,7 @@ private:
   void BinLogAxis(const TH1 *h);
   void BinLogAxis(const TH3 *h, Int_t axisNumber);
   Bool_t IsTriggered();
+  void ResetTreeVariables();
   
   // Private variables
   AliESDEvent          *fESD;                               //! ESD object
@@ -62,6 +64,51 @@ private:
   Int_t                 fNCounter;                          //  # points in the signal graph
   TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
+  TTree                *fTree;                              //! Deuteron tree
+  
+  // tree variables
+  Char_t     fName[1000];
+  Int_t      fEvnt;
+  Char_t     fFileName[1000];
+  Int_t      fEventNumber;
+  Float_t    fCentrality;
+  //
+  Int_t      fItrk;
+  //
+  Double_t   fEta[1000];
+  Int_t      fKinkIndex[1000];
+  //
+  UShort_t   fTPCNsignal[1000];
+  UShort_t   fTPCnCluster[1000];
+  Double_t   fChi2PerClusterTPC[1000];
+  Bool_t     fTPCRefit[1000];
+  Int_t      fTPCSharedClusters[1000];
+  UShort_t   fTPCNclsIter1[1000];
+  //
+  Double_t   fITSsignal[1000];
+  Int_t      fITSnCluster[1000];
+  Int_t      fITSnClusterPID[1000];
+  Double_t   fChi2PerClusterITS[1000];
+  Bool_t     fITSRefit[1000];
+  //
+  Bool_t     fTOFRefit[1000];
+  Bool_t     fTOFtime[1000];
+  Bool_t     fTOFout[1000];
+  Double_t   fTOFsignalDz[1000];
+  Double_t   fTOFsignalDx[1000];
+  //
+  Float_t    fDCAZ[1000];
+  Float_t    fDCAXY[1000];
+  //
+  Double_t   fTrkPtot[1000];
+  Double_t   fTPCPtot[1000];
+  Double_t   fTrackPt[1000];
+  Double_t   fDeDx[1000];
+  Double_t   fSign[1000];
+  Float_t    fMass[1000];
+  Float_t    fTime[1000];
+  Float_t    fLength[1000];
+  Double_t   fSigmaQP[1000];
   
   // Constants
   const Int_t           fkNTriggers;                        //  Number of used triggers
