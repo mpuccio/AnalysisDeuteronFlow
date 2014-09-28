@@ -29,6 +29,7 @@ public:
   Int_t          Initialize();
   Int_t          SetupEvent();
   void           ResetEvent();
+  void           SetFillTree(Bool_t io = kFALSE) { fFillTree = io; }
   
 private:
   // Private methods
