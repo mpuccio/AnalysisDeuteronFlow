@@ -31,9 +31,10 @@ public:
   virtual void   UserCreateOutputObjects();
   virtual void   UserExec(Option_t *option);
   virtual void   Terminate(const Option_t*);
-  Int_t  Initialize();
-  Int_t  SetupEvent();
-  void   ResetEvent();
+  Int_t          Initialize();
+  Int_t          SetupEvent();
+  void           ResetEvent();
+  void           SetFillTree(Bool_t io = kTRUE) { fFillTree = io; }
   
   
 private:
@@ -65,6 +66,7 @@ private:
   TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
   TTree                *fTree;                              //! Deuteron tree
+  Bool_t                fFillTree;                          //  TTree switch
   
   // tree variables
   Char_t     fName[1000];

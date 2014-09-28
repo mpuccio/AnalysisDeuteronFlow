@@ -364,9 +364,12 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fTree->Branch("fSigmaQP",fSigmaQP,"fSigmaQP[fItrk]/D");
   //
 //  fOutputContainer->Add(fTree);
+  if (fFillTree) {
+    fOutputContainer->Add(fTree);
+  }
   PostData(1,fOutputContainer);
-  OpenFile(2);
-  PostData(2, fTree);
+//  OpenFile(2);
+//  PostData(2, fTree);
 }
 
 //__________________________________________________________________________________________________
@@ -390,7 +393,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   if (SetupEvent() < 0) {
     PostData(1, fOutputContainer);
-    PostData(2,fTree);
+    //PostData(2,fTree);
     return;
   }
   
@@ -400,7 +403,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     vertex = fESD->GetPrimaryVertexSPD();
     if(vertex->GetNContributors() < 1) {
       PostData(1, fOutputContainer);
-      PostData(2,fTree);
+      //PostData(2,fTree);
       return;
     }
   }
@@ -411,7 +414,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
                                         GetInputEventHandler()))->IsEventSelected();
   if (!isSelected || TMath::Abs(vertex->GetZv()) > 10) {
     PostData(1, fOutputContainer);
-    PostData(2,fTree);
+    //PostData(2,fTree);
     return;
   }
   
@@ -576,7 +579,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   // Post output data.
   PostData(1, fOutputContainer);
-  PostData(2,fTree);
+  //PostData(2,fTree);
 }
 
 //________________________________________________________________________
