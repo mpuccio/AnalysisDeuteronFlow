@@ -49,7 +49,7 @@ AliAnalysisTask *AddTaskFlowd(){
 //  AliAnalysisDataContainer *coutput2 =
 //      mgr->CreateContainer("mpuccio_FlowdTree", TTree::Class(),
 //                           AliAnalysisManager::kOutputContainer,"mpuccio_Flowd_tree.root");
-  coutput2->SetSpecialOutput();
+//  coutput2->SetSpecialOutput();
 
   //connect containers
   mgr->ConnectInput  (task,  0,  mgr->GetCommonInputContainer());
