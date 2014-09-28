@@ -84,7 +84,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   DefineInput(0, TChain::Class());
   // Output slot #0 writes into a TH1 container
   DefineOutput(1, TList::Class());
-//  DefineOutput(2, TTree::Class());
+  DefineOutput(2, TTree::Class());
   
   // cuts for candidates
   //
@@ -363,8 +363,10 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fTree->Branch("fLength",fLength,"fLength[fItrk]/F");
   fTree->Branch("fSigmaQP",fSigmaQP,"fSigmaQP[fItrk]/D");
   //
-  fOutputContainer->Add(fTree);
+//  fOutputContainer->Add(fTree);
   PostData(1,fOutputContainer);
+  OpenFile(2);
+  PostData(2, fTree);
 }
 
 //__________________________________________________________________________________________________
@@ -388,6 +390,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   if (SetupEvent() < 0) {
     PostData(1, fOutputContainer);
+    PostData(2,fTree);
     return;
   }
   
@@ -397,6 +400,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     vertex = fESD->GetPrimaryVertexSPD();
     if(vertex->GetNContributors() < 1) {
       PostData(1, fOutputContainer);
+      PostData(2,fTree);
       return;
     }
   }
@@ -407,6 +411,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
                                         GetInputEventHandler()))->IsEventSelected();
   if (!isSelected || TMath::Abs(vertex->GetZv()) > 10) {
     PostData(1, fOutputContainer);
+    PostData(2,fTree);
     return;
   }
   
@@ -571,7 +576,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   // Post output data.
   PostData(1, fOutputContainer);
-}      
+  PostData(2,fTree);
+}
 
 //________________________________________________________________________
 void AliAnalysisTaskFlowd::Terminate(const Option_t *)
