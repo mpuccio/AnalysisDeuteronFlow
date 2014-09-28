@@ -9,10 +9,10 @@
 #include <Riostream.h>
 #include "TChain.h"
 #include "TTree.h"
+#include "TNtuple.h"
 #include "TF1.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TH3F.h"
 #include "THn.h"
 #include "TCanvas.h"
 #include "AliESDpid.h"
@@ -74,6 +74,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fHistTriggerStat(0x0)
 ,fHistTriggerStatAfterEventSelection(0x0)
 ,fNCounter(0)
+,fNtuple(0x0)
 ,fOutputContainer(0x0)
 ,fTrigger(0)
 ,fkNTriggers(5)
@@ -136,32 +137,6 @@ void AliAnalysisTaskFlowd::BinLogAxis(const TH1 *h)
 }
 
 //__________________________________________________________________________________________________
-void AliAnalysisTaskFlowd::BinLogAxis(const TH3 *h, Int_t axisNumber)
-{
-  //
-  // Method for the correct logarithmic binning of histograms
-  //
-  TAxis *axis = const_cast<TAxis*>(h->GetXaxis());
-  if (axisNumber == 1) axis = const_cast<TAxis*>(h->GetYaxis());
-  if (axisNumber == 2) axis = const_cast<TAxis*>(h->GetZaxis());
-  const Int_t bins = axis->GetNbins();
-  
-  const Double_t from = axis->GetXmin();
-  const Double_t to = axis->GetXmax();
-  Double_t *newBins = new Double_t[bins + 1];
-  
-  newBins[0] = from;
-  const Double_t factor = pow(to / from, 1. / bins);
-  
-  for (Int_t i = 1; i <= bins; i++) {
-    newBins[i] = factor * newBins[i-1];
-  }
-  axis->Set(bins, newBins);
-  delete [] newBins;
-  
-}
-
-//__________________________________________________________________________________________________
 Int_t AliAnalysisTaskFlowd::Initialize()
 {
   // Initialisation === Reset
@@ -197,43 +172,6 @@ void AliAnalysisTaskFlowd::ResetEvent()
   
   fTrigger = 0;
   return;
-}
-
-//__________________________________________________________________________________________________
-void AliAnalysisTaskFlowd::ResetTreeVariables()
-{
-  fEta[fItrk] = -2;
-  fTPCNsignal[fItrk] = -1;
-  fTPCnCluster[fItrk] = -1;
-  fChi2PerClusterTPC[fItrk] = -1;
-  fTPCRefit[fItrk] = kFALSE;
-  fTPCSharedClusters[fItrk] = -1;
-  fTPCNclsIter1[fItrk] = -1;
-  
-  fITSsignal[fItrk] = -1;
-  fITSnCluster[fItrk] = -1;
-  fITSnClusterPID[fItrk] = -1;
-  fChi2PerClusterITS[fItrk] = -1;
-  fITSRefit[fItrk] = kFALSE;
-  
-  fTOFRefit[fItrk] = kFALSE;
-  fTOFtime[fItrk] = kFALSE;
-  fTOFout[fItrk] = kFALSE;
-  fTOFsignalDz[fItrk] = -1;
-  fTOFsignalDx[fItrk] = -1;
-  
-  fDCAZ[fItrk] = -1;
-  fDCAXY[fItrk] = -1;
-  
-  fTrkPtot[fItrk] = -1;
-  fTPCPtot[fItrk] = -1;
-  fTrackPt[fItrk] = -1;
-  fDeDx[fItrk] = -1;
-  fSign[fItrk] = -2;
-  fMass[fItrk] = -1;
-  fTime[fItrk] = -1;
-  fLength[fItrk] = -1;
-  fSigmaQP[fItrk] = -1;
 }
 
 //__________________________________________________________________________________________________
@@ -320,53 +258,12 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistTOFnuclei);
   
   // Tree and branch definitions
-  fTree = new TTree("tree", "Deuteron candidates");
-  // Event variables
-  fTree->Branch("fName",fName,"fName/C");
-  fTree->Branch("fEvnt",&fEvnt, "fEvnt/I");
-  fTree->Branch("fFileName",fFileName,"fFileName/C");
-  fTree->Branch("fEventNumber",&fEventNumber,"fEventNumber/I");
-  fTree->Branch("fCentrality",&fCentrality,"fCentrality/F");
-  fTree->Branch("fItrk",&fItrk, "fItrk/I");
-  // Track variables
-  fTree->Branch("fEta",fEta,"fEta[fItrk]/D");
-  fTree->Branch("fKinkIndex",fKinkIndex,"fKinkIndex[fItrk]/I");
-  //
-  fTree->Branch("fTPCnCluster",fTPCnCluster,"fTPCnCluster[fItrk]/s");
-  fTree->Branch("fTPCNsignal",fTPCNsignal,"fTPCNsignal[fItrk]/s");
-  fTree->Branch("fChi2PerClusterTPC",fChi2PerClusterTPC,"fChi2PerClusterTPC[fItrk]/D");
-  fTree->Branch("fTPCRefit",fTPCRefit,"fTPCRefit[fItrk]/O");
-  fTree->Branch("fTPCSharedClusters",fTPCSharedClusters,"fTPCSharedClusters[fItrk]/I");
-  fTree->Branch("fTPCNclsIter1",fTPCNclsIter1,"fTPCNclsIter1[fItrk]/s");
-  //
-  fTree->Branch("fITSsignal",fITSsignal,"fITSsignal[fItrk]/D");
-  fTree->Branch("fITSnCluster",fITSnCluster,"fITSnCluster[fItrk]/I");
-  fTree->Branch("fITSnClusterPID",fITSnClusterPID,"fITSnCluster[fItrk]/I");
-  fTree->Branch("fChi2PerClusterITS",fChi2PerClusterITS,"fChi2PerClusterITS[fItrk]/D");
-  fTree->Branch("fITSRefit",fITSRefit,"fITSRefit[fItrk]/O");
-  //
-  fTree->Branch("fTOFtime",fTOFtime,"fTOFtime[fItrk]/O");
-  fTree->Branch("fTOFRefit",fTOFRefit,"fTOFRefit[fItrk]/O");
-  fTree->Branch("fTOFout",fTOFout,"fTOFout[fItrk]/O");
-  fTree->Branch("fTOFsignalDz",fTOFsignalDz,"fTOFsignalDz[fItrk]/D");
-  fTree->Branch("fTOFsignalDx",fTOFsignalDx,"fTOFsignalDx[fItrk]/D");
-  //
-  fTree->Branch("fDCAXY",fDCAXY,"fDCAXY[fItrk]/F");
-  fTree->Branch("fDCAZ",fDCAZ,"fDCAZ[fItrk]/F");
-  //
-  fTree->Branch("fTrkPtot",fTrkPtot,"fTrkPtot[fItrk]/D");
-  fTree->Branch("fTPCPtot",fTPCPtot,"fTPCPtot[fItrk]/D");
-  fTree->Branch("fTrackPt",fTrackPt,"fTrackPt[fItrk]/D");
-  fTree->Branch("fDeDx",fDeDx,"fDeDx[fItrk]/D");
-  fTree->Branch("fSign",fSign,"fSign[fItrk]/D");
-  fTree->Branch("fMass",fMass,"fMass[fItrk]/F");
-  fTree->Branch("fTime",fTime,"fTime[fItrk]/F");
-  fTree->Branch("fLength",fLength,"fLength[fItrk]/F");
-  fTree->Branch("fSigmaQP",fSigmaQP,"fSigmaQP[fItrk]/D");
-  //
-//  fOutputContainer->Add(fTree);
+  fNtuple = new TNtuple("deuterons",
+                        "deuteron candidates",
+                        "centrality:eta:kinkIndex:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//22 elements
+  //  fOutputContainer->Add(fTree);
   if (fFillTree) {
-    fOutputContainer->Add(fTree);
+    fOutputContainer->Add(fNtuple);
   }
   PostData(1,fOutputContainer);
 //  OpenFile(2);
@@ -460,11 +357,9 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
                                                       6.41583e+00);
   }
 
-  fItrk = 0;
   // Track loop to fill the spectram
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
   {
-    ResetTreeVariables();
     AliESDtrack* track = fESD->GetTrack(iTracks);
     if (!fESDtrackCuts.AcceptTrack(track)) continue;
     UInt_t  status = track->GetStatus();
@@ -529,54 +424,37 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       }
     }
     
-    if((track->GetTPCsignal() - expSignalDeuteron)/expSignalDeuteron > -0.3 && fItrk < 1000) {
-      fEta[fItrk] = track->Eta();
-      fKinkIndex[fItrk] = track->GetKinkIndex(0);
-      
-      fTPCNsignal[fItrk] = track->GetTPCsignalN();
-      fTPCnCluster[fItrk] = track->GetTPCNcls();
-      fChi2PerClusterTPC[fItrk] = track->GetTPCchi2()/fTPCnCluster[fItrk];
-      fTPCSharedClusters[fItrk] = shared.CountBits();
-      fTPCNclsIter1[fItrk] = track->GetTPCNclsIter1();
-      
-      fITSsignal[fItrk] = track->GetITSsignal();
-      fITSnCluster[fItrk] = track->GetNcls(0);
-      fITSnClusterPID[fItrk] = NumberOfPIDClustersITS(track);
-      fChi2PerClusterITS[fItrk] = track->GetITSchi2()/fITSnCluster[fItrk];
-      fTOFtime[fItrk] = hasTOFtime;
-      fTOFout[fItrk]  = hasTOFout;
-      fTOFsignalDz[fItrk] = track->GetTOFsignalDz();
-      fTOFsignalDx[fItrk] = track->GetTOFsignalDx();
-      
+    if((track->GetTPCsignal() - expSignalDeuteron)/expSignalDeuteron > -0.3) {
       Float_t dca[2],cov[3];
       track->GetImpactParameters(dca, cov);
-      fDCAZ[fItrk] = dca[1];
-      fDCAXY[fItrk] = dca[0];
-      
-      fTrkPtot[fItrk] = track->P();
-      fTPCPtot[fItrk] = ptot;
-      fTrackPt[fItrk] = track->Pt();
-      fDeDx[fItrk] = track->GetTPCsignal();
-      fSign[fItrk] = sign;
-      fMass[fItrk] = mass;
-      fTime[fItrk] = time;
-      fLength[fItrk] = length;
-      
       Double_t cov1[15];
       track->GetExternalCovariance(cov1);
-      fSigmaQP[fItrk] = cov1[14];
-      
-      fItrk++;
+      Float_t x[22];
+      x[0]  = centralityPercentile;                       // centrality
+      x[1]  = track->Eta();                               // eta
+      x[2]  = track->GetKinkIndex(0);                     // kinkIndex
+      x[3]  = track->GetTPCNcls();                        // TPCnClust
+      x[4]  = track->GetTPCsignal();                      // TPCsignal
+      x[5]  = track->GetTPCsignalN();                     // TPCnSignal
+      x[6]  = track->GetTPCchi2() / track->GetTPCNcls();  // TPCchi2
+      x[7]  = shared.CountBits();                         // TPCshared
+      x[8]  = track->GetITSsignal();                      // ITSsignal
+      x[9]  = track->GetNcls(0);                          // ITSnClust
+      x[10] = NumberOfPIDClustersITS(track);              // ITSnClustPID
+      x[11] = track->GetITSchi2() / x[10];                // ITSchi2
+      x[12] = hasTOF ? time : -1.f;                       // TOFtime
+      x[13] = track->GetTOFsignalDz();                    // TOFsignalDz
+      x[14] = track->GetTOFsignalDx();                    // TOFsignalDx
+      x[15] = dca[1];                                     // DCAxy
+      x[16] = dca[0];                                     // DCAz
+      x[17] = track->P();                                 // p
+      x[18] = ptot;                                       // pTPC
+      x[19] = sign * track->Pt();                         // pT
+      x[20] = length;                                     // length
+      x[21] = cov1[14];                                   // sigmaQP
+      fNtuple->Fill(x);
     }
   }//end loop over tracks
-  
-  if (fItrk > 0) {
-    sscanf(fInputHandler->GetTree()->GetCurrentFile()->GetName(),"%s", fFileName);
-    fEventNumber = fESD->GetEventNumberInFile();
-    fCentrality = centralityPercentile;
-    fEventNumber = fESD->GetEventNumberInFile();
-    fTree->Fill();
-  }
   
   // Post output data.
   PostData(1, fOutputContainer);

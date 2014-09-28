@@ -8,20 +8,15 @@
 #ifndef ALIANALYSISTASKFLOWD_H
 #define ALIANALYSISTASKFLOWD_H
 
-class TF1;
 class TH1F;
 class TH2F;
-class TH3F;
 class AliESDEvent;
 class AliESDVertex;
 class AliESDpid;
-class TTree;
+class TNtuple;
 
 #include "AliESDtrackCuts.h"
 #include "AliAnalysisTaskSE.h"
-#include "TH3F.h"
-#include "TGraph.h"
-#include "AliStack.h"
 
 class AliAnalysisTaskFlowd : public AliAnalysisTaskSE {
 public:
@@ -34,17 +29,13 @@ public:
   Int_t          Initialize();
   Int_t          SetupEvent();
   void           ResetEvent();
-  void           SetFillTree(Bool_t io = kTRUE) { fFillTree = io; }
-  
   
 private:
   // Private methods
   AliAnalysisTaskFlowd(const AliAnalysisTaskFlowd&);            //! Not implemented
   AliAnalysisTaskFlowd& operator=(const AliAnalysisTaskFlowd&); //! Not implemented
   void BinLogAxis(const TH1 *h);
-  void BinLogAxis(const TH3 *h, Int_t axisNumber);
   Bool_t IsTriggered();
-  void ResetTreeVariables();
   
   // Private variables
   AliESDEvent          *fESD;                               //! ESD object
@@ -64,53 +55,9 @@ private:
   TH1F                 *fHistTriggerStat;                   //! Trigger statistic
   TH1F                 *fHistTriggerStatAfterEventSelection;//! Trigger statistic after selection
   Int_t                 fNCounter;                          //  # points in the signal graph
+  TNtuple              *fNtuple;                            //! Deuteron ntuple
   TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
-  TTree                *fTree;                              //! Deuteron tree
-  
-  // tree variables
-  Char_t     fName[1000];
-  Int_t      fEvnt;
-  Char_t     fFileName[1000];
-  Int_t      fEventNumber;
-  Float_t    fCentrality;
-  //
-  Int_t      fItrk;
-  //
-  Double_t   fEta[1000];
-  Int_t      fKinkIndex[1000];
-  //
-  UShort_t   fTPCNsignal[1000];
-  UShort_t   fTPCnCluster[1000];
-  Double_t   fChi2PerClusterTPC[1000];
-  Bool_t     fTPCRefit[1000];
-  Int_t      fTPCSharedClusters[1000];
-  UShort_t   fTPCNclsIter1[1000];
-  //
-  Double_t   fITSsignal[1000];
-  Int_t      fITSnCluster[1000];
-  Int_t      fITSnClusterPID[1000];
-  Double_t   fChi2PerClusterITS[1000];
-  Bool_t     fITSRefit[1000];
-  //
-  Bool_t     fTOFRefit[1000];
-  Bool_t     fTOFtime[1000];
-  Bool_t     fTOFout[1000];
-  Double_t   fTOFsignalDz[1000];
-  Double_t   fTOFsignalDx[1000];
-  //
-  Float_t    fDCAZ[1000];
-  Float_t    fDCAXY[1000];
-  //
-  Double_t   fTrkPtot[1000];
-  Double_t   fTPCPtot[1000];
-  Double_t   fTrackPt[1000];
-  Double_t   fDeDx[1000];
-  Double_t   fSign[1000];
-  Float_t    fMass[1000];
-  Float_t    fTime[1000];
-  Float_t    fLength[1000];
-  Double_t   fSigmaQP[1000];
   
   // Constants
   const Int_t           fkNTriggers;                        //  Number of used triggers
