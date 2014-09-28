@@ -1,4 +1,4 @@
-AliAnalysisTask *AddTaskFlowd(){
+AliAnalysisTask *AddTaskFlowd(Bool_t fillTree = kFALSE){
 
 
   //get the current analysis manager
@@ -46,17 +46,19 @@ AliAnalysisTask *AddTaskFlowd(){
   //define output containers, please use 'username'_'somename'
   AliAnalysisDataContainer *coutput1 = 
       mgr->CreateContainer("mpuccio_Flowd", TList::Class(),AliAnalysisManager::kOutputContainer,"mpuccio_Flowd.root");
-//  AliAnalysisDataContainer *coutput2 =
-//      mgr->CreateContainer("mpuccio_FlowdTree", TTree::Class(),
-//                           AliAnalysisManager::kOutputContainer,"mpuccio_Flowd_tree.root");
-//  coutput2->SetSpecialOutput();
 
   //connect containers
   mgr->ConnectInput  (task,  0,  mgr->GetCommonInputContainer());
   //mgr->ConnectOutput (task,  0, coutput0);
   mgr->ConnectOutput (task,  1, coutput1);
-  //mgr->ConnectOutput (task,  2, coutput2);
-
+  task->SetFillTree(fillTree);
+  if (fillTree) {
+    AliAnalysisDataContainer *coutput2 = mgr->CreateContainer("mpuccio_FlowdTree", TTree::Class(),
+                                                              AliAnalysisManager::kOutputContainer,
+                                                              "mpuccio_Flowd_tree.root");
+    coutput2->SetSpecialOutput();
+    mgr->ConnectOutput (task,  2, coutput2);
+  }
 
   return task;
 }

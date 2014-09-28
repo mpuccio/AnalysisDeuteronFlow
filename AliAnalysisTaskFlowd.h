@@ -52,6 +52,7 @@ private:
   AliESDtrackCuts       fESDtrackCuts;                      //  basic cut variables
   AliESDtrackCuts       fESDtrackCutsStrict;                //  basic cut variables
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
+  Bool_t                fFillTree;                          //  TTree switch
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
   TH2F                 *fHistDeDx;                          //! Histo for a dE/dx
@@ -66,7 +67,6 @@ private:
   TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
   TTree                *fTree;                              //! Deuteron tree
-  Bool_t                fFillTree;                          //  TTree switch
   
   // tree variables
   Char_t     fName[1000];
