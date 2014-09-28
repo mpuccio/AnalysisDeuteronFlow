@@ -260,7 +260,7 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   // Tree and branch definitions
   fNtuple = new TNtuple("deuterons",
                         "deuteron candidates",
-                        "centrality:eta:kinkIndex:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//22 elements
+                        "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
   //  fOutputContainer->Add(fTree);
   if (fFillTree) {
     fOutputContainer->Add(fNtuple);
@@ -413,7 +413,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
           gamma = 1/TMath::Sqrt(1 - beta*beta);
           mass = ptot/TMath::Sqrt(gamma*gamma - 1); // using inner TPC mom. as approx.
           if (TMath::Sqrt(track->GetTOFsignalDz() * track->GetTOFsignalDz() +
-                          track->GetTOFsignalDx()*track->GetTOFsignalDx()) < 5.) {
+                          track->GetTOFsignalDx() * track->GetTOFsignalDx()) < 5.) {
             if((track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron > -0.3) {
               fHistDeuteron->Fill(mass*mass);
               fHistTOFnuclei->Fill(ptot,beta);
@@ -429,29 +429,28 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       track->GetImpactParameters(dca, cov);
       Double_t cov1[15];
       track->GetExternalCovariance(cov1);
-      Float_t x[22];
+      Float_t x[21];
       x[0]  = centralityPercentile;                       // centrality
       x[1]  = track->Eta();                               // eta
-      x[2]  = track->GetKinkIndex(0);                     // kinkIndex
-      x[3]  = track->GetTPCNcls();                        // TPCnClust
-      x[4]  = track->GetTPCsignal();                      // TPCsignal
-      x[5]  = track->GetTPCsignalN();                     // TPCnSignal
-      x[6]  = track->GetTPCchi2() / track->GetTPCNcls();  // TPCchi2
-      x[7]  = shared.CountBits();                         // TPCshared
-      x[8]  = track->GetITSsignal();                      // ITSsignal
-      x[9]  = track->GetNcls(0);                          // ITSnClust
-      x[10] = NumberOfPIDClustersITS(track);              // ITSnClustPID
-      x[11] = track->GetITSchi2() / x[10];                // ITSchi2
-      x[12] = hasTOF ? time : -1.f;                       // TOFtime
-      x[13] = track->GetTOFsignalDz();                    // TOFsignalDz
-      x[14] = track->GetTOFsignalDx();                    // TOFsignalDx
-      x[15] = dca[1];                                     // DCAxy
-      x[16] = dca[0];                                     // DCAz
-      x[17] = track->P();                                 // p
-      x[18] = ptot;                                       // pTPC
-      x[19] = sign * track->Pt();                         // pT
-      x[20] = length;                                     // length
-      x[21] = cov1[14];                                   // sigmaQP
+      x[2]  = track->GetTPCNcls();                        // TPCnClust
+      x[3]  = track->GetTPCsignal();                      // TPCsignal
+      x[4]  = track->GetTPCsignalN();                     // TPCnSignal
+      x[5]  = track->GetTPCchi2() / track->GetTPCNcls();  // TPCchi2
+      x[6]  = shared.CountBits();                         // TPCshared
+      x[7]  = track->GetITSsignal();                      // ITSsignal
+      x[8]  = track->GetNcls(0);                          // ITSnClust
+      x[9]  = NumberOfPIDClustersITS(track);              // ITSnClustPID
+      x[10] = track->GetITSchi2() / x[10];                // ITSchi2
+      x[11] = hasTOF ? time : -1.f;                       // TOFtime
+      x[12] = track->GetTOFsignalDz();                    // TOFsignalDz
+      x[13] = track->GetTOFsignalDx();                    // TOFsignalDx
+      x[14] = dca[1];                                     // DCAxy
+      x[15] = dca[0];                                     // DCAz
+      x[16] = track->P();                                 // p
+      x[17] = ptot;                                       // pTPC
+      x[18] = sign * track->Pt();                         // pT
+      x[19] = length;                                     // length
+      x[20] = cov1[14];                                   // sigmaQP
       fNtuple->Fill(x);
     }
   }//end loop over tracks
