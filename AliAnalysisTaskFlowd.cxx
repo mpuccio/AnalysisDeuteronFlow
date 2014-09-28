@@ -424,7 +424,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       }
     }
     
-    if((track->GetTPCsignal() - expSignalDeuteron)/expSignalDeuteron > -0.3) {
+    if((track->GetTPCsignal() - expSignalDeuteron)/expSignalDeuteron > -0.3 && ptot < 5.f) {
       Float_t dca[2],cov[3];
       track->GetImpactParameters(dca, cov);
       Double_t cov1[15];
