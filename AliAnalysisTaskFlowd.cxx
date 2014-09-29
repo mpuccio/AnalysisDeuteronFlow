@@ -326,13 +326,19 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     centralityClass10 = esdCentrality->GetCentralityClass10("V0M");
     centralityPercentile = esdCentrality->GetCentralityPercentile("V0M");
     //select only events with centralities between 0 and 80 %
-    if (centralityPercentile < 0. || centralityPercentile > 80. )
+    if (centralityPercentile < 0. || centralityPercentile > 80. ) {
+      PostData(1, fOutputContainer);
+      if(fFillTree) PostData(2, fNtuple);
       return;
+    }
   }
   //
   // select only events which pass kMB, kCentral, kSemiCentral
-  if (!(fTrigger & kMB) && !(fTrigger & kCentral) && !(fTrigger & kSemiCentral))
+  if (!(fTrigger & kMB) && !(fTrigger & kCentral) && !(fTrigger & kSemiCentral)) {
+    PostData(1, fOutputContainer);
+    if(fFillTree) PostData(2, fNtuple);
     return;
+  }
   //
   fHistCentralityClass10->Fill(centralityClass10);
   fHistCentralityPercentile->Fill(centralityPercentile);
