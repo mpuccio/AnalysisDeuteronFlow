@@ -162,7 +162,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   // plugin->SetAdditionalLibs("libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
   
   plugin->SetAnalysisSource("AliAnalysisTaskFlowd.cxx");
-  plugin->SetAdditionalLibs("AliAnalysisTaskCheckCascadePbPb.h AliAnalysisTaskCheckCascadePbPb.cxx ");
+  plugin->SetAdditionalLibs("AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx ");
   cout<<"-->>>>>>>>>>>>>>>>>>>>>>>>> 1"<<endl;
   
   // Declare the analysis source files names separated by blancs. To be compiled runtime
