@@ -439,12 +439,12 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       x[2]  = track->GetTPCNcls();                                           // TPCnClust
       x[3]  = track->GetTPCsignal();                                         // TPCsignal
       x[4]  = track->GetTPCsignalN();                                        // TPCnSignal
-      x[5]  = x[2] != 0 ? track->GetTPCchi2() / x[2] : -1.f ;                // TPCchi2
+      x[5]  = x[2] != 0 ? track->GetTPCchi2() / x[2] : -1.f;                 // TPCchi2
       x[6]  = shared.CountBits();                                            // TPCshared
       x[7]  = track->GetITSsignal();                                         // ITSsignal
       x[8]  = track->GetNcls(0);                                             // ITSnClust
       x[9]  = NumberOfPIDClustersITS(track);                                 // ITSnClustPID
-      x[10] = x[10] != 0 ? track->GetITSchi2() / x[10] : -1.f                // ITSchi2
+      x[10] = x[10] != 0 ? track->GetITSchi2() / x[10] : -1.f;               // ITSchi2
       x[11] = hasTOF ? time : -1.f;                                          // TOFtime
       x[12] = track->GetTOFsignalDz();                                       // TOFsignalDz
       x[13] = track->GetTOFsignalDx();                                       // TOFsignalDx
