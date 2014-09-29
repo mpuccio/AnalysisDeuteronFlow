@@ -7,7 +7,7 @@ Int_t iAODTagCreation  = 1;
 Int_t iAODAddMCBranch  = 0;
 
 //______________________________________________________________________________
-void run(
+void RunGrid(
          const char* runtype = "local", // local, proof or grid
          const char *gridmode = "test", // Set the run mode (can be "full", "test", "offline", "submit" or "terminate"). Full & Test work for proof
          const bool bMCtruth = 1, // 1 = MCEvent handler is on (MC truth), 0 = MCEvent handler is off (MC reconstructed/real data)
