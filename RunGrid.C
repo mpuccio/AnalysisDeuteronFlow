@@ -135,7 +135,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   // plugin->SetDataPattern("pass2/*AliAOD.root"); // sim
   
   plugin->SetGridDataDir("/alice/data/2011/LHC11h_2/"); //sim
-  plugin->SetDataPattern("/pass2/ESDs/*AliESD.root"); // sim
+  plugin->SetDataPattern("*/pass2/*AliESDs.root"); // sim
   plugin->SetRunPrefix("000");   // real data
   
   Int_t runlist[1]={167693};
