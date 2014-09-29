@@ -56,14 +56,19 @@ void run(
   // Load analysis specific libraries
   //=====================================================================
   //------ Create AlienPlugin ---------------------
-  
-  AliAnalysisGrid *plugin = CreateAlienHandler(taskname, gridmode, proofcluster, proofdataset);
-  if(!plugin) return;
-  
+  AliAnalysisGrid *plugin = 0x0;
+  TChain *chain = 0x0;
+  if (runtype != "local") {
+    plugin = CreateAlienHandler(taskname, gridmode, proofcluster, proofdataset);
+    if(!plugin) return;
+  } else {
+    gROOT->LoadMacro("$ALICE_ROOT/PWGCF/Correlations/macros/dphicorrelations/CreateESDChain.C");
+    chain = CreateESDChain("ESDs.txt");
+  }
   
   //---- Create the analysis manager
   AliAnalysisManager* mgr = new AliAnalysisManager(taskname);
-  mgr->SetGridHandler(plugin);
+  if(plugin) mgr->SetGridHandler(plugin);
   
   //  Input
   
@@ -80,8 +85,6 @@ void run(
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskCentrality.C");
   AliCentralitySelectionTask *taskCentr = AddTaskCentrality();
   
-  
-  
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
   AliAnalysisTaskPIDResponse *pidTask = AddTaskPIDResponse(useMC);
   
@@ -92,7 +95,7 @@ void run(
 
   
   //__________________________________________________________________________
-  // Disbale debug printouts
+  // Disable debug printouts
   mgr->SetDebugLevel(3);
   AliLog::SetGlobalLogLevel(AliLog::kFatal);
   AliLog::SetGlobalDebugLevel(0);
@@ -101,7 +104,10 @@ void run(
   if (!mgr->InitAnalysis()) return;
   mgr->PrintStatus();
   // Start analysis in grid.
-  mgr->StartAnalysis(runtype);
+  if (runtype == "local")
+    mgr->StartAnalysis(runtype,chain,nentries,firstentry);
+  else
+    mgr->StartAnalysis(runtype,nentries,firstentry);
 };
 
 }
