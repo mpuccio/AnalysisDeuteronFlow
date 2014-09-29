@@ -108,9 +108,8 @@ void run(
     mgr->StartAnalysis(runtype,chain,nentries,firstentry);
   else
     mgr->StartAnalysis(runtype,nentries,firstentry);
-};
-
 }
+
 
 //______________________________________________________________________________
 AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, const char *proofcluster, const char *proofdataset)
