@@ -262,12 +262,11 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
                         "deuteron candidates",
                         "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
   //  fOutputContainer->Add(fTree);
-  if (fFillTree) {
-    fOutputContainer->Add(fNtuple);
-  }
   PostData(1,fOutputContainer);
-//  OpenFile(2);
-//  PostData(2, fTree);
+  if(fFillTree) {
+    OpenFile(2);
+    PostData(2, fNtuple);
+  }
 }
 
 //__________________________________________________________________________________________________
@@ -291,7 +290,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   if (SetupEvent() < 0) {
     PostData(1, fOutputContainer);
-    //PostData(2,fTree);
+    if(fFillTree) PostData(2, fNtuple);
     return;
   }
   
@@ -301,7 +300,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     vertex = fESD->GetPrimaryVertexSPD();
     if(vertex->GetNContributors() < 1) {
       PostData(1, fOutputContainer);
-      //PostData(2,fTree);
+      if(fFillTree) PostData(2, fNtuple);
       return;
     }
   }
@@ -312,7 +311,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
                                         GetInputEventHandler()))->IsEventSelected();
   if (!isSelected || TMath::Abs(vertex->GetZv()) > 10) {
     PostData(1, fOutputContainer);
-    //PostData(2,fTree);
+    if(fFillTree) PostData(2, fNtuple);
     return;
   }
   
@@ -461,7 +460,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   // Post output data.
   PostData(1, fOutputContainer);
-  //PostData(2,fTree);
+  if(fFillTree) PostData(2, fNtuple);
 }
 
 //________________________________________________________________________
