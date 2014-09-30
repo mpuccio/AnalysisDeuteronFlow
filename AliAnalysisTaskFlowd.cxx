@@ -256,16 +256,17 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistDeuteron);
   fOutputContainer->Add(fHistTOF2D);
   fOutputContainer->Add(fHistTOFnuclei);
-  
-  // Tree and branch definitions
-  fNtuple = new TNtuple("deuterons",
-                        "deuteron candidates",
-                        "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
+
   //  fOutputContainer->Add(fTree);
   PostData(1,fOutputContainer);
   if(fFillTree) {
     OpenFile(2);
+    fNtuple = new TNtuple("deuterons",
+                          "deuteron candidates",
+                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
     PostData(2, fNtuple);
+  } else {
+    fNtuple = new TNtuple();
   }
 }
 
