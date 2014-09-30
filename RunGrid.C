@@ -162,7 +162,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   // plugin->SetAdditionalLibs("libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
   
   plugin->SetAnalysisSource("AliAnalysisTaskFlowd.cxx");
-  plugin->SetAdditionalLibs("AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx ");
+  //plugin->SetAdditionalLibs("AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx ");
   cout<<"-->>>>>>>>>>>>>>>>>>>>>>>>> 1"<<endl;
   
   // Declare the analysis source files names separated by blancs. To be compiled runtime
@@ -181,7 +181,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   // plugin->SetAdditionalLibs("AliAnalysisTaskESDMuonFilterO_cxx.so");
   
   //questo
-  plugin->SetAdditionalLibs("libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so");
+  plugin->SetAdditionalLibs("libSTEERBase.so libESD.so AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so");
   plugin->AddIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/ITS -I$ALICE_ROOT/TPC -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER/STEER -I$ALICE_ROOT/STEER/STEERBase -I$ALICE_ROOT/STEER/ESD -I$ALICE_ROOT/STEER/AOD -I$ALICE_ROOT/TRD -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS  -I$ALICE_ROOT/OADB -I$ALICE_ROOT/PWGHF -I$ALICE_ROOT/PWGHF/base -I$ALICE_ROOT/PWGHF/vertexingHF -I$ALICE_ROOT/PWG/FLOW/Base -I$ALICE_ROOT/PWG/FLOW/Tasks -g");
   
   
