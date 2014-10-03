@@ -264,7 +264,6 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
     fNtuple = new TNtuple("deuterons",
                           "deuteron candidates",
                           "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
-    PostData(2, fNtuple);
   } else {
     fNtuple = new TNtuple();
   }
@@ -430,7 +429,10 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       }
     }
     
-    if (ptot > 2.f && (!hasTOF || time < 0.f)) {
+    if (!fFillTree)
+      continue;
+    
+    if (ptot > 1.5f && (!hasTOF || time < 0.f)) {
       continue;
     }
     
@@ -462,6 +464,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       x[19] = length;                                                        // length
       x[20] = cov1[14];                                                      // sigmaQP
       fNtuple->Fill(x);
+      PostData(2, fNtuple);
     }
   }//end loop over tracks
   
