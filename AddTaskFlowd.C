@@ -19,43 +19,20 @@ AliAnalysisTask *AddTaskFlowd(Bool_t fillTree = kFALSE){
   //========= Add task to the ANALYSIS manager =====
   AliAnalysisTaskFlowd *task = new AliAnalysisTaskFlowd("Flowd");
 
-  //Int_t iResult = task->Initialize();
-  // if (!iResult)
   mgr->AddTask(task);
-    // else {
-    //AliError("NO pt ranges specfied, not adding the task !!!");
-    //return -1;
-    //}
 
-  //mgr->AddTask(task);
-  
-  //================================================
-  //              data containers
-  //================================================
-  //            find input container
-  //below the trunk version
-  //AliAnalysisDataContainer *cinput  = mgr->GetCommonInputContainer();
-
-  //dumm output container
-  // AliAnalysisDataContainer *coutput0 =
-  //     mgr->CreateContainer("mpuccio_treeFlowd",
-  //                          TTree::Class(),
-  //                          AliAnalysisManager::kExchangeContainer,
-  //                          "mpuccio_default");
-
-  //define output containers, please use 'username'_'somename'
   AliAnalysisDataContainer *coutput1 = 
-      mgr->CreateContainer("mpuccio_Flowd", TList::Class(),AliAnalysisManager::kOutputContainer,"mpuccio_Flowd.root");
+      mgr->CreateContainer("mpuccio_Flowd", TList::Class(),
+                           AliAnalysisManager::kOutputContainer,"mpuccio_Flowd.root");
 
   //connect containers
   mgr->ConnectInput  (task,  0,  mgr->GetCommonInputContainer());
-  //mgr->ConnectOutput (task,  0, coutput0);
   mgr->ConnectOutput (task,  1, coutput1);
   task->SetFillTree(fillTree);
   if (fillTree) {
     AliAnalysisDataContainer *coutput2 = mgr->CreateContainer("mpuccio_FlowdTree", TNtuple::Class(),
                                                               AliAnalysisManager::kOutputContainer,
-                                                              "mpuccio_Flowd_tree.root");
+                                                              "mpuccio_Flowdnt.root");
     coutput2->SetSpecialOutput();
     mgr->ConnectOutput (task,  2, coutput2);
   }
