@@ -8,11 +8,9 @@ Int_t iAODAddMCBranch  = 0;
 
 //______________________________________________________________________________
 void RunGrid(
-         const char* runtype = "local", // local, proof or grid
+         const char* runtype = "grid", // local, proof or grid
          const char *gridmode = "test", // Set the run mode (can be "full", "test", "offline", "submit" or "terminate"). Full & Test work for proof
-         const bool bMCtruth = 1, // 1 = MCEvent handler is on (MC truth), 0 = MCEvent handler is off (MC reconstructed/real data)
-         const bool bMCphyssel = 1, // 1 = looking at MC truth or reconstructed, 0 = looking at real data
-         const Long64_t nentries = 2000, // for local and proof mode, ignored in grid mode. Set to 1234567890 for all events.
+         const Long64_t nentries = 400, // for local and proof mode, ignored in grid mode. Set to 1234567890 for all events.
          const Long64_t firstentry = 0, // for local and proof mode, ignored in grid mode
          const char *proofdataset = "/alice/data/LHC10c_000120821_p1", // path to dataset on proof cluster, for proof analysis
          const char *proofcluster = "alice-caf.cern.ch", // which proof cluster to use in proof mode
@@ -139,7 +137,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   plugin->SetRunPrefix("000");   // real data
   
   Int_t runlist[] = {                                                               // Counter
-    170309, 170308, 170306, 170270, 170269, 170268, 170230, 170228, 170204, 170203, // 10
+    /*170309, 170308, 170306, 170270,*/ 170269, 170268, 170230, 170228, 170204, 170203, // 10
     170193, 170163, 170159, 170155, 170081, 170027, 169859, 169858, 169855, 169846, // 20
     169838, 169837, 169835, 169417, 169415, 169411, 169238, 169167, 169160, 169156, // 30
     169148, 169145, 169144, 169138, 169094, 169091, 169035, 168992, 168988, 168826, // 40
@@ -147,11 +145,9 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
     168342, 168341, 168325, 168322, 168311, 168310, 167988, 167987                  // 58
   };
   
-  for(Int_t i=0;i<1;i++)
+  for(Int_t i = 0; i < 3; i++)
     plugin->AddRunNumber(runlist[i]);
-  
-  //    plugin->AddRunNumber(139505);
-  //  plugin->AddRunNumber(138652);
+
   plugin->SetNrunsPerMaster(1);
   plugin->SetOutputToRunNo();
   
