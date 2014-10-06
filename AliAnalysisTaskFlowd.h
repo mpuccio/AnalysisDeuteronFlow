@@ -13,7 +13,7 @@ class TH2F;
 class AliESDEvent;
 class AliESDVertex;
 class AliESDpid;
-class TNtuple;
+class TTree;
 
 #include "AliESDtrackCuts.h"
 #include "AliAnalysisTaskSE.h"
@@ -56,9 +56,31 @@ private:
   TH1F                 *fHistTriggerStat;                   //! Trigger statistic
   TH1F                 *fHistTriggerStatAfterEventSelection;//! Trigger statistic after selection
   Int_t                 fNCounter;                          //  # points in the signal graph
-  TNtuple              *fNtuple;                            //! Deuteron ntuple
+  TTree                *fTree;                              //! Deuteron ntuple
   TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
+  
+  // Tree variables
+  Float_t fCentrality;
+  Float_t fEta;
+  Float_t fTPCsignal;
+  Float_t fTPCchi2;
+  Float_t fITSsignal;
+  Float_t fITSchi2;
+  Float_t fTOFtime;
+  Float_t fTOFsignalDz;
+  Float_t fTOFsignalDx;
+  Float_t fDCAxy;
+  Float_t fDCAz;
+  Float_t fP;
+  Float_t fPtpc;
+  Float_t fPt;
+  Float_t fLength;
+  Float_t fSigmaQP;
+  Short_t fTPCnClust;
+  Short_t fTPCnSignal;
+  Short_t fITSnClust;
+  Short_t fITSnSignal;
   
   // Constants
   const Int_t           fkNTriggers;                        //  Number of used triggers

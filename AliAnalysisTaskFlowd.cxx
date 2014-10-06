@@ -75,9 +75,29 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fHistTriggerStat(0x0)
 ,fHistTriggerStatAfterEventSelection(0x0)
 ,fNCounter(0)
-,fNtuple(0x0)
+,fTree(0x0)
 ,fOutputContainer(0x0)
 ,fTrigger(0)
+,fCentrality(0)
+,fEta(0)
+,fTPCsignal(0)
+,fTPCchi2(0)
+,fITSsignal(0)
+,fITSchi2(0)
+,fTOFtime(0)
+,fTOFsignalDz(0)
+,fTOFsignalDx(0)
+,fDCAxy(0)
+,fDCAz(0)
+,fP(0)
+,fPtpc(0)
+,fPt(0)
+,fLength(0)
+,fSigmaQP(0)
+,fTPCnClust(0)
+,fTPCnSignal(0)
+,fITSnClust(0)
+,fITSnSignal(0)
 ,fkNTriggers(5)
 {
   // Standard c-tor
@@ -87,7 +107,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   DefineInput(0, TChain::Class());
   // Output slot #0 writes into a TH1 container
   DefineOutput(1, TList::Class());
-  DefineOutput(2, TNtuple::Class());
+  DefineOutput(2, TTree::Class());
   
   // cuts for candidates
   //
@@ -119,7 +139,7 @@ AliAnalysisTaskFlowd::~AliAnalysisTaskFlowd()
   if (fCustomPID) {
     delete fESDpid;
   }
-  delete fNtuple;
+  delete fTree;
   
 }
 
@@ -261,13 +281,32 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistTOFnuclei);
 
   PostData(1,fOutputContainer);
-  if(fFillTree) {
+  if(fFillTree)
     OpenFile(2);
-    fNtuple = new TNtuple("deuterons",
-                          "deuteron candidates",
-                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
-  } else {
-    fNtuple = new TNtuple();
+  fTree = new TTree("deuterons","deuterons");
+  fTree->Branch("fCentrality",&fCentrality, "fCentrality/F");
+  fTree->Branch("fEta",&fEta,"fEta/F");
+  fTree->Branch("fTPCsignal",&fTPCsignal,"fTPCsignal/F");
+  fTree->Branch("fTPCchi2",&fTPCchi2,"fTPCchi2/F");
+  fTree->Branch("fITSsignal",&fITSsignal,"fITSsignal/F");
+  fTree->Branch("fITSchi2",&fITSchi2,"fITSchi2/F");
+  fTree->Branch("fTOFtime",&fTOFtime,"fTOFtime/F");
+  fTree->Branch("fTOFsignalDz",&fTOFsignalDz,"fTOFsignalDz/F");
+  fTree->Branch("fTOFsignalDx",&fTOFsignalDx,"fTOFsignalDx/F");
+  fTree->Branch("fDCAxy",&fDCAxy,"fDCAxy/F");
+  fTree->Branch("fDCAz",&fDCAz,"fDCAz/F");
+  fTree->Branch("fP",&fP,"fP/F");
+  fTree->Branch("fPtpc",&fPtpc,"fPtpc/F");
+  fTree->Branch("fPt",&fPt,"fPt/F");
+  fTree->Branch("fLength",&fLength,"fLength/F");
+  fTree->Branch("fSigmaQP",&fSigmaQP,"fSigmaQP/F");
+  fTree->Branch("fTPCnClust",&fTPCnClust,"fTPCnClust/S");
+  fTree->Branch("fTPCnSignal",&fTPCnSignal,"fTPCnSignal/S");
+  fTree->Branch("fITSnClust",&fITSnClust,"fITSnClust/S");
+  fTree->Branch("fITSnSignal",&fITSnSignal,"fITSnSignal/S");
+
+  if (fFillTree) {
+    PostData(2, fTree);
   }
 }
 
@@ -292,7 +331,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   if (SetupEvent() < 0) {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
+    if(fFillTree) PostData(2, fTree);
     return;
   }
   
@@ -302,7 +341,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     vertex = fESD->GetPrimaryVertexSPD();
     if(vertex->GetNContributors() < 1) {
       PostData(1, fOutputContainer);
-      if(fFillTree) PostData(2, fNtuple);
+      if(fFillTree) PostData(2, fTree);
       return;
     }
   }
@@ -313,7 +352,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
                                         GetInputEventHandler()))->IsEventSelected();
   if (!isSelected || TMath::Abs(vertex->GetZv()) > 10) {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
+    if(fFillTree) PostData(2, fTree);
     return;
   }
   
@@ -330,7 +369,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     //select only events with centralities between 0 and 80 %
     if (centralityPercentile < 0. || centralityPercentile > 80. ) {
       PostData(1, fOutputContainer);
-      if(fFillTree) PostData(2, fNtuple);
+      if(fFillTree) PostData(2, fTree);
       return;
     }
   }
@@ -338,7 +377,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   // select only events which pass kMB, kCentral, kSemiCentral
   if (!(fTrigger & kMB) && !(fTrigger & kCentral) && !(fTrigger & kSemiCentral)) {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
+    if(fFillTree) PostData(2, fTree);
     return;
   }
   //
@@ -444,36 +483,33 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       track->GetImpactParameters(dca, cov);
       Double_t cov1[15];
       track->GetExternalCovariance(cov1);
-      Float_t x[21];
-      x[0]  = centralityPercentile;                                          // centrality
-      x[1]  = track->Eta();                                                  // eta
-      x[2]  = track->GetTPCNcls();                                           // TPCnClust
-      x[3]  = track->GetTPCsignal();                                         // TPCsignal
-      x[4]  = track->GetTPCsignalN();                                        // TPCnSignal
-      x[5]  = x[2] != 0.f ? track->GetTPCchi2() / x[2] : -1.f;               // TPCchi2
-      x[6]  = shared.CountBits();                                            // TPCshared
-      x[7]  = track->GetITSsignal();                                         // ITSsignal
-      x[8]  = track->GetNcls(0);                                             // ITSnClust
-      x[9]  = NumberOfPIDClustersITS(track);                                 // ITSnClustPID
-      x[10] = x[8] != 0.f ? track->GetITSchi2() / x[8] : -1.f;               // ITSchi2
-      x[11] = hasTOF ? time : -1.f;                                          // TOFtime
-      x[12] = track->GetTOFsignalDz();                                       // TOFsignalDz
-      x[13] = track->GetTOFsignalDx();                                       // TOFsignalDx
-      x[14] = dca[1];                                                        // DCAxy
-      x[15] = dca[0];                                                        // DCAz
-      x[16] = track->P();                                                    // p
-      x[17] = ptot;                                                          // pTPC
-      x[18] = sign * track->Pt();                                            // pT
-      x[19] = length;                                                        // length
-      x[20] = cov1[14];                                                      // sigmaQP
-      fNtuple->Fill(x);
-      PostData(2, fNtuple);
+      fCentrality  = centralityPercentile;                                        // centrality
+      fEta = track->Eta();                                                        // eta
+      fTPCnClust = track->GetTPCNcls();                                           // TPCnClust
+      fTPCsignal = track->GetTPCsignal();                                         // TPCsignal
+      fTPCnSignal = track->GetTPCsignalN();                                       // TPCnSignal
+      fTPCchi2 = fTPCnClust != 0.f ? track->GetTPCchi2() / fTPCnClust : -1.f;     // TPCchi2
+      fITSsignal = track->GetITSsignal();                                         // ITSsignal
+      fITSnClust = track->GetNcls(0);                                             // ITSnClust
+      fITSnSignal = NumberOfPIDClustersITS(track);                                // ITSnClustPID
+      fITSchi2 = fITSnClust != 0.f ? track->GetITSchi2() / fITSnClust : -1.f;     // ITSchi2
+      fTOFtime = hasTOF ? time : -1.f;                                            // TOFtime
+      fTOFsignalDz = track->GetTOFsignalDz();                                     // TOFsignalDz
+      fTOFsignalDx = track->GetTOFsignalDx();                                     // TOFsignalDx
+      fDCAz = dca[1];                                                             // DCAxy
+      fDCAxy = dca[0];                                                            // DCAz
+      fP = track->P();                                                            // p
+      fPtpc = ptot;                                                               // pTPC
+      fPt = sign * track->Pt();                                                   // pT
+      fLength = length;                                                           // length
+      fSigmaQP = cov1[14];                                                        // sigmaQP
+      fTree->Fill();
     }
   }//end loop over tracks
   
   // Post output data.
   PostData(1, fOutputContainer);
-  if(fFillTree) PostData(2, fNtuple);
+  if(fFillTree) PostData(2, fTree);
 }
 
 //________________________________________________________________________
