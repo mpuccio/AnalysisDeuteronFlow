@@ -57,6 +57,7 @@ inline static Int_t NumberOfPIDClustersITS(AliESDtrack* track) {
 //__________________________________________________________________________________________________
 AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 :AliAnalysisTaskSE(name)
+,fCustomPID(kFALSE)
 ,fESD(0x0)
 ,fESDpid(0x0)
 ,fESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts")
@@ -113,6 +114,16 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 }
 
 //__________________________________________________________________________________________________
+AliAnalysisTaskFlowd::~AliAnalysisTaskFlowd()
+{
+  if (fCustomPID) {
+    delete fESDpid;
+  }
+  delete fNtuple;
+  
+}
+
+//__________________________________________________________________________________________________
 void AliAnalysisTaskFlowd::BinLogAxis(const TH1 *h)
 {
   //
@@ -134,14 +145,6 @@ void AliAnalysisTaskFlowd::BinLogAxis(const TH1 *h)
   axis->Set(bins, newBins);
   delete [] newBins;
   
-}
-
-//__________________________________________________________________________________________________
-Int_t AliAnalysisTaskFlowd::Initialize()
-{
-  // Initialisation === Reset
-  ResetEvent();
-  return 0;
 }
 
 //__________________________________________________________________________________________________
@@ -257,7 +260,6 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistTOF2D);
   fOutputContainer->Add(fHistTOFnuclei);
 
-  //  fOutputContainer->Add(fTree);
   PostData(1,fOutputContainer);
   if(fFillTree) {
     OpenFile(2);
@@ -356,6 +358,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   }
   if (!fESDpid)
   {
+    fCustomPID = kTRUE;
     fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
     fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
                                                       TMath::Exp(-3.16327e+01), 1.87901e+00,

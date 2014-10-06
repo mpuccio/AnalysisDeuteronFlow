@@ -21,12 +21,11 @@ class TNtuple;
 class AliAnalysisTaskFlowd : public AliAnalysisTaskSE {
 public:
   AliAnalysisTaskFlowd(const char *name = "DeuteronAnalysis");
-  virtual ~AliAnalysisTaskFlowd() {}
+  virtual ~AliAnalysisTaskFlowd();
   
   virtual void   UserCreateOutputObjects();
   virtual void   UserExec(Option_t *option);
   virtual void   Terminate(const Option_t*);
-  Int_t          Initialize();
   Int_t          SetupEvent();
   void           ResetEvent();
   void           SetFillTree(Bool_t io = kFALSE) { fFillTree = io; }
@@ -39,6 +38,7 @@ private:
   Bool_t IsTriggered();
   
   // Private variables
+  Bool_t                fCustomPID;                         //
   AliESDEvent          *fESD;                               //! ESD object
   AliESDpid            *fESDpid;                            //! basic TPC object for n-sigma cuts
   AliESDtrackCuts       fESDtrackCuts;                      //  basic cut variables
