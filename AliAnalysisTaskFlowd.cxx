@@ -358,11 +358,14 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   }
   if (!fESDpid)
   {
-    fCustomPID = kTRUE;
-    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
-    fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
-                                                      TMath::Exp(-3.16327e+01), 1.87901e+00,
-                                                      6.41583e+00);
+    PostData(1, fOutputContainer);
+    if(fFillTree) PostData(2, fNtuple);
+    return;
+//    fCustomPID = kTRUE;
+//    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
+//    fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
+//                                                      TMath::Exp(-3.16327e+01), 1.87901e+00,
+//                                                      6.41583e+00);
   }
 
   // Track loop to fill the spectram
