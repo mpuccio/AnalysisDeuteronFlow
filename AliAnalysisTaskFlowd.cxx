@@ -395,14 +395,14 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     fESDpid = ((AliESDInputHandler*)(AliAnalysisManager::GetAnalysisManager()->
                                      GetInputEventHandler()))->GetESDpid();
   }
-  if (!fESDpid)
-  {
-    fCustomPID = kTRUE;
-    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
-    fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
-                                                      TMath::Exp(-3.16327e+01), 1.87901e+00,
-                                                      6.41583e+00);
-  }
+//  if (!fESDpid)
+//  {
+//    fCustomPID = kTRUE;
+//    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
+//    fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
+//                                                      TMath::Exp(-3.16327e+01), 1.87901e+00,
+//                                                      6.41583e+00);
+//  }
 
   // Track loop to fill the spectram
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
