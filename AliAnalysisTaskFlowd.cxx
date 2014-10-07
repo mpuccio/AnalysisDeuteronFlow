@@ -265,7 +265,7 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
     OpenFile(2);
     fNtuple = new TNtuple("deuterons",
                           "deuteron candidates",
-                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP");//21 elements
+                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP",4000);//21 elements
   } else {
     fNtuple = new TNtuple();
   }
