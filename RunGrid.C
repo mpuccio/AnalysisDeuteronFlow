@@ -137,7 +137,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   plugin->SetRunPrefix("000");   // real data
   
   Int_t runlist[] = {                                                               // Counter
-    /*170309, 170308, 170306, 170270,*/ 170269, 170268, 170230, 170228, 170204, 170203, // 10
+    /*170309, 170308, 170306, 170270, 170269, 170268, 170230,*/ 170228, 170204, 170203, // 10
     170193, 170163, 170159, 170155, 170081, 170027, 169859, 169858, 169855, 169846, // 20
     169838, 169837, 169835, 169417, 169415, 169411, 169238, 169167, 169160, 169156, // 30
     169148, 169145, 169144, 169138, 169094, 169091, 169035, 168992, 168988, 168826, // 40
@@ -145,7 +145,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
     168342, 168341, 168325, 168322, 168311, 168310, 167988, 167987                  // 58
   };
   
-  for(Int_t i = 0; i < 3; i++)
+  for(Int_t i = 0; i < 2; i++)
     plugin->AddRunNumber(runlist[i]);
 
   plugin->SetNrunsPerMaster(1);
