@@ -89,6 +89,7 @@ private:
   TH1D*            fBeta;
   TH1D*            fGamma;
   TH2F*            fdEdxTPC;
+  TH2F*            fdEdxTPCproj;
   TH2F*            fdEdxTPCSignal;
   TH1D*            fSignal;
   ClassDef(DeutSelector,0);

@@ -103,10 +103,12 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   fGamma = new TH1D("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
+  fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
   fSignal = new TH1D("fSignal",";",600,0.1,6.1);
   GetOutputList()->Add(fdEdxTPC);
   GetOutputList()->Add(fdEdxTPCSignal);
+  GetOutputList()->Add(fdEdxTPCproj);
   GetOutputList()->Add(fSignal);
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fGamma);
@@ -135,6 +137,7 @@ Bool_t DeutSelector::Process(Long64_t entry)
 
   GetEntry(entry);
   fdEdxTPC->Fill(pTPC,TPCsignal);
+  fdEdxTPCproj->Fill(pTPC,TPCsignal);
   
   if (TOFtime > 0.f && length > 0.f) {
     Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
@@ -144,7 +147,7 @@ Bool_t DeutSelector::Process(Long64_t entry)
       fGamma->Fill(gamma);
       fSignal->Fill(p / (beta * gamma));
       if (p / (beta * gamma) > 1.5f ) {
-	fdEdxTPCSignal->Fill(pTPC,TPCsignal);
+        fdEdxTPCSignal->Fill(pTPC,TPCsignal);
       }
     }
   }
@@ -183,6 +186,11 @@ void DeutSelector::Terminate()
     fdEdxTPCSignal->Write();
   }
 
+  fdEdxTPCproj = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPCproj"));
+  if (fdEdxTPCproj) {
+    fdEdxTPCproj->Write();
+  }
+  
   fBeta = dynamic_cast<TH1D*>(GetOutputList()->FindObject("fBeta"));
   if (fBeta) {
     fBeta->Write();
