@@ -101,7 +101,7 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   fBeta = new TH1D("fBeta",";#beta;Entries",100,0.f,1.f);
   fGamma = new TH1D("fGamma",";#gamma;Entries",1000,1.f,1000.f);
-  fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
+  fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,1000,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
