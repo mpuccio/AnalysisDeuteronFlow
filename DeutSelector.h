@@ -14,6 +14,7 @@
 #include <TSelector.h>              
 
 class TH2F;
+class TH1D;
 
 // Header file for the classes stored in the TTree if any.
 
@@ -85,7 +86,11 @@ class DeutSelector : public TSelector {
   virtual void    SlaveTerminate();
   virtual void    Terminate();
 private:
+  TH1D*            fBeta;
+  TH1D*            fGamma;
   TH2F*            fdEdxTPC;
+  TH2F*            fdEdxTPCSignal;
+  TH1D*            fSignal;
   ClassDef(DeutSelector,0);
 };
 
