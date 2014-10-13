@@ -69,6 +69,7 @@ Bool_t DeutSelector::Process(Long64_t entry)
   //
   // The return value is currently not used.
   
+  GetEntry(entry);
   fdEdxTPC->Fill(pTPC,TPCsignal);
   
   return kTRUE;
@@ -87,5 +88,6 @@ void DeutSelector::Terminate()
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
+  fdEdxTPC->Draw("colz");
   
 }
