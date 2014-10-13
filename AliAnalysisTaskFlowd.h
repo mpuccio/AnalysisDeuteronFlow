@@ -44,7 +44,6 @@ private:
   AliESDtrackCuts       fESDtrackCuts;                      //  basic cut variables
   AliESDtrackCuts       fESDtrackCutsStrict;                //  basic cut variables
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
-  Bool_t                fFillTree;                          //  TTree switch
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
   TH2F                 *fHistDeDx;                          //! Histo for a dE/dx
@@ -56,7 +55,6 @@ private:
   TH1F                 *fHistTriggerStat;                   //! Trigger statistic
   TH1F                 *fHistTriggerStatAfterEventSelection;//! Trigger statistic after selection
   Int_t                 fNCounter;                          //  # points in the signal graph
-  TNtuple              *fNtuple;                            //! Deuteron ntuple
   TList                *fOutputContainer;                   //! Output data container
   Int_t                 fTrigger;                           //  "Trigger mask"
   

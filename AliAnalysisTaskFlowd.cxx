@@ -8,8 +8,6 @@
 #include "AliAnalysisTaskFlowd.h"
 #include <Riostream.h>
 #include "TChain.h"
-#include "TTree.h"
-#include "TNtuple.h"
 #include "TF1.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -63,7 +61,6 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts")
 ,fESDtrackCutsStrict("AliESDtrackCuts","AliESDtrackCuts")
 ,fEventHandler(0x0)
-,fFillTree(kFALSE)
 ,fHistCentralityClass10(0x0)
 ,fHistCentralityPercentile(0x0)
 ,fHistDeDx(0x0)
@@ -75,7 +72,6 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fHistTriggerStat(0x0)
 ,fHistTriggerStatAfterEventSelection(0x0)
 ,fNCounter(0)
-,fNtuple(0x0)
 ,fOutputContainer(0x0)
 ,fTrigger(0)
 ,fkNTriggers(5)
@@ -87,7 +83,6 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   DefineInput(0, TChain::Class());
   // Output slot #0 writes into a TH1 container
   DefineOutput(1, TList::Class());
-  DefineOutput(2, TNtuple::Class());
   
   // cuts for candidates
   //
@@ -118,9 +113,7 @@ AliAnalysisTaskFlowd::~AliAnalysisTaskFlowd()
 {
   if (fCustomPID) {
     delete fESDpid;
-  }
-  delete fNtuple;
-  
+  }  
 }
 
 //__________________________________________________________________________________________________
@@ -261,16 +254,6 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistTOFnuclei);
 
   PostData(1,fOutputContainer);
-  if(fFillTree) {
-    OpenFile(2);
-    fNtuple = new TNtuple("deuterons",
-                          "deuteron candidates",
-                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP",4000);//21 elements
-    fNtuple->SetAutoSave(100000000);
-    PostData(2,fNtuple);
-  } else {
-    fNtuple = new TNtuple();
-  }
 }
 
 //__________________________________________________________________________________________________
@@ -294,7 +277,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   
   if (SetupEvent() < 0) {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
     return;
   }
   
@@ -304,7 +286,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     vertex = fESD->GetPrimaryVertexSPD();
     if(vertex->GetNContributors() < 1) {
       PostData(1, fOutputContainer);
-      if(fFillTree) PostData(2, fNtuple);
       return;
     }
   }
@@ -315,7 +296,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
                                         GetInputEventHandler()))->IsEventSelected();
   if (!isSelected || TMath::Abs(vertex->GetZv()) > 10) {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
     return;
   }
   
@@ -332,7 +312,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     //select only events with centralities between 0 and 80 %
     if (centralityPercentile < 0. || centralityPercentile > 80. ) {
       PostData(1, fOutputContainer);
-      if(fFillTree) PostData(2, fNtuple);
       return;
     }
   }
@@ -340,7 +319,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   // select only events which pass kMB, kCentral, kSemiCentral
   if (!(fTrigger & kMB) && !(fTrigger & kCentral) && !(fTrigger & kSemiCentral)) {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
     return;
   }
   //
@@ -361,7 +339,6 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   if (!fESDpid)
   {
     PostData(1, fOutputContainer);
-    if(fFillTree) PostData(2, fNtuple);
     return;
 //    fCustomPID = kTRUE;
 //    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
@@ -445,55 +422,10 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       }
     }
     
-    if (!fFillTree)
-      continue;
-    
-    if (ptot > 1.5f && (!hasTOF || time < 0.f))
-    {
-      continue;
-    }
-    
-    if (ptot < 0.35f)
-    {
-      continue;
-    }
-    
-    if((track->GetTPCsignal() - expSignalDeuteron) / expSignalDeuteron > -0.3 && ptot < 5.f)
-    {
-      Float_t dca[2],cov[3];
-      track->GetImpactParameters(dca, cov);
-      Double_t cov1[15];
-      track->GetExternalCovariance(cov1);
-      Float_t x[21];
-      x[0]  = centralityPercentile;                                          // centrality
-      x[1]  = track->Eta();                                                  // eta
-      x[2]  = track->GetTPCNcls();                                           // TPCnClust
-      x[3]  = track->GetTPCsignal();                                         // TPCsignal
-      x[4]  = track->GetTPCsignalN();                                        // TPCnSignal
-      x[5]  = x[2] != 0.f ? track->GetTPCchi2() / x[2] : -1.f;               // TPCchi2
-      x[6]  = shared.CountBits();                                            // TPCshared
-      x[7]  = track->GetITSsignal();                                         // ITSsignal
-      x[8]  = track->GetNcls(0);                                             // ITSnClust
-      x[9]  = NumberOfPIDClustersITS(track);                                 // ITSnClustPID
-      x[10] = x[8] != 0.f ? track->GetITSchi2() / x[8] : -1.f;               // ITSchi2
-      x[11] = hasTOF ? time : -1.f;                                          // TOFtime
-      x[12] = track->GetTOFsignalDz();                                       // TOFsignalDz
-      x[13] = track->GetTOFsignalDx();                                       // TOFsignalDx
-      x[14] = dca[1];                                                        // DCAxy
-      x[15] = dca[0];                                                        // DCAz
-      x[16] = track->P();                                                    // p
-      x[17] = ptot;                                                          // pTPC
-      x[18] = sign * track->Pt();                                            // pT
-      x[19] = length;                                                        // length
-      x[20] = cov1[14];                                                      // sigmaQP
-      fNtuple->Fill(x);
-      PostData(2, fNtuple);
-    }
   }//end loop over tracks
   
   // Post output data.
   PostData(1, fOutputContainer);
-  if(fFillTree) PostData(2, fNtuple);
 }
 
 //________________________________________________________________________
