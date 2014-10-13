@@ -28,7 +28,6 @@ public:
   virtual void   Terminate(const Option_t*);
   Int_t          SetupEvent();
   void           ResetEvent();
-  void           SetFillTree(Bool_t io = kFALSE) { fFillTree = io; }
   
 private:
   // Private methods

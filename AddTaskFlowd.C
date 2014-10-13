@@ -28,14 +28,6 @@ AliAnalysisTask *AddTaskFlowd(Bool_t fillTree = kFALSE){
   //connect containers
   mgr->ConnectInput  (task,  0,  mgr->GetCommonInputContainer());
   mgr->ConnectOutput (task,  1, coutput1);
-  task->SetFillTree(fillTree);
-  if (fillTree) {
-    AliAnalysisDataContainer *coutput2 = mgr->CreateContainer("mpuccio_FlowdTree", TNtuple::Class(),
-                                                              AliAnalysisManager::kOutputContainer,
-                                                              "mpuccio_Flowdnt.root");
-    coutput2->SetSpecialOutput();
-    mgr->ConnectOutput (task,  2, coutput2);
-  }
 
   return task;
 }
