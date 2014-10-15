@@ -357,6 +357,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (track->GetInnerParam())
     {
       ptot = track->GetInnerParam()->GetP();
+    } else {
+      continue;
     }
     
     Double_t ptotInc = track->GetP(); // total momentum of the incoming particle
