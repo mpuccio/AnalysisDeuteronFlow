@@ -8,7 +8,7 @@ Int_t iAODAddMCBranch  = 0;
 
 //______________________________________________________________________________
 void RunGrid(
-         const char* runtype = "grid", // local, proof or grid
+         const char* runtype = "local", // local, proof or grid
          const char *gridmode = "test", // Set the run mode (can be "full", "test", "offline", "submit" or "terminate"). Full & Test work for proof
          const Long64_t nentries = 400, // for local and proof mode, ignored in grid mode. Set to 1234567890 for all events.
          const Long64_t firstentry = 0, // for local and proof mode, ignored in grid mode
@@ -61,7 +61,7 @@ void RunGrid(
     if(!plugin) return;
   } else {
     gROOT->LoadMacro("$ALICE_ROOT/PWGCF/Correlations/macros/dphicorrelations/CreateESDChain.C");
-    chain = CreateESDChain("ESDs.txt");
+    chain = CreateESDChain("ESDs.txt",20,0,kFALSE,kFALSE,"check");
   }
   
   //---- Create the analysis manager
@@ -89,9 +89,9 @@ void RunGrid(
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
   AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
   
-  gROOT->LoadMacro("./AliAnalysisTaskFlowd.cxx+g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
-  gROOT->LoadMacro("./AddTaskFlowd.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
-  AliAnalysisTaskFlowd *task = AddTaskFlowd(kFALSE);
+//  gROOT->LoadMacro("./AliAnalysisTaskFlowd.cxx+g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
+//  gROOT->LoadMacro("./AddTaskFlowd.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
+//  AliAnalysisTaskFlowd *task = AddTaskFlowd(kFALSE);
   
 
   
@@ -169,7 +169,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
   
   // plugin->SetAdditionalLibs("libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
   
-  plugin->SetAnalysisSource("AliAnalysisTaskFlowd.cxx");
+//  plugin->SetAnalysisSource("AliAnalysisTaskFlowd.cxx");
   //plugin->SetAdditionalLibs("AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx ");
   cout<<"-->>>>>>>>>>>>>>>>>>>>>>>>> 1"<<endl;
   
@@ -189,7 +189,8 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
   // plugin->SetAdditionalLibs("AliAnalysisTaskESDMuonFilterO_cxx.so");
   
   //questo
-  plugin->SetAdditionalLibs("libSTEERBase.so libESD.so AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so");
+  plugin->SetAdditionalLibs("libSTEERBase.so libESD.so libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so");
+//    plugin->SetAdditionalLibs("libSTEERBase.so libESD.so AliAnalysisTaskFlowd.h AliAnalysisTaskFlowd.cxx libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so");
   plugin->AddIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/ITS -I$ALICE_ROOT/TPC -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER/STEER -I$ALICE_ROOT/STEER/STEERBase -I$ALICE_ROOT/STEER/ESD -I$ALICE_ROOT/STEER/AOD -I$ALICE_ROOT/TRD -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS  -I$ALICE_ROOT/OADB -I$ALICE_ROOT/PWGHF -I$ALICE_ROOT/PWGHF/base -I$ALICE_ROOT/PWGHF/vertexingHF -I$ALICE_ROOT/PWG/FLOW/Base -I$ALICE_ROOT/PWG/FLOW/Tasks -g");
   
   
