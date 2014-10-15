@@ -136,6 +136,9 @@ Bool_t DeutSelector::Process(Long64_t entry)
   // The return value is currently not used.
 
   GetEntry(entry);
+  if (pTPC == p) {
+    return kTRUE;
+  }
   fdEdxTPC->Fill(pTPC,TPCsignal);
   fdEdxTPCproj->Fill(pTPC,TPCsignal);
   
