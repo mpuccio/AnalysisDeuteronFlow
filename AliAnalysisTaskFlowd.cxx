@@ -60,10 +60,12 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fESDpid(0x0)
 ,fESDtrackCuts("AliESDtrackCuts","AliESDtrackCuts")
 ,fESDtrackCutsStrict("AliESDtrackCuts","AliESDtrackCuts")
+,fESDStandardTrackCuts(0x0)
 ,fEventHandler(0x0)
 ,fHistCentralityClass10(0x0)
 ,fHistCentralityPercentile(0x0)
 ,fHistDeDx(0x0)
+,fHistDeDxSig(0x0)
 ,fHistDeDxITS(0x0)
 ,fHistDeDxITSsa(0x0)
 ,fHistDeuteron(0x0)
@@ -106,6 +108,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   fESDtrackCutsStrict.SetMinNClustersITS(1);
   fESDtrackCutsStrict.SetEtaRange(-1.0,1.0);
 
+  fESDStandardTrackCuts = AliESDtrackCuts::GetStandardITSTPCTrackCuts2011();
 }
 
 //__________________________________________________________________________________________________
@@ -114,6 +117,7 @@ AliAnalysisTaskFlowd::~AliAnalysisTaskFlowd()
   if (fCustomPID) {
     delete fESDpid;
   }
+  delete fESDStandardTrackCuts;
 }
 
 //__________________________________________________________________________________________________
@@ -217,6 +221,11 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fHistDeDx->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
   BinLogAxis(fHistDeDx);
   
+  fHistDeDxSig = new TH2F("fHistDeDxSig", "dE/dx", 1000, 0.1, 6.0, 1000, 0.0, 1000);
+  fHistDeDxSig->GetYaxis()->SetTitle("TPC dE/dx signal (a.u.)");
+  fHistDeDxSig->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
+  BinLogAxis(fHistDeDxSig);
+  
   fHistDeDxITS = new TH2F("fHistDeDxITS", "dE/dx ITS", 676, 0.1, 4.0, 1000, 0.0, 1000);
   fHistDeDxITS->GetYaxis()->SetTitle("ITS dE/dx signal (a.u.)");
   fHistDeDxITS->GetXaxis()->SetTitle("#frac{p}{z} (GeV/c)");
@@ -247,6 +256,7 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistTriggerStat);
   fOutputContainer->Add(fHistTriggerStatAfterEventSelection);
   fOutputContainer->Add(fHistDeDx);
+  fOutputContainer->Add(fHistDeDxSig);
   fOutputContainer->Add(fHistDeDxITS);
   fOutputContainer->Add(fHistDeDxITSsa);
   fOutputContainer->Add(fHistDeuteron);
@@ -351,6 +361,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
   {
     AliESDtrack* track = fESD->GetTrack(iTracks);
+    if(!fESDStandardTrackCuts->AcceptTrack(track)) continue;
     if (!fESDtrackCuts.AcceptTrack(track)) continue;
     UInt_t  status = track->GetStatus();
     Double_t ptot = track->GetP();
@@ -390,6 +401,13 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
         fHistDeDxITS->Fill(ptot,track->GetITSsignal());
     }
     
+    if (ptot < 1.2f) {
+      if (track->GetTPCsignal() >
+          1.3f * fESDpid->GetTPCResponse().GetExpectedSignal(track, AliPID::kProton)) {
+        
+      }
+    } else 
+      fHistDeDxSig->Fill(ptot,track->GetTPCsignal());
     //
     Float_t mass = 0;
     Float_t time = -1;

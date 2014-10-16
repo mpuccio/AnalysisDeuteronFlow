@@ -42,9 +42,11 @@ private:
   AliESDpid            *fESDpid;                            //! basic TPC object for n-sigma cuts
   AliESDtrackCuts       fESDtrackCuts;                      //  basic cut variables
   AliESDtrackCuts       fESDtrackCutsStrict;                //  basic cut variables
+  AliESDtrackCuts      *fESDStandardTrackCuts;              //  basic cut variables
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
+  TH2F                 *fHistDeDxSig;                       //! Histo for a dE/dx
   TH2F                 *fHistDeDx;                          //! Histo for a dE/dx
   TH2F                 *fHistDeDxITS;                       //! Histo for a dE/dx ITS
   TH2F                 *fHistDeDxITSsa;                     //! Histo for a dE/dx ITSsa
