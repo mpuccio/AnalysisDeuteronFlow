@@ -88,6 +88,7 @@ class DeutSelector : public TSelector {
   virtual void    Terminate();
 private:
   TH1D*            fBeta;
+  TH2F*            fBeta2D;
   TF1*             fDeutBB;
   TH2F*            fdEdxTPC;
   TH2F*            fdEdxTPCproj;

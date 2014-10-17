@@ -92,6 +92,7 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   
   TString option = GetOption();
   fBeta = new TH1D("fBeta",";#beta;Entries",100,0.f,1.f);
+  fBeta2D = new TH2F("fBeta2D","TOF; #frac{p}{z} (GeV/c); #beta", 500,0.01,5.,2250,0.1,1.);
   fGamma = new TH1D("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,500,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
@@ -103,6 +104,7 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fdEdxTPCproj);
   GetOutputList()->Add(fSignal);
   GetOutputList()->Add(fBeta);
+  GetOutputList()->Add(fBeta2D);
   GetOutputList()->Add(fGamma);
   
   fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
@@ -138,18 +140,19 @@ Bool_t DeutSelector::Process(Long64_t entry)
   fdEdxTPC->Fill(pTPC,TPCsignal);
   fdEdxTPCproj->Fill(pTPC,TPCsignal);
   
-  if (TOFtime > 0.f && length > 0.f) {
-    Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
-    fBeta->Fill(beta);
-    if (beta < (1.f - EPSILON)) {
-      Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
-      fGamma->Fill(gamma);
-      fSignal->Fill(p / (beta * gamma));
-    }
-  }
-  
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     fdEdxTPCSignal->Fill(pTPC,TPCsignal);
+    
+    if (TOFtime > 0.f && length > 0.f) {
+      Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
+      fBeta->Fill(beta);
+      fBeta2D->Fill(pTPC,beta);
+      if (beta < (1.f - EPSILON)) {
+        Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
+        fGamma->Fill(gamma);
+        fSignal->Fill(p / (beta * gamma));
+      }
+    }
   }
   return kTRUE;
 }
@@ -204,6 +207,11 @@ void DeutSelector::Terminate()
   fSignal = dynamic_cast<TH1D*>(GetOutputList()->FindObject("fSignal"));
   if (fSignal) {
     fSignal->Write();
+  }
+  
+  fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
+  if (fBeta2D) {
+    fBeta2D->Write();
   }
   f.Close();
 
