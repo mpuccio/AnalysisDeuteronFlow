@@ -45,6 +45,13 @@ void RunPoD(
   // Centrality selection
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskCentrality.C");
   AliCentralitySelectionTask *taskCentr = AddTaskCentrality();
+  // PID response
+  gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
+  AliAnalysisTaskPIDResponse *pidTask = AddTaskPIDResponse(kFALSE); // useMC
+  // PID QA
+  gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
+  AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
+  
   
   gProof->Load("AliAnalysisTaskFlowd.cxx+");  // DON'T use double '+' when running multiple times: it uselessly recompiles everything!
   gROOT->LoadMacro("AddTaskFlowd.C");
