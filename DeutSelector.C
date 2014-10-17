@@ -73,7 +73,7 @@ Double_t BetheBlochAleph(Double_t bg,
 
 Double_t DeuteronTPC(Double_t *x, Double_t *par) {
   // Deuteron expected signal in TPC, taken from AntiHe4 task
-  return BetheBlochAleph(x/1.875612,4.69637,7.51827,0.0183746,2.60,2.7);
+  return BetheBlochAleph(x[0]/1.875612,4.69637,7.51827,0.0183746,2.60,2.7);
 }
 
 void DeutSelector::Begin(TTree * /*tree*/)
