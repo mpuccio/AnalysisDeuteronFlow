@@ -130,6 +130,8 @@ Bool_t DeutSelector::Process(Long64_t entry)
   // The return value is currently not used.
 
   GetEntry(entry);
+  if (TMath::Abs(eta) > 0.8)
+    return kTRUE;
   if (pTPC == p) {
     return kTRUE;
   }
