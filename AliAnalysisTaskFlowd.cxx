@@ -65,9 +65,9 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fHistCentralityClass10(0x0)
 ,fHistCentralityPercentile(0x0)
 ,fHistDeDx(0x0)
-,fHistDeDxSig(0x0)
 ,fHistDeDxITS(0x0)
 ,fHistDeDxITSsa(0x0)
+,fHistDeDxSig(0x0)
 ,fHistDeuteron(0x0)
 ,fHistTOF2D(0x0)
 ,fHistTOFnuclei(0x0)
@@ -403,10 +403,9 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     
     if (ptot < 1.2f) {
       if (track->GetTPCsignal() >
-          1.3f * fESDpid->GetTPCResponse().GetExpectedSignal(track, AliPID::kProton)) {
-        
-      }
-    } else 
+          1.3f * fESDpid->GetTPCResponse().GetExpectedSignal(track, AliPID::kProton))
+        fHistDeDxSig->Fill(ptot,track->GetTPCsignal());
+    } else
       fHistDeDxSig->Fill(ptot,track->GetTPCsignal());
     //
     Float_t mass = 0;

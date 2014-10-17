@@ -46,10 +46,10 @@ private:
   AliInputEventHandler *fEventHandler;                      //! for ESDs or AODs
   TH1F                 *fHistCentralityClass10;             //! centrality distribution
   TH1F                 *fHistCentralityPercentile;          //! centrality distribution
-  TH2F                 *fHistDeDxSig;                       //! Histo for a dE/dx
   TH2F                 *fHistDeDx;                          //! Histo for a dE/dx
   TH2F                 *fHistDeDxITS;                       //! Histo for a dE/dx ITS
   TH2F                 *fHistDeDxITSsa;                     //! Histo for a dE/dx ITSsa
+  TH2F                 *fHistDeDxSig;                       //! Histo for a dE/dx
   TH1F                 *fHistDeuteron;                      //! d plot TOF mass
   TH2F                 *fHistTOF2D;                         //! Histo for a TOF
   TH2F                 *fHistTOFnuclei;                     //! Histo for a TOF nuclei
