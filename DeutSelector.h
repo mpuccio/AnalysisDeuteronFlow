@@ -15,6 +15,7 @@
 
 class TH2F;
 class TH1D;
+class TF1;
 
 // Header file for the classes stored in the TTree if any.
 
@@ -87,10 +88,11 @@ class DeutSelector : public TSelector {
   virtual void    Terminate();
 private:
   TH1D*            fBeta;
-  TH1D*            fGamma;
+  TF1*             fDeutBB;
   TH2F*            fdEdxTPC;
   TH2F*            fdEdxTPCproj;
   TH2F*            fdEdxTPCSignal;
+  TH1D*            fGamma;
   TH1D*            fSignal;
   ClassDef(DeutSelector,0);
 };

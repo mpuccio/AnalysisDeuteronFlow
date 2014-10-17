@@ -71,17 +71,9 @@ Double_t BetheBlochAleph(Double_t bg,
   return (kp2-aa-bb)*kp1/aa;
 }
 
-Double_t DeuteronTPC(Double_t *x,Double_t *par) {
-  // Deuteron expected signal in TPC
-  // Double_t fAlephParameters[5];
-  // fAlephParameters[0] = 0.0283086;
-  // fAlephParameters[1] = 2.63394e+01;
-  // fAlephParameters[2] = 5.04114e-11;
-  // fAlephParameters[3] = 2.12543e+00;
-  // fAlephParameters[4] = 4.88663e+00;
-  //                                  1.45802,27.4992,4.00313e-15,2.48485,8.31768
-  return BetheBlochAleph(x[0] / 1.876,1.45802,27.4992,4.00313e-15,2.48485,8.31768);
-  //return BetheBlochAleph(x[0] / 1.876,fAlephParameters[0],fAlephParameters[1],fAlephParameters[2],fAlephParameters[3],fAlephParameters[4]);
+Double_t DeuteronTPC(Double_t *x, Double_t *par) {
+  // Deuteron expected signal in TPC, taken from AntiHe4 task
+  return BetheBlochAleph(x/1.875612,4.69637,7.51827,0.0183746,2.60,2.7);
 }
 
 void DeutSelector::Begin(TTree * /*tree*/)
@@ -112,6 +104,8 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fSignal);
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fGamma);
+  
+  fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
 
 }
 
@@ -149,10 +143,11 @@ Bool_t DeutSelector::Process(Long64_t entry)
       Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
       fGamma->Fill(gamma);
       fSignal->Fill(p / (beta * gamma));
-      if (p / (beta * gamma) > 1.5f ) {
-        fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      }
     }
+  }
+  
+  if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
+    fdEdxTPCSignal->Fill(pTPC,TPCsignal);
   }
   return kTRUE;
 }
@@ -162,7 +157,7 @@ void DeutSelector::SlaveTerminate()
   // The SlaveTerminate() function is called after all entries or objects
   // have been processed. When running with PROOF SlaveTerminate() is called
   // on each slave server.
-  
+  delete fDeutBB;
 }
 
 void DeutSelector::Terminate()
