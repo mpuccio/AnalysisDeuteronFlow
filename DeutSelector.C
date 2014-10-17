@@ -142,7 +142,7 @@ Bool_t DeutSelector::Process(Long64_t entry)
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-    
+    if (pTPC > 1.f) return kTRUE;
     if (TOFtime > 0.f && length > 0.f) {
       Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
       fBeta->Fill(beta);
