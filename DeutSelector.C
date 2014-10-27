@@ -112,7 +112,7 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   fBins[0] = bins[0];
   for (int i = 0; i < 13; ++i) {
     fBins[i+1] = bins[i+1];
-    fSignal[i] = new TH1D(Form("fSignal_%4.1f_%4.1f",fBins[i],fBins[i+1]),";(m - m_{PDG})^{2};Entries",600,0.1,6.1);
+    fSignal[i] = new TH1D(Form("fSignal%i",i),Form("%4.1f #leq p_{T} #let %4.1f ;(m - m_{PDG})^{2};Entries",fBins[i],fBins[i+1]),600,0.1,6.1);
     GetOutputList()->Add(fSignal[i]);
   }
   GetOutputList()->Add(fdEdxTPC);
@@ -230,7 +230,7 @@ void DeutSelector::Terminate()
   }
 
   for (int i = 0; i < 13; ++i) {
-    fSignal[i] = dynamic_cast<TH1D*>(GetOutputList()->FindObject(Form("fSignal_%4.1f_%4.1f",fBins[i],fBins[i+1])));
+    fSignal[i] = dynamic_cast<TH1D*>(GetOutputList()->FindObject(Form("fSignal%i",fBins[i],fBins[i+1])));
     if (fSignal[i]) {
       fSignal[i]->Write();
     }
