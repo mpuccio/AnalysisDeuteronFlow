@@ -90,6 +90,7 @@ int DeutSelector::GetPtBin(float pt) {
       return i;
     }
   }
+  return -1;
 }
 
 void DeutSelector::SlaveBegin(TTree * /*tree*/)
@@ -165,7 +166,11 @@ Bool_t DeutSelector::Process(Long64_t entry)
         Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
         fGamma->Fill(gamma);
         const float dm = 1.875612859f - p / (beta * gamma);
-        fSignal[GetPtBin(pT)]->Fill(dm * dm);
+        const int j = GetPtBin(pT);
+        if (j < 0) {
+          return kTRUE;
+        }
+        fSignal[j]->Fill(dm * dm);
       }
     }
   }
