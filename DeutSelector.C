@@ -220,7 +220,7 @@ void DeutSelector::Terminate()
   }
 
   for (int i = 0; i < 13; ++i) {
-    fSignal[i] = dynamic_cast<TH1D*>(GetOutputList()->FindObject(Form("fSignal_%4.1f_%4.1f",fBins[i],fBins[i+1]));
+    fSignal[i] = dynamic_cast<TH1D*>(GetOutputList()->FindObject(Form("fSignal_%4.1f_%4.1f",fBins[i],fBins[i+1])));
     if (fSignal[i]) {
       fSignal[i]->Write();
     }
