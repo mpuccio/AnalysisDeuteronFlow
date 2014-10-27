@@ -87,14 +87,16 @@ class DeutSelector : public TSelector {
   virtual void    SlaveTerminate();
   virtual void    Terminate();
 private:
+  Int_t            GetPtBin(float pt);
   TH1D*            fBeta;
   TH2F*            fBeta2D;
+  Float_t          fBins[14];
   TF1*             fDeutBB;
   TH2F*            fdEdxTPC;
   TH2F*            fdEdxTPCproj;
   TH2F*            fdEdxTPCSignal;
   TH1D*            fGamma;
-  TH1D*            fSignal;
+  TH1D**           fSignal;
   ClassDef(DeutSelector,0);
 };
 

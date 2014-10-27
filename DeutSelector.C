@@ -84,6 +84,14 @@ void DeutSelector::Begin(TTree * /*tree*/)
   TString option = GetOption();
 }
 
+int DeutSelector::GetPtBin(float pt) {
+  for (int i = 0; i < 13; ++i) {
+    if (pt < fBins[i+1] && pt >= fBins[i]) {
+      return i;
+    }
+  }
+}
+
 void DeutSelector::SlaveBegin(TTree * /*tree*/)
 {
   // The SlaveBegin() function is called after the Begin() function.
@@ -98,11 +106,17 @@ void DeutSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
-  fSignal = new TH1D("fSignal",";",600,0.1,6.1);
+  fSignal = new TH1D*[13];
+  float bins[14] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f};
+  fBins[0] = bins[0];
+  for (int i = 0; i < 13; ++i) {
+    fBins[i+1] = bins[i+1];
+    fSignal[i] = new TH1D(Form("fSignal_%4.1f_%4.1f",fBins[i],fBins[i+1]),";(m - m_{PDG})^{2};Entries",600,0.1,6.1);
+    GetOutputList()->Add(fSignal[i]);
+  }
   GetOutputList()->Add(fdEdxTPC);
   GetOutputList()->Add(fdEdxTPCSignal);
   GetOutputList()->Add(fdEdxTPCproj);
-  GetOutputList()->Add(fSignal);
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fBeta2D);
   GetOutputList()->Add(fGamma);
@@ -142,7 +156,7 @@ Bool_t DeutSelector::Process(Long64_t entry)
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-    if (pTPC > 1.f) return kTRUE;
+    if (pTPC > 5.f) return kTRUE;
     if (TOFtime > 0.f && length > 0.f) {
       Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
       fBeta->Fill(beta);
@@ -150,7 +164,8 @@ Bool_t DeutSelector::Process(Long64_t entry)
       if (beta < (1.f - EPSILON)) {
         Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
         fGamma->Fill(gamma);
-        fSignal->Fill(p / (beta * gamma));
+        const float dm = 1.875612859f - p / (beta * gamma);
+        fSignal[GetPtBin(pT)]->Fill(dm * dm);
       }
     }
   }
@@ -204,9 +219,11 @@ void DeutSelector::Terminate()
     fGamma->Write();
   }
 
-  fSignal = dynamic_cast<TH1D*>(GetOutputList()->FindObject("fSignal"));
-  if (fSignal) {
-    fSignal->Write();
+  for (int i = 0; i < 13; ++i) {
+    fSignal[i] = dynamic_cast<TH1D*>(GetOutputList()->FindObject(Form("fSignal_%4.1f_%4.1f",fBins[i],fBins[i+1]));
+    if (fSignal[i]) {
+      fSignal[i]->Write();
+    }
   }
   
   fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
