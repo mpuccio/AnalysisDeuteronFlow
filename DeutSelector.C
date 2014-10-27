@@ -82,6 +82,10 @@ void DeutSelector::Begin(TTree * /*tree*/)
   // When running with PROOF Begin() is only called on the client.
   // The tree argument is deprecated (on PROOF 0 is passed).
   TString option = GetOption();
+  float bins[14] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f};
+  fBins[0] = bins[0];
+  for (int i = 0; i < 13; ++i) 
+    fBins[i+1] = bins[i+1];
 }
 
 int DeutSelector::GetPtBin(float pt) {
