@@ -72,8 +72,8 @@ void AODdEfficiency::UserCreateOutputObjects(){
   
   fDYield = new TH1F("fDYield",";p_{T} (GeV/c);Number of d tracks",120,0.1,6.1);
   fAntiDYield = new TH1F("fAntiDYield",";p_{T} (GeV/c);Number of #bar{d} tracks",120,0.1,6.1);
-  fDYieldTOF = new TH1F("fDTOF",";p_{T} (GeV/c);Number of d tracks",120,0.1,6.1);
-  fAntiDYieldTOF = new TH1F("fAntiDTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",120,0.1,6.1);
+  fDYieldTOF = new TH1F("fDYieldTOF",";p_{T} (GeV/c);Number of d tracks",120,0.1,6.1);
+  fAntiDYieldTOF = new TH1F("fAntiDYieldTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",120,0.1,6.1);
   fAntiDMCYield = new TH1F("fAntiDMCYield",";p_{T} (GeV/c);Number of MC #bar{d}",120,0.1,6.1);
   fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",120,0.1,6.1);
   
