@@ -197,8 +197,9 @@ void AODdEfficiency::Terminate(Option_t *) {
   return;
 }
 
+ClassImp(TrackCuts)
 //__________________________________________________________________________________________________
-bool AODdEfficiency::TrackCuts::AcceptTrack(AliAODTrack *t) {
+bool TrackCuts::AcceptTrack(AliAODTrack *t) {
   if (!Enabled) {
     return true;
   }

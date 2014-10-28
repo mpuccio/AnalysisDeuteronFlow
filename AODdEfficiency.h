@@ -15,6 +15,21 @@ class TList;
 
 #include "AliAnalysisTaskSE.h"
 
+class TrackCuts : public TObject {
+public:
+  bool AcceptTrack(AliAODTrack *t);
+  float Chi2;
+  float Eta;
+  unsigned int   ClustTPC;
+  unsigned int   ClustSPD;
+  unsigned int   ClustITS;
+  bool  RefitTPC;
+  bool  RefitITS;
+  bool  RejectKink;
+  bool  Enabled;
+  ClassDef(TrackCuts,1);
+};
+
 class AODdEfficiency: public AliAnalysisTaskSE {
 public:
   
@@ -43,19 +58,6 @@ private:
   TH1F    *fAntiDMCYield;
   TH1F    *fDMCYield;
   TH1F    *fDClones;
-  
-  struct TrackCuts {
-    bool AcceptTrack(AliAODTrack *t);
-    float Chi2;
-    float Eta;
-    unsigned int   ClustTPC;
-    unsigned int   ClustSPD;
-    unsigned int   ClustITS;
-    bool  RefitTPC;
-    bool  RefitITS;
-    bool  RejectKink;
-    bool  Enabled;
-  };
   TrackCuts fTrackCuts;
   
   ClassDef(AODdEfficiency, 1);
