@@ -45,19 +45,8 @@ fAntiDYield(0),
 fDYieldTOF(0),
 fAntiDYieldTOF(0),
 fAntiDMCYield(0),
-fDMCYield(0),
-fTrackCuts()
+fDMCYield(0)
 {
-  fTrackCuts.Eta = 0.8f;
-  fTrackCuts.ClustTPC = 70;
-  fTrackCuts.RefitITS = true;
-  fTrackCuts.RefitTPC = true;
-  fTrackCuts.RejectKink = true;
-  fTrackCuts.ClustITS = 2;
-  fTrackCuts.ClustSPD = 0;
-  fTrackCuts.Chi2 = 4;
-  fTrackCuts.Enabled = true;
-  
   DefineInput(0, TChain::Class());
   DefineOutput(1, TList::Class());
 }
@@ -154,13 +143,28 @@ void AODdEfficiency::UserExec(Option_t *){
   }
   
   // Checking how many deuterons in acceptance are reconstructed well
-  for (Int_t i = 0; i < (Int_t)ev->GetNumberOfTracks(); ++i) {
-    AliAODTrack *aodtr = dynamic_cast<AliAODTrack*>(ev->GetTrack(i));
+  for (Int_t iT = 0; iT < (Int_t)ev->GetNumberOfTracks(); ++iT) {
+    AliAODTrack *aodtr = dynamic_cast<AliAODTrack*>(ev->GetTrack(iT));
     // Skip fake tracks
     if (aodtr->GetLabel() < 0) continue;
     if (aodtr->GetID() <= 0) continue;
     // Track cuts
-    if (!fTrackCuts.AcceptTrack(aodtr)) continue;
+    ULong_t status = aodtr->GetStatus();
+    if (!(status & AliVTrack::kITSrefit)) continue;
+    if (!(status & AliVTrack::kTPCrefit)) continue;
+    if (TMath::Abs(aodtr->Eta()) > 0.8f) continue;
+    if (aodtr->Chi2perNDF() > 4.f) continue;
+    AliAODVertex *vtx1 = (AliAODVertex*)aodtr->GetProdVertex();
+    if(Int_t(vtx1->GetType()) == AliAODVertex::kKink) continue;
+    if (aodtr->GetTPCClusterMap().CountBits() < 70) continue;
+    unsigned int nSPD = 0, nITS = 0;
+    for (int i = 0; i < 6; ++i) {
+      if (aodtr->HasPointOnITSLayer(i)) {
+        if(i < 2) nSPD++;
+        nITS++;
+      }
+    }
+    if (nSPD < 1 || nITS < 2) continue;
     if (!aodtr->PropagateToDCA(primaryVtx, b, 100, dca_tr, covar_tr)) continue;
     if (dca_tr[1] > 2.f) continue;
     // Has the track a nice prolongation in TOF? Answer in hasTOF.
@@ -195,45 +199,4 @@ void AODdEfficiency::Terminate(Option_t *) {
   // Called once at the end of the query
   
   return;
-}
-
-ClassImp(TrackCuts)
-//__________________________________________________________________________________________________
-bool TrackCuts::AcceptTrack(AliAODTrack *t) {
-  if (!Enabled) {
-    return true;
-  }
-  
-  ULong_t status = t->GetStatus();
-  if (RefitITS) {
-    if (!(status & AliVTrack::kITSrefit))
-      return false;
-  }
-  if (RefitTPC) {
-    if (!(status & AliVTrack::kTPCrefit))
-      return false;
-  }
-  if (TMath::Abs(t->Eta()) > Eta) {
-    return false;
-  }
-  if (t->Chi2perNDF() > Chi2) {
-    return false;
-  }
-  if (RejectKink) {
-    AliAODVertex *vtx1 = (AliAODVertex*)t->GetProdVertex();
-    Int_t vtyp1 = (Int_t)vtx1->GetType();
-    if(vtyp1 == AliAODVertex::kKink)
-      return false;
-  }
-  if (t->GetTPCClusterMap().CountBits() < ClustTPC) {
-    return false;
-  }
-  unsigned int nSPD = 0, nITS = 0;
-  for (int i = 0; i < 6; ++i) {
-    if (t->HasPointOnITSLayer(i)) {
-      if(i < 2) nSPD++;
-      nITS++;
-    }
-  }
-  return bool(nSPD >= ClustSPD && nITS >= ClustITS);
 }
