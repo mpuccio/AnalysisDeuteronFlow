@@ -40,6 +40,7 @@ ClassImp(AODdEfficiency)
 AODdEfficiency::AODdEfficiency():
 AliAnalysisTaskSE("Task d efficiency"),						//
 fAOD(0),
+fOutput(0),
 fDYield(0),
 fAntiDYield(0),
 fDYieldTOF(0),
