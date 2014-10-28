@@ -32,7 +32,7 @@ private:
   AODdEfficiency (const AODdEfficiency &source);
   AODdEfficiency &operator=(const AODdEfficiency &source);
   
-  AliAODEvent     *fAOD; //AOD object
+  AliAODEvent     *fAOD;              // AOD object
   
   TList   *fOutput;                   //! tlist with output
   
@@ -42,7 +42,6 @@ private:
   TH1F    *fAntiDYieldTOF;
   TH1F    *fAntiDMCYield;
   TH1F    *fDMCYield;
-  TH1F    *fDClones;
   
   ClassDef(AODdEfficiency, 1);
 };
