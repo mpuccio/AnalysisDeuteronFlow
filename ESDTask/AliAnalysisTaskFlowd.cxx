@@ -37,9 +37,8 @@ ClassImp(AliAnalysisTaskFlowd)
 
 //__________________________________________________________________________________________________
 inline static Double_t DeuteronTPC(Double_t x) {
-  // Deuteron expected signal in TPC
-  return AliExternalTrackParam::BetheBlochAleph(x / 1.876,1.45802,27.4992,4.00313e-15,
-                                                2.48485,8.31768);
+  // Deuteron expected signal in TPC, taken from AntiHe4 task
+  return AliExternalTrackParam::BetheBlochAleph(x/1.875612,4.69637,7.51827,0.0183746,2.60,2.7);
 }
 
 //__________________________________________________________________________________________________
@@ -129,7 +128,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   fESDtrackCutsStrict.SetRequireTPCRefit(kTRUE);
   fESDtrackCutsStrict.SetRequireITSRefit(kTRUE);
   fESDtrackCutsStrict.SetMinNClustersITS(1);
-  fESDtrackCutsStrict.SetEtaRange(-1.0,1.0);
+  fESDtrackCutsStrict.SetEtaRange(-1,1);
 
 }
 
@@ -279,34 +278,17 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   fOutputContainer->Add(fHistDeuteron);
   fOutputContainer->Add(fHistTOF2D);
   fOutputContainer->Add(fHistTOFnuclei);
-
   PostData(1,fOutputContainer);
   if(fFillTree)
     OpenFile(2);
-  fTree = new TTree("deuterons","deuterons");
-  fTree->Branch("fCentrality",&fCentrality, "fCentrality/F");
-  fTree->Branch("fEta",&fEta,"fEta/F");
-  fTree->Branch("fTPCsignal",&fTPCsignal,"fTPCsignal/F");
-  fTree->Branch("fTPCchi2",&fTPCchi2,"fTPCchi2/F");
-  fTree->Branch("fITSsignal",&fITSsignal,"fITSsignal/F");
-  fTree->Branch("fITSchi2",&fITSchi2,"fITSchi2/F");
-  fTree->Branch("fTOFtime",&fTOFtime,"fTOFtime/F");
-  fTree->Branch("fTOFsignalDz",&fTOFsignalDz,"fTOFsignalDz/F");
-  fTree->Branch("fTOFsignalDx",&fTOFsignalDx,"fTOFsignalDx/F");
-  fTree->Branch("fDCAxy",&fDCAxy,"fDCAxy/F");
-  fTree->Branch("fDCAz",&fDCAz,"fDCAz/F");
-  fTree->Branch("fP",&fP,"fP/F");
-  fTree->Branch("fPtpc",&fPtpc,"fPtpc/F");
-  fTree->Branch("fPt",&fPt,"fPt/F");
-  fTree->Branch("fLength",&fLength,"fLength/F");
-  fTree->Branch("fSigmaQP",&fSigmaQP,"fSigmaQP/F");
-  fTree->Branch("fTPCnClust",&fTPCnClust,"fTPCnClust/S");
-  fTree->Branch("fTPCnSignal",&fTPCnSignal,"fTPCnSignal/S");
-  fTree->Branch("fITSnClust",&fITSnClust,"fITSnClust/S");
-  fTree->Branch("fITSnSignal",&fITSnSignal,"fITSnSignal/S");
 
-  if (fFillTree) {
-    PostData(2, fTree);
+    fNtuple = new TNtuple("deuterons",
+                          "deuteron candidates",
+                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:TPCshared:ITSsignal:ITSnClust:ITSnClustPID:ITSchi2:TOFtime:TOFsignalDz:TOFsignalDx:DCAxy:DCAz:p:pTPC:pT:length:sigmaQP",4000);//21 elements
+    fNtuple->SetAutoSave(100000000);
+    PostData(2,fNtuple);
+  } else {
+    fNtuple = new TNtuple();
   }
 }
 
@@ -395,14 +377,13 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     fESDpid = ((AliESDInputHandler*)(AliAnalysisManager::GetAnalysisManager()->
                                      GetInputEventHandler()))->GetESDpid();
   }
-//  if (!fESDpid)
-//  {
-//    fCustomPID = kTRUE;
-//    fESDpid = new AliESDpid(); // HACK FOR MC PBPB --> PLEASE REMOVE AS SOON AS POSSIBLE
-//    fESDpid->GetTPCResponse().SetBetheBlochParameters(1.28778e+00 / 50., 3.13539e+01,
-//                                                      TMath::Exp(-3.16327e+01), 1.87901e+00,
-//                                                      6.41583e+00);
-//  }
+
+  if (!fESDpid)
+  {
+    PostData(1, fOutputContainer);
+    if(fFillTree) PostData(2, fNtuple);
+    return;
+  }
 
   // Track loop to fill the spectram
   for (Int_t iTracks = 0; iTracks < fESD->GetNumberOfTracks(); iTracks++)
@@ -411,9 +392,10 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (!fESDtrackCuts.AcceptTrack(track)) continue;
     UInt_t  status = track->GetStatus();
     Double_t ptot = track->GetP();
-    if (track->GetInnerParam()) {
+    if (track->GetInnerParam())
       ptot = track->GetInnerParam()->GetP();
-    }
+    else
+      continue;
     
     Double_t ptotInc = track->GetP(); // total momentum of the incoming particle
     Double_t sign = track->GetSign();
@@ -423,7 +405,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     // fill final histograms
     if (NumberOfPIDClustersITS(track) > 2 && !(status & AliVTrack::kTPCin) &&
         track->GetITSchi2() / track->GetNcls(0) < 36. &&
-        (track->GetNcls(0) - NumberOfPIDClustersITS(track)) > 0) {
+        (track->GetNcls(0) - NumberOfPIDClustersITS(track)) > 0)
+    {
       fHistDeDxITSsa->Fill(ptotInc,track->GetITSsignal());
     }
     
@@ -436,7 +419,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       continue;
     
     //
-    if(sign > 0) {
+    if(sign > 0)
+    {
       fHistDeDx->Fill(ptot, track->GetTPCsignal());
       if (NumberOfPIDClustersITS(track) > 2)
         fHistDeDxITS->Fill(ptot,track->GetITSsignal());
@@ -451,17 +435,22 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     Bool_t hasTOFtime = status & AliESDtrack::kTIME;
     Float_t length = track->GetIntegratedLength();
     Bool_t hasTOF = (hasTOFout & hasTOFtime) && length > 350.f;
-    if (hasTOF == kTRUE && ptot < 5) {
+    if (hasTOF == kTRUE && ptot < 5)
+    {
       Float_t time0 = fESDpid->GetTOFResponse().GetStartTime(track->P());//fESDpid->GetTOFResponse().GetTimeZero();
       time = track->GetTOFsignal() - time0;
-      if (time > 0) {
+      if (time > 0)
+      {
         beta = length / (2.99792457999999984e-02 * time);
-        if (beta < 0.975) {
+        if (beta < 0.975)
+        {
           gamma = 1/TMath::Sqrt(1 - beta*beta);
           mass = ptot/TMath::Sqrt(gamma*gamma - 1); // using inner TPC mom. as approx.
           if (TMath::Sqrt(track->GetTOFsignalDz() * track->GetTOFsignalDz() +
-                          track->GetTOFsignalDx() * track->GetTOFsignalDx()) < 5.) {
-            if((track->GetTPCsignal()-expSignalDeuteron)/expSignalDeuteron > -0.3) {
+                          track->GetTOFsignalDx() * track->GetTOFsignalDx()) < 5.)
+          {
+            if((track->GetTPCsignal() - expSignalDeuteron) / expSignalDeuteron > -0.3)
+            {
               fHistDeuteron->Fill(mass*mass);
               fHistTOFnuclei->Fill(ptot,beta);
             }
@@ -474,11 +463,18 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (!fFillTree)
       continue;
     
-    if (ptot > 1.5f && (!hasTOF || time < 0.f)) {
+    if (ptot > 1.5f && (!hasTOF || time < 0.f))
+    {
       continue;
     }
     
-    if((track->GetTPCsignal() - expSignalDeuteron)/expSignalDeuteron > -0.3 && ptot < 5.f) {
+    if (ptot < 0.35f)
+    {
+      continue;
+    }
+    
+    if((track->GetTPCsignal() - expSignalDeuteron) / expSignalDeuteron > -0.3 && ptot < 5.f)
+    {
       Float_t dca[2],cov[3];
       track->GetImpactParameters(dca, cov);
       Double_t cov1[15];

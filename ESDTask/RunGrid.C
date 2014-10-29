@@ -88,9 +88,10 @@ void RunGrid(
   // PID QA
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
   AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
+
   gROOT->LoadMacro("./AliAnalysisTaskFlowd.cxx+g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
   gROOT->LoadMacro("./AddTaskFlowd.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
-  AliAnalysisTaskFlowd *task = AddTaskFlowd(kTRUE);
+  AliAnalysisTaskFlowd *task = AddTaskFlowd(kFALSE);
   
 
   
@@ -112,7 +113,8 @@ void RunGrid(
 
 
 //______________________________________________________________________________
-AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, const char *proofcluster, const char *proofdataset)
+AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
+                                    const char *proofcluster, const char *proofdataset)
 {
   AliAnalysisAlien *plugin = new AliAnalysisAlien();
   // Set the run mode (can be "full", "test", "offline", "submit" or "terminate")
@@ -213,13 +215,16 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode, 
   plugin->SetAnalysisMacro(Form("%s.C",taskname));
   
   // Optionally set maximum number of input files/subjob (default 100, put 0 to ignore)
-  plugin->SetSplitMaxInputFileNumber(100);
+  plugin->SetSplitMaxInputFileNumber(10);
   
   // Optionally modify the executable name (default analysis.sh)
   plugin->SetExecutable(Form("%s.sh",taskname));
   
   // set number of test files to use in "test" mode
   plugin->SetNtestFiles(10);
+  
+  // file containing a list of chuncks to be used for testin
+  plugin->SetFileForTestMode("testdata");
   
   // Optionally resubmit threshold.
   plugin->SetMasterResubmitThreshold(90);
