@@ -37,9 +37,8 @@ ClassImp(AliAnalysisTaskFlowd)
 
 //__________________________________________________________________________________________________
 inline static Double_t DeuteronTPC(Double_t x) {
-  // Deuteron expected signal in TPC
-  return AliExternalTrackParam::BetheBlochAleph(x / 1.876,1.45802,27.4992,4.00313e-15,
-                                                2.48485,8.31768);
+  // Deuteron expected signal in TPC, taken from AntiHe4 task
+  return AliExternalTrackParam::BetheBlochAleph(x/1.875612,4.69637,7.51827,0.0183746,2.60,2.7);
 }
 
 //__________________________________________________________________________________________________
@@ -109,7 +108,7 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
   fESDtrackCutsStrict.SetRequireTPCRefit(kTRUE);
   fESDtrackCutsStrict.SetRequireITSRefit(kTRUE);
   fESDtrackCutsStrict.SetMinNClustersITS(1);
-  fESDtrackCutsStrict.SetEtaRange(-1.0,1.0);
+  fESDtrackCutsStrict.SetEtaRange(-1,1);
 
 }
 
