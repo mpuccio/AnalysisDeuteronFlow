@@ -34,6 +34,8 @@
 #include "AliVTrack.h"
 #include "AliVVertex.h"
 
+using TMath::TwoPi;
+
 ClassImp(AODdEfficiency)
 
 //__________________________________________________________________________________________________
@@ -46,7 +48,8 @@ fAntiDYield(0),
 fDYieldTOF(0),
 fAntiDYieldTOF(0),
 fAntiDMCYield(0),
-fDMCYield(0)
+fDMCYield(0),
+fEtaPhiCoverage(0)
 {
   DefineInput(0, TChain::Class());
   DefineOutput(1, TList::Class());
@@ -76,6 +79,7 @@ void AODdEfficiency::UserCreateOutputObjects(){
   fAntiDYieldTOF = new TH1F("fAntiDYieldTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",120,0.1,6.1);
   fAntiDMCYield = new TH1F("fAntiDMCYield",";p_{T} (GeV/c);Number of MC #bar{d}",120,0.1,6.1);
   fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",120,0.1,6.1);
+  fEtaPhiCoverage = new TH2F("fEtaPhiCoverage",";#eta;#phi;Entries",160,-0.8,0.8,628,0,TwoPi());
   
   fOutput->Add(fDYield);
   fOutput->Add(fAntiDYield);
@@ -83,6 +87,7 @@ void AODdEfficiency::UserCreateOutputObjects(){
   fOutput->Add(fAntiDYieldTOF);
   fOutput->Add(fDMCYield);
   fOutput->Add(fAntiDMCYield);
+  fOutput->Add(fEtaPhiCoverage);
   PostData(1,fOutput);
 }
 
@@ -178,6 +183,7 @@ void AODdEfficiency::UserExec(Option_t *){
     AliAODMCParticle *part = (AliAODMCParticle*) stack->At(aodtr->GetLabel());
     if (!part) continue;
     if (mcD.Contains(part)) {
+      fEtaPhiCoverage->Fill(part->Eta(),part->Phi());
       fDYield->Fill(part->Pt());
       if (hasTOF) {
         fDYieldTOF->Fill(part->Pt());

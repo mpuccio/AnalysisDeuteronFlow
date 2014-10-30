@@ -12,6 +12,7 @@ class AliAODEvent;
 class AliAODTrack;
 class TH1F;
 class TList;
+class TH2F;
 
 #include "AliAnalysisTaskSE.h"
 
@@ -42,6 +43,7 @@ private:
   TH1F    *fAntiDYieldTOF;
   TH1F    *fAntiDMCYield;
   TH1F    *fDMCYield;
+  TH2F    *fEtaPhiCoverage;
   
   ClassDef(AODdEfficiency, 1);
 };
