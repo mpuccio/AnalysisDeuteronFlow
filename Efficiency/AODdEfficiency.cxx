@@ -43,12 +43,20 @@ AODdEfficiency::AODdEfficiency():
 AliAnalysisTaskSE("Task d efficiency"),						//
 fAOD(0),
 fOutput(0),
-fDYield(0),
-fAntiDYield(0),
-fDYieldTOF(0),
-fAntiDYieldTOF(0),
 fAntiDMCYield(0),
+fAntiDYield(0),
+fAntiDYieldTOF(0),
+fDCAxyPrimariesAD(),
+fDCAxySecondariesAD(),
+fDCAzPrimariesAD(),
+fDCAzSecondariesAD(),
+fDCAxyPrimariesD(),
+fDCAxySecondariesD(),
+fDCAzPrimariesD(),
+fDCAzSecondariesD(),
 fDMCYield(0),
+fDYield(0),
+fDYieldTOF(0),
 fEtaPhiCoverage(0)
 {
   DefineInput(0, TChain::Class());
@@ -88,6 +96,24 @@ void AODdEfficiency::UserCreateOutputObjects(){
   fOutput->Add(fDMCYield);
   fOutput->Add(fAntiDMCYield);
   fOutput->Add(fEtaPhiCoverage);
+  for (int iCent = 0; iCent < 3; ++iCent) {
+    fDCAxyPrimariesD[iCent] = new TH1F(Form("fDCAxyPrimariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAxySecondariesD[iCent] = new TH1F(Form("fDCAxySecondariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAzPrimariesD[iCent] = new TH1F(Form("fDCAzPrimariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAzSecondariesD[iCent] = new TH1F(Form("fDCAzSecondariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fOutput->Add(fDCAxyPrimariesD[iCent]);
+    fOutput->Add(fDCAxySecondariesD[iCent]);
+    fOutput->Add(fDCAzPrimariesD[iCent]);
+    fOutput->Add(fDCAzSecondariesD[iCent]);
+    fDCAxyPrimariesAD[iCent] = new TH1F(Form("fDCAxyPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAxySecondariesAD[iCent] = new TH1F(Form("fDCAxySecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAzPrimariesAD[iCent] = new TH1F(Form("fDCAzPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAzSecondariesAD[iCent] = new TH1F(Form("fDCAzSecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fOutput->Add(fDCAxyPrimariesAD[iCent]);
+    fOutput->Add(fDCAxySecondariesAD[iCent]);
+    fOutput->Add(fDCAzPrimariesAD[iCent]);
+    fOutput->Add(fDCAzSecondariesAD[iCent]);
+  }
   PostData(1,fOutput);
 }
 
@@ -98,7 +124,12 @@ void AODdEfficiency::UserExec(Option_t *){
   // Check event selection mask
   AliAnalysisManager *mgr = AliAnalysisManager::GetAnalysisManager();
   AliInputEventHandler* handl = (AliInputEventHandler*)mgr->GetInputEventHandler();
-  if (!(handl->IsEventSelected() & 0xffffffff)) {
+  UInt_t mask = handl->IsEventSelected();
+  if (!(mask & 0xffffffff)) {
+    PostData(1, fOutput);
+    return;
+  }
+  if (!((mask & AliVEvent::kMB) || (mask & AliVEvent::kCentral) || (mask & AliVEvent::kSemiCentral))) {
     PostData(1, fOutput);
     return;
   }
@@ -117,12 +148,28 @@ void AODdEfficiency::UserExec(Option_t *){
     return;
   }
   
+  // Centrality selection in PbPb, percentile determined with V0
+  Float_t centralityPercentile = centr->GetCentralityPercentile("V0M");
+  //select only events with centralities between 0 and 80 %
+  if (centralityPercentile < 0. || centralityPercentile > 80.) {
+    PostData(1, fOutput);
+    return;
+  }
+  
   // Primary vertex displacement cut
   const AliVVertex *primaryVtx = ev->GetPrimaryVertex();
   if(TMath::Abs(primaryVtx->GetZ()) > 10.) {
     PostData(1, fOutput);
     return;
   }
+  
+  Int_t cent = -1;
+  if (centralityPercentile < 5.f)
+    cent = 0;
+  else if (centralityPercentile > 20.f && centralityPercentile < 40.f)
+    cent = 1;
+  else if (centralityPercentile > 40.f && centralityPercentile < 60.f)
+    cent = 2;
   
   // Used later for the track propagation
   Double_t b = (Double_t)ev->GetMagneticField();
@@ -134,7 +181,7 @@ void AODdEfficiency::UserExec(Option_t *){
   mcDbar.SetOwner(kFALSE);
   for (int iMC = 0; iMC < stack->GetEntriesFast(); ++iMC) {
     AliAODMCParticle *part = (AliAODMCParticle*)stack->UncheckedAt(iMC);
-    if (!part->IsPhysicalPrimary()) continue;
+    //if (!part->IsPhysicalPrimary()) continue;
     if (TMath::Abs(part->Eta()) > 0.8) continue;
     if (TMath::Abs(part->Y()) > 0.5) continue;
     const float pt = part->Pt();
@@ -183,15 +230,36 @@ void AODdEfficiency::UserExec(Option_t *){
     AliAODMCParticle *part = (AliAODMCParticle*) stack->At(aodtr->GetLabel());
     if (!part) continue;
     if (mcD.Contains(part)) {
-      fEtaPhiCoverage->Fill(part->Eta(),part->Phi());
-      fDYield->Fill(part->Pt());
-      if (hasTOF) {
-        fDYieldTOF->Fill(part->Pt());
+      if (part->IsPhysicalPrimary()) {
+        fEtaPhiCoverage->Fill(part->Eta(),part->Phi());
+        fDYield->Fill(part->Pt());
+        if (hasTOF)
+          fDYieldTOF->Fill(part->Pt());
+        if (cent > 0) {
+          fDCAxyPrimariesD[cent]->Fill(dca_tr[0]);
+          fDCAzPrimariesD[cent]->Fill(dca_tr[1]);
+        }
+      } else {
+        if (cent > 0) {
+          fDCAxySecondariesD[cent]->Fill(dca_tr[0]);
+          fDCAzSecondariesD[cent]->Fill(dca_tr[1]);
+        }
       }
     } else if (mcDbar.Contains(part)) {
-      fAntiDYield->Fill(part->Pt());
-      if (hasTOF) {
-        fAntiDYieldTOF->Fill(part->Pt());
+      if (part->IsPhysicalPrimary()) {
+        fEtaPhiCoverage->Fill(part->Eta(),part->Phi());
+        fAntiDYield->Fill(part->Pt());
+        if (hasTOF)
+          fAntiDYieldTOF->Fill(part->Pt());
+        if (cent > 0) {
+          fDCAxyPrimariesAD[cent]->Fill(dca_tr[0]);
+          fDCAzPrimariesAD[cent]->Fill(dca_tr[1]);
+        }
+      } else {
+        if (cent > 0) {
+          fDCAxySecondariesAD[cent]->Fill(dca_tr[0]);
+          fDCAzSecondariesAD[cent]->Fill(dca_tr[1]);
+        }
       }
     }
   } // End AOD track loop

@@ -37,12 +37,20 @@ private:
   
   TList   *fOutput;                   //! tlist with output
   
-  TH1F    *fDYield;
-  TH1F    *fAntiDYield;
-  TH1F    *fDYieldTOF;
-  TH1F    *fAntiDYieldTOF;
   TH1F    *fAntiDMCYield;
+  TH1F    *fAntiDYield;
+  TH1F    *fAntiDYieldTOF;
+  TH1F    *fDCAxyPrimariesAD[3];
+  TH1F    *fDCAxySecondariesAD[3];
+  TH1F    *fDCAzPrimariesAD[3];
+  TH1F    *fDCAzSecondariesAD[3];
+  TH1F    *fDCAxyPrimariesD[3];
+  TH1F    *fDCAxySecondariesD[3];
+  TH1F    *fDCAzPrimariesD[3];
+  TH1F    *fDCAzSecondariesD[3];
   TH1F    *fDMCYield;
+  TH1F    *fDYield;
+  TH1F    *fDYieldTOF;
   TH2F    *fEtaPhiCoverage;
   
   ClassDef(AODdEfficiency, 1);
