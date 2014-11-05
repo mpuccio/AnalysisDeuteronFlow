@@ -348,6 +348,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (!(status & AliVTrack::kITSrefit)) continue;
     if (!(status & AliVTrack::kTPCrefit)) continue;
     if (track->GetTPCSharedMap().CountBits() > 1) continue;
+    if (track->GetTPCNcls() < 70) continue;
     if (TMath::Abs(track->Eta()) > 0.8f) continue;
     if (track->Chi2perNDF() > 4.f) continue;
     AliAODVertex *vtx1 = (AliAODVertex*)track->GetProdVertex();
