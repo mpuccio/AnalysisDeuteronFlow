@@ -349,11 +349,11 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (!(status & AliVTrack::kTPCrefit)) continue;
     if (track->GetTPCSharedMap().CountBits() > 1) continue;
     if (track->GetTPCNcls() < 70) continue;
+    if (track->GetTPCnclsS() < 70) continue;
     if (TMath::Abs(track->Eta()) > 0.8f) continue;
     if (track->Chi2perNDF() > 4.f) continue;
     AliAODVertex *vtx1 = (AliAODVertex*)track->GetProdVertex();
     if(Int_t(vtx1->GetType()) == AliAODVertex::kKink) continue;
-    if (track->GetTPCClusterMap().CountBits() < 70) continue;
     unsigned int nSPD = 0, nITS = 0;
     for (int i = 0; i < 6; ++i) {
       if (track->HasPointOnITSLayer(i)) {
