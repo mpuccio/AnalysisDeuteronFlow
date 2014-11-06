@@ -348,8 +348,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     if (!(status & AliVTrack::kITSrefit)) continue;
     if (!(status & AliVTrack::kTPCrefit)) continue;
     if (track->GetTPCSharedMap().CountBits() > 1) continue;
+    if (track->GetTPCsignalN() < 70) continue;
     if (track->GetTPCNcls() < 70) continue;
-    if (track->GetTPCnclsS() < 70) continue;
     if (TMath::Abs(track->Eta()) > 0.8f) continue;
     if (track->Chi2perNDF() > 4.f) continue;
     AliAODVertex *vtx1 = (AliAODVertex*)track->GetProdVertex();
@@ -396,11 +396,11 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
         beta = length / (2.99792457999999984e-02 * time);
         if (beta < 0.975)
         {
-          gamma = 1/TMath::Sqrt(1 - beta*beta);
-          mass = ptot/TMath::Sqrt(gamma*gamma - 1); // using inner TPC mom. as approx.
+          gamma = 1.f / TMath::Sqrt(1.f - beta * beta);
+          mass = ptot / TMath::Sqrt(gamma * gamma - 1); // using inner TPC mom. as approx.
           if((track->GetTPCsignal() - expSignalDeuteron) / expSignalDeuteron > -0.3)
           {
-            fHistDeuteron->Fill(mass*mass);
+            fHistDeuteron->Fill(mass * mass);
             fHistTOFnuclei->Fill(ptot,beta);
           }
           
@@ -417,12 +417,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       continue;
     }
     
-    if (ptot < 0.35f)
-    {
-      continue;
-    }
-    
-    if((track->GetTPCsignal() - expSignalDeuteron) / expSignalDeuteron > -0.3 && ptot < 6.1f)
+    if(fAODpid->NumberOfSigmasTPC(track,AliPID::kProton) >= -3.f)
     {
       Float_t x[16];
       x[0]  = centralityPercentile;                                          // centrality
