@@ -115,7 +115,7 @@ void RunGrid(TString runtype = "grid", // local, proof or grid
   
   gROOT->LoadMacro("./AliAnalysisTaskFlowd.cxx+g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
   gROOT->LoadMacro("./AddTaskFlowd.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
-  AliAnalysisTaskFlowd *task = AddTaskFlowd(kFALSE);//kTRUE);
+  AliAnalysisTaskFlowd *task = AddTaskFlowd(kTRUE);//kTRUE);
   
 
   
