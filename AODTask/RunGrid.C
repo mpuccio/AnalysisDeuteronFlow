@@ -243,7 +243,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   plugin->SetAnalysisMacro(Form("%s.C",taskname));
   
   // Optionally set maximum number of input files/subjob (default 100, put 0 to ignore)
-  plugin->SetSplitMaxInputFileNumber(25);
+  plugin->SetSplitMaxInputFileNumber(15);
   
   // Optionally modify the executable name (default analysis.sh)
   plugin->SetExecutable(Form("%s.sh",taskname));
