@@ -86,6 +86,7 @@ private:
   TH2F*            fBeta2D;
   Float_t          fBins[14];
   TF1*             fDeutBB;
+  TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;
   TH2F*            fdEdxTPCproj;
   TH2F*            fdEdxTPCSignal;
@@ -94,6 +95,7 @@ private:
   TH1F*            fCentrality;
   TH1F*            fGamma;
   TH1F*            fSignal[42];
+  TH1F*            fSignalAD[42];
   
   Float_t          fPrevious;
   ClassDef(AODSelector,0);

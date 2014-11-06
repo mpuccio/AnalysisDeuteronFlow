@@ -130,6 +130,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,500,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",500,0.1,5.,2000,0,2000);
+  fTPCSignalN = new TH1F("fTPCSignalN",";#clusters for PID;Entries",161,-0.5f,160.5f);
   Double_t d[7] = {0.35,0.5,0.6,0.7,0.8,1.};
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
@@ -140,8 +141,11 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
       fBins[i+1] = bins[i+1];
       fSignal[cent*13+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
       GetOutputList()->Add(fSignal[cent*13+i]);
+      fSignalAD[cent*13+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
+      GetOutputList()->Add(fSignalAD[cent*13+i]);
     }
   }
+  
   GetOutputList()->Add(fdEdxTPC);
   GetOutputList()->Add(fdEdxTPCSignal);
   for (int i = 0; i < 3; ++i) {
@@ -151,6 +155,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     GetOutputList()->Add(fdEdxTPCSignalCountsAD[i]);
   }
   GetOutputList()->Add(fdEdxTPCproj);
+  GetOutputList()->Add(fTPCSignalN);
   GetOutputList()->Add(fCentrality);
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fBeta2D);
@@ -193,8 +198,14 @@ Bool_t AODSelector::Process(Long64_t entry)
     return kTRUE;
   }
   
+  if (TPCnSignal < 70)
+    return kTRUE;
+  
+  fTPCSignalN->Fill(TPCnSignal);
+  
   const int cent = GetCentBin(centrality);
   if (cent < 0) return kTRUE;
+  
   
   fdEdxTPC->Fill(pTPC,TPCsignal);
   fdEdxTPCproj->Fill(pTPC,TPCsignal);
@@ -219,11 +230,14 @@ Bool_t AODSelector::Process(Long64_t entry)
         Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
         fGamma->Fill(gamma);
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-        const int j = GetPtBin(-pT);
+        const int j = GetPtBin(TMath::Abs(pT));
         if (j < 0) {
           return kTRUE;
         }
-        fSignal[13 * cent + j]->Fill(dm);
+        if(pT > 0)
+          fSignal[13 * cent + j]->Fill(dm);
+        else
+          fSignalAD[13 * cent + j]->Fill(dm);
       }
     }
   }
@@ -285,6 +299,12 @@ void AODSelector::Terminate()
     fdEdxTPCproj->Write();
   }
   
+  fTPCSignalN = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTPCSignalN"));
+  if (fTPCSignalN) {
+    fTPCSignalN->Write();
+  }
+  
+  
   fBeta = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fBeta"));
   if (fBeta) {
     fBeta->Write();
@@ -298,12 +318,15 @@ void AODSelector::Terminate()
   for (int cent=0; cent < 3; ++cent) {
     for (int i = 0; i < 13; ++i) {
       fSignal[cent*13+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignal%i_%i",cent,i)));
-      if (fSignal[cent*13+i]) {
+      if (fSignal[cent*13+i])
         fSignal[cent*13+i]->Write();
-      }
+
+      fSignalAD[cent*13+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,i)));
+      if (fSignalAD[cent*13+i])
+        fSignalAD[cent*13+i]->Write();
     }
   }
-  
+
   fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
   if (fBeta2D) {
     fBeta2D->Write();
