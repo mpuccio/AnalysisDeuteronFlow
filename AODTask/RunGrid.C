@@ -6,18 +6,48 @@ Int_t iESDfilter       = 0;
 Int_t iAODTagCreation  = 1;
 Int_t iAODAddMCBranch  = 0;
 
+void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
+  if (who.Contains("stefano",TString::kIgnoreCase)) {
+    start = 0;
+    nRuns = 20;
+  }
+  else if (who.Contains("simone",TString::kIgnoreCase)) {
+    start = 20;
+    nRuns = 10;
+  }
+  else if (who.Contains("massimo",TString::kIgnoreCase)) {
+    start = 30;
+    nRuns = 10;
+  }
+  else if (who.Contains("maximiliano",TString::kIgnoreCase)) {
+    start = 40;
+    nRuns = 18;
+  }
+  else {
+    start = 0;
+    nRuns = 58;
+  }
+  return;
+}
+
+
 //______________________________________________________________________________
-void RunGrid(
-         const char* runtype = "grid", // local, proof or grid
-         const char *gridmode = "test", // Set the run mode (can be "full", "test", "offline", "submit" or "terminate"). Full & Test work for proof
-         const Long64_t nentries = 400, // for local and proof mode, ignored in grid mode. Set to 1234567890 for all events.
-         const Long64_t firstentry = 0, // for local and proof mode, ignored in grid mode
-         const char *proofdataset = "/alice/data/LHC10c_000120821_p1", // path to dataset on proof cluster, for proof analysis
-         const char *proofcluster = "alice-caf.cern.ch", // which proof cluster to use in proof mode
-         const char *taskname = "Flowd_PbPb2011"
-         )
+void RunGrid(TString runtype = "grid", // local, proof or grid
+             TString gridmode = "test", // Set the run mode (can be "full", "test", "offline", "submit" or "terminate"). Full & Test work for proof
+             const Long64_t nentries = 400, // for local and proof mode, ignored in grid mode. Set to 1234567890 for all events.
+             const Long64_t firstentry = 0, // for local and proof mode, ignored in grid mode
+             const char *proofdataset = "/alice/data/LHC10c_000120821_p1", // path to dataset on proof cluster, for proof analysis
+             const char *proofcluster = "alice-caf.cern.ch", // which proof cluster to use in proof mode
+             const char *taskname = "NucleiPbPb2011"
+             )
 {
   // check run type
+  TString who = runtype;
+  if (who.Contains("massimo",TString::kIgnoreCase) || who.Contains("simone",TString::kIgnoreCase) || who.Contains("maximiliano",TString::kIgnoreCase) || who.Contains("stefano",TString::kIgnoreCase) || who.Contains("all",TString::kIgnoreCase)) {
+    runtype = "grid";
+    gridmode = "full";
+  }
+  
   if(runtype != "local" && runtype != "proof" && runtype != "grid"){
     Printf("\n\tIncorrect run option, check first argument of run macro");
     Printf("\tint runtype = local, proof or grid\n");
@@ -57,7 +87,7 @@ void RunGrid(
   AliAnalysisGrid *plugin = 0x0;
   TChain *chain = 0x0;
   if (runtype != "local") {
-    plugin = CreateAlienHandler(taskname, gridmode, proofcluster, proofdataset);
+    plugin = CreateAlienHandler(who,taskname, gridmode.Data(), proofcluster, proofdataset);
     if(!plugin) return;
   } else {
     gROOT->LoadMacro("$ALICE_ROOT/PWGCF/Correlations/macros/dphicorrelations/CreateESDChain.C");
@@ -107,7 +137,7 @@ void RunGrid(
 
 
 //______________________________________________________________________________
-AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
+AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const char *gridmode,
                                     const char *proofcluster, const char *proofdataset)
 {
   AliAnalysisAlien *plugin = new AliAnalysisAlien();
@@ -134,7 +164,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
   plugin->SetDataPattern("*/pass2/AOD145/*AliAOD.root"); // sim
   plugin->SetRunPrefix("000");   // real data
   
-  Int_t runlist[] = {                                                                 // Counter
+  Int_t runlist[58] = {                                                                 // Counter
     170309, 170308, 170306, 170270, 170269, 170268, 170230, 170228, 170204, 170203,
     170193, 170163, 170159, 170155, 170081, 170027, 169859, 169858, 169855, 169846,
     169838, 169837, 169835, 169417, 169415, 169411, 169238, 169167, 169160, 169156,
@@ -143,10 +173,14 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
     168342, 168341, 168325, 168322, 168311, 168310, 167988, 167987
   };
   
-  for(Int_t i = 0; i < 10; i++)
+  Int_t start = 0, nrun = 0;
+  GetRunList(who,start,nrun);
+  
+  for(Int_t i = start; i < start + nrun; i++) {
     plugin->AddRunNumber(runlist[i]);
+  }
 
-  plugin->SetNrunsPerMaster(1);
+  plugin->SetNrunsPerMaster(nrun);
   plugin->SetOutputToRunNo();
   
   
@@ -154,10 +188,10 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
   //   plugin->AddDataFile("/alice/data/2008/LHC08c/000057657/raw/Run57657.Merged.RAW.tag.root");
   
   // Define alien work directory where all files will be copied. Relative to alien $HOME.
-  plugin->SetGridWorkingDir("testShared");
+  plugin->SetGridWorkingDir("NucleiPbPb2011");
   
   // Declare alien output directory. Relative to working directory.
-  plugin->SetGridOutputDir("outputAOD2"); // In this case will be $HOME/taskname/out
+  plugin->SetGridOutputDir("output"); // In this case will be $HOME/taskname/out
   
 //  plugin->SetAdditionalLibs("libTree.so libGeom.so libPhysics.so libVMC.so libMinuit.so libSTEERBase.so libESD.so libAOD.so  libANALYSIS.so libOADB.so libANALYSISalice.so libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
   
@@ -215,7 +249,7 @@ AliAnalysisGrid* CreateAlienHandler(const char *taskname, const char *gridmode,
   plugin->SetExecutable(Form("%s.sh",taskname));
   
   // set number of test files to use in "test" mode
-  plugin->SetNtestFiles(10);
+  plugin->SetNtestFiles(5);
   
   // file containing a list of chuncks to be used for testin
   plugin->SetFileForTestMode("testdata");
