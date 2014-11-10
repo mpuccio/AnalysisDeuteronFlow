@@ -84,7 +84,7 @@ private:
   Int_t            GetPtBin(float pt);
   TH1F*            fBeta;
   TH2F*            fBeta2D;
-  Float_t          fBins[14];
+  Float_t          fBins[17];
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;
@@ -94,8 +94,8 @@ private:
   TH1F*            fdEdxTPCSignalCountsAD[3];
   TH1F*            fCentrality;
   TH1F*            fGamma;
-  TH1F*            fSignal[42];
-  TH1F*            fSignalAD[42];
+  TH1F*            fSignal[48];
+  TH1F*            fSignalAD[48];
   
   Float_t          fPrevious;
   ClassDef(AODSelector,0);
