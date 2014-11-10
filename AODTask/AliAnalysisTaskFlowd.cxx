@@ -387,13 +387,14 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
     Bool_t hasTOFtime = status & AliVTrack::kTIME;
     Float_t length = track->GetIntegratedLength();
     Bool_t hasTOF = (hasTOFout & hasTOFtime) && length > 350.f;
-    if (hasTOF == kTRUE && ptot < 5)
+    if (hasTOF == kTRUE)
     {
       Float_t time0 = fAODpid->GetTOFResponse().GetStartTime(track->P());
       time = track->GetTOFsignal() - time0;
       if (time > 0)
       {
         beta = length / (2.99792457999999984e-02 * time);
+        hasTOF &= (Bool_t)(beta < 1.f);
         if (beta < 0.975)
         {
           gamma = 1.f / TMath::Sqrt(1.f - beta * beta);
