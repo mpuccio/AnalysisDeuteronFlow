@@ -109,7 +109,7 @@ Int_t AODSelector::GetCentBin(float cent) {
 }
 
 Int_t AODSelector::GetPtBin(float pt) {
-  for (int i = 0; i < 13; ++i) {
+  for (int i = 0; i < 16; ++i) {
     if (pt < fBins[i+1] && pt >= fBins[i]) {
       return i;
     }
@@ -134,15 +134,15 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   Double_t d[7] = {0.35,0.5,0.6,0.7,0.8,1.};
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
-  float bins[14] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f};
+  float bins[17] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f,6.f,8.f,10.f};
   fBins[0] = bins[0];
   for (int cent = 0; cent < 3; ++cent) {
-    for (int i = 0; i < 13; ++i) {
+    for (int i = 0; i < 16; ++i) {
       fBins[i+1] = bins[i+1];
-      fSignal[cent*13+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
-      GetOutputList()->Add(fSignal[cent*13+i]);
-      fSignalAD[cent*13+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
-      GetOutputList()->Add(fSignalAD[cent*13+i]);
+      fSignal[cent*16+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
+      GetOutputList()->Add(fSignal[cent*16+i]);
+      fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
+      GetOutputList()->Add(fSignalAD[cent*16+i]);
     }
   }
   
@@ -270,9 +270,9 @@ void AODSelector::Terminate()
     fdEdxTPC->Write();
   }
   
-  float bins[14] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f};
+  float bins[17] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f,6.f,8.f,10.f};
   fBins[0] = bins[0];
-  for (int i = 0; i < 13; ++i)
+  for (int i = 0; i < 16; ++i)
     fBins[i+1] = bins[i+1];
   
   fdEdxTPCSignal = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPCSignal"));
@@ -316,14 +316,14 @@ void AODSelector::Terminate()
   }
   
   for (int cent=0; cent < 3; ++cent) {
-    for (int i = 0; i < 13; ++i) {
-      fSignal[cent*13+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignal%i_%i",cent,i)));
-      if (fSignal[cent*13+i])
-        fSignal[cent*13+i]->Write();
+    for (int i = 0; i < 16; ++i) {
+      fSignal[cent*16+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignal%i_%i",cent,i)));
+      if (fSignal[cent*16+i])
+        fSignal[cent*16+i]->Write();
 
-      fSignalAD[cent*13+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,i)));
-      if (fSignalAD[cent*13+i])
-        fSignalAD[cent*13+i]->Write();
+      fSignalAD[cent*16+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,i)));
+      if (fSignalAD[cent*16+i])
+        fSignalAD[cent*16+i]->Write();
     }
   }
 
