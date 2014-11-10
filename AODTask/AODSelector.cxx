@@ -109,8 +109,9 @@ Int_t AODSelector::GetCentBin(float cent) {
 }
 
 Int_t AODSelector::GetPtBin(float pt) {
+  float bins[17] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,5.0f,6.f,8.f,10.f};
   for (int i = 0; i < 16; ++i) {
-    if (pt < fBins[i+1] && pt >= fBins[i]) {
+    if (pt < bins[i+1] && pt >= bins[i]) {
       return i;
     }
   }
@@ -139,9 +140,11 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int cent = 0; cent < 3; ++cent) {
     for (int i = 0; i < 16; ++i) {
       fBins[i+1] = bins[i+1];
-      fSignal[cent*16+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
+      float lim = (i > 12) ? 4.8f : 2.4f;
+      int nbin = (i > 12) ? 120 : 60;
+      fSignal[cent*16+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,-lim,lim);
       GetOutputList()->Add(fSignal[cent*16+i]);
-      fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),60,-2.4,2.4);
+      fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,-lim,lim);
       GetOutputList()->Add(fSignalAD[cent*16+i]);
     }
   }
