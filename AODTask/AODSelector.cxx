@@ -238,9 +238,9 @@ Bool_t AODSelector::Process(Long64_t entry)
           return kTRUE;
         }
         if(pT > 0)
-          fSignal[13 * cent + j]->Fill(dm);
+          fSignal[16 * cent + j]->Fill(dm);
         else
-          fSignalAD[13 * cent + j]->Fill(dm);
+          fSignalAD[16 * cent + j]->Fill(dm);
       }
     }
   }
