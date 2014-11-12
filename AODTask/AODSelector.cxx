@@ -220,7 +220,6 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-    if (pTPC > 5.f) return kTRUE;
     if (pTPC < 1.f) {
       fdEdxTPCSignalCounts[cent]->Fill(pT);
       fdEdxTPCSignalCountsAD[cent]->Fill(-pT);
