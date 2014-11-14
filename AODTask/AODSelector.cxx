@@ -140,14 +140,19 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int cent = 0; cent < 3; ++cent) {
     for (int i = 0; i < 16; ++i) {
       fBins[i+1] = bins[i+1];
-      float lim = (i > 12) ? 4.8f : 2.4f;
-      int nbin = (i > 12) ? 120 : 60;
-      fSignal[cent*16+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,-lim,lim);
+      float hlim = (i > 12) ? 3.4f : 2.4f;
+      float llim = (i > 12) ? 0.f : -2.4f;
+      int nbin = (i > 12) ? 85 : 60;
+      fSignal[cent*16+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,llim,hlim);
       GetOutputList()->Add(fSignal[cent*16+i]);
-      fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,-lim,lim);
+      fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,llim,hlim);
       GetOutputList()->Add(fSignalAD[cent*16+i]);
     }
   }
+  fCompleteSignalAD = new TH2F("fCompleteSignalAD",";p_{T};m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",112,0.8,12,85,-3.4,3.4);
+  fCompleteSignalD = new TH2F("fCompleteSignalD",";p_{T};m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",112,0.8,12,85,-3.4,3.4);
+  GetOutputList()->Add(fCompleteSignalD);
+  GetOutputList()->Add(fCompleteSignalAD);
   
   GetOutputList()->Add(fdEdxTPC);
   GetOutputList()->Add(fdEdxTPCSignal);
@@ -236,10 +241,20 @@ Bool_t AODSelector::Process(Long64_t entry)
         if (j < 0) {
           return kTRUE;
         }
-        if(pT > 0)
-          fSignal[16 * cent + j]->Fill(dm);
-        else
-          fSignalAD[16 * cent + j]->Fill(dm);
+        if (j > 12) {
+          if(pT > 0)
+            fSignal[16 * cent + j]->Fill(p/(beta*gamma));
+          else
+            fSignalAD[16 * cent + j]->Fill(p/(beta*gamma));
+        } else {
+          if(pT > 0) {
+            fSignal[16 * cent + j]->Fill(dm);
+            fCompleteSignalD->Fill(pT,dm);
+          } else {
+            fSignalAD[16 * cent + j]->Fill(dm);
+            fCompleteSignalAD->Fill(pT,dm);
+          }
+        }
       }
     }
   }
@@ -299,6 +314,16 @@ void AODSelector::Terminate()
   fdEdxTPCproj = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPCproj"));
   if (fdEdxTPCproj) {
     fdEdxTPCproj->Write();
+  }
+  
+  fCompleteSignalAD = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fCompleteSignalAD"));
+  if (fCompleteSignalAD) {
+    fCompleteSignalAD->Write();
+  }
+  
+  fCompleteSignalD = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fCompleteSignalD"));
+  if (fCompleteSignalD) {
+    fCompleteSignalD->Write();
   }
   
   fTPCSignalN = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTPCSignalN"));

@@ -85,6 +85,8 @@ private:
   TH1F*            fBeta;
   TH2F*            fBeta2D;
   Float_t          fBins[17];
+  TH2F*            fCompleteSignalAD;
+  TH2F*            fCompleteSignalD;
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;
