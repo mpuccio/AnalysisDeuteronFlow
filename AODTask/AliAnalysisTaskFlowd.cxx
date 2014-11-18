@@ -240,7 +240,7 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
     OpenFile(2);
     fNtuple = new TNtuple("deuterons",
                           "deuteron candidates",
-                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:ITSsignal:ITSnClust:ITSnClustPID:TOFtime:DCAxy:DCAz:p:pTPC:pT:length",4000);//16 elements
+                          "centrality:eta:TPCnClust:TPCsignal:TPCnSignal:TPCchi2:ITSsignal:ITSnClust:ITSnClustPID:TOFtime:DCAxy:DCAz:p:pTPC:pT:length:TPCsigmad:TPCsigmat",4000);//18 elements
     fNtuple->SetAutoSave(100000000);
     PostData(2,fNtuple);
   } else {
@@ -418,9 +418,9 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       continue;
     }
     
-    if(fAODpid->NumberOfSigmasTPC(track,AliPID::kProton) >= -3.f)
+    if((fAODpid->NumberOfSigmasTPC(track,AliPID::kProton) >= -3.f && ptot < 1.2f) || ptot >= 1.2f)
     {
-      Float_t x[16];
+      Float_t x[18];
       x[0]  = centralityPercentile;                                          // centrality
       x[1]  = track->Eta();                                                  // eta
       x[2]  = track->GetTPCNcls();                                           // TPCnClust
@@ -437,6 +437,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       x[13] = ptot;                                                          // pTPC
       x[14] = sign * track->Pt();                                            // pT
       x[15] = length;                                                        // length
+      x[16] = fAODpid->NumberOfSigmasTPC(track, AliPID::kDeuteron);          // TPCsigmad
+      x[17] = fAODpid->NumberOfSigmasTPC(track, AliPID::kTriton);            // TPCsigmat
       fNtuple->Fill(x);
       PostData(2, fNtuple);
     }
