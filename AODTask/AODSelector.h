@@ -85,6 +85,8 @@ private:
   TH1F*            fBeta;
   TH2F*            fBeta2D;
   Float_t          fBins[17];
+  TH1F*            fMassSpectra[48];
+  TH1F*            fMassSpectraAD[48];
   TH2F*            fCompleteSignalAD;
   TH2F*            fCompleteSignalD;
   TF1*             fDeutBB;

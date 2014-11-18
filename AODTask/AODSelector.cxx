@@ -140,13 +140,17 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int cent = 0; cent < 3; ++cent) {
     for (int i = 0; i < 16; ++i) {
       fBins[i+1] = bins[i+1];
-      float hlim = (i > 12) ? 3.4f : 2.4f;
-      float llim = (i > 12) ? 0.f : -2.4f;
+      float hlim = (i > 12) ? 2.4f : 2.4f;
+      float llim = (i > 12) ? -3.4f : -2.4f;
       int nbin = (i > 12) ? 85 : 60;
       fSignal[cent*16+i] = new TH1F(Form("fSignal%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,llim,hlim);
       GetOutputList()->Add(fSignal[cent*16+i]);
       fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,llim,hlim);
       GetOutputList()->Add(fSignalAD[cent*16+i]);
+      fMassSpectra[cent*16+i] = new TH1F(Form("fMassSpectra%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),600,0,3.);
+      GetOutputList()->Add(fMassSpectra[cent*16+i]);
+      fMassSpectraAD[cent*16+i] = new TH1F(Form("fMassSpectraAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),600,0,3.);
+      GetOutputList()->Add(fMassSpectraAD[cent*16+i]);
     }
   }
   fCompleteSignalAD = new TH2F("fCompleteSignalAD",";p_{T};m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",112,0.8,12,85,-3.4,3.4);
@@ -241,20 +245,17 @@ Bool_t AODSelector::Process(Long64_t entry)
         if (j < 0) {
           return kTRUE;
         }
-        if (j > 12) {
-          if(pT > 0)
-            fSignal[16 * cent + j]->Fill(p/(beta*gamma));
-          else
-            fSignalAD[16 * cent + j]->Fill(p/(beta*gamma));
+
+        if(pT > 0) {
+          fSignal[16 * cent + j]->Fill(dm);
+          fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
+          fCompleteSignalD->Fill(pT,dm);
         } else {
-          if(pT > 0) {
-            fSignal[16 * cent + j]->Fill(dm);
-            fCompleteSignalD->Fill(pT,dm);
-          } else {
-            fSignalAD[16 * cent + j]->Fill(dm);
-            fCompleteSignalAD->Fill(pT,dm);
-          }
+          fSignalAD[16 * cent + j]->Fill(dm);
+          fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
+          fCompleteSignalAD->Fill(-pT,dm);
         }
+        
       }
     }
   }
@@ -342,8 +343,15 @@ void AODSelector::Terminate()
     fGamma->Write();
   }
   
+  fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
+  if (fBeta2D) {
+    fBeta2D->Write();
+  }
+  
+  f.mkdir("MassSpectra");
   for (int cent=0; cent < 3; ++cent) {
     for (int i = 0; i < 16; ++i) {
+      f.cd();
       fSignal[cent*16+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignal%i_%i",cent,i)));
       if (fSignal[cent*16+i])
         fSignal[cent*16+i]->Write();
@@ -351,13 +359,19 @@ void AODSelector::Terminate()
       fSignalAD[cent*16+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,i)));
       if (fSignalAD[cent*16+i])
         fSignalAD[cent*16+i]->Write();
+      
+      f.cd("MassSpectra");
+      fMassSpectra[cent*16+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fMassSpectra%i_%i",cent,i)));
+      if (fMassSpectra[cent*16+i])
+        fMassSpectra[cent*16+i]->Write();
+      
+      fMassSpectraAD[cent*16+i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fMassSpectraAD%i_%i",cent,i)));
+      if (fMassSpectraAD[cent*16+i])
+        fMassSpectraAD[cent*16+i]->Write();
     }
   }
 
-  fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
-  if (fBeta2D) {
-    fBeta2D->Write();
-  }
+
   f.Close();
 
   
