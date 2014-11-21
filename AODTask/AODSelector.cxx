@@ -148,13 +148,13 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
       GetOutputList()->Add(fSignal[cent*16+i]);
       fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,llim,hlim);
       GetOutputList()->Add(fSignalAD[cent*16+i]);
-      fMassSpectra[cent*16+i] = new TH1F(Form("fMassSpectra%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),80,0,3.);
+      fMassSpectra[cent*16+i] = new TH1F(Form("fMassSpectra%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),100,0,3.);
       GetOutputList()->Add(fMassSpectra[cent*16+i]);
-      fMassSpectraAD[cent*16+i] = new TH1F(Form("fMassSpectraAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),80,0,3.);
+      fMassSpectraAD[cent*16+i] = new TH1F(Form("fMassSpectraAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),100,0,3.);
       GetOutputList()->Add(fMassSpectraAD[cent*16+i]);
-      fMassdEdxD[cent*16+i] = new TH2F(Form("fMassdEdxD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c); #beta; Entries",fBins[i],fBins[i+1]),80,0,3.,500,0,2000);
+      fMassdEdxD[cent*16+i] = new TH2F(Form("fMassdEdxD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c); #beta; Entries",fBins[i],fBins[i+1]),600,0,3.,500,0,500);
       GetOutputList()->Add(fMassdEdxD[cent*16+i]);
-      fMassdEdxAD[cent*16+i] = new TH2F(Form("fMassdEdxAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c); #beta; Entries",fBins[i],fBins[i+1]),80,0,3.,500,0,2000);
+      fMassdEdxAD[cent*16+i] = new TH2F(Form("fMassdEdxAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c); #beta; Entries",fBins[i],fBins[i+1]),600,0,3.,500,0,500);
       GetOutputList()->Add(fMassdEdxAD[cent*16+i]);
     }
   }
