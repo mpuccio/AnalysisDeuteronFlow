@@ -267,34 +267,34 @@ Bool_t AODSelector::Process(Long64_t entry)
           }     
         }
       }
-    } else {
-      fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      if (TOFtime > 0.f && length > 0.f) {
-        Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
-        fBeta->Fill(beta);
-        fBeta2D->Fill(pTPC,beta);
-        if (beta < (1.f - EPSILON)) {
-          Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
-          fGamma->Fill(gamma);
-          const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-          const int j = GetPtBin(TMath::Abs(pT));
-          if (j < 0) {
-            return kTRUE;
-          }
-          
-          if(pT > 0) {
-            fSignal[16 * cent + j]->Fill(dm);
-            fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
-            fMassdEdxD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
-            fCompleteSignalD->Fill(pT,dm);
-          } else {
-            fSignalAD[16 * cent + j]->Fill(dm);
-            fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
-            fMassdEdxAD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
-            fCompleteSignalAD->Fill(-pT,dm);
-          }
-          
+    }
+  } else {
+    fdEdxTPCSignal->Fill(pTPC,TPCsignal);
+    if (TOFtime > 0.f && length > 0.f) {
+      Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
+      fBeta->Fill(beta);
+      fBeta2D->Fill(pTPC,beta);
+      if (beta < (1.f - EPSILON)) {
+        Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
+        fGamma->Fill(gamma);
+        const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
+        const int j = GetPtBin(TMath::Abs(pT));
+        if (j < 0) {
+          return kTRUE;
         }
+        
+        if(pT > 0) {
+          fSignal[16 * cent + j]->Fill(dm);
+          fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
+          fMassdEdxD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
+          fCompleteSignalD->Fill(pT,dm);
+        } else {
+          fSignalAD[16 * cent + j]->Fill(dm);
+          fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
+          fMassdEdxAD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
+          fCompleteSignalAD->Fill(-pT,dm);
+        }
+        
       }
     }
   }
