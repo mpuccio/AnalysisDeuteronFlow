@@ -87,11 +87,14 @@ private:
   Float_t          fBins[17];
   TH1F*            fMassSpectra[48];
   TH1F*            fMassSpectraAD[48];
+  TH2F*            fMassdEdxD[48];
+  TH2F*            fMassdEdxAD[48];
   TH2F*            fCompleteSignalAD;
   TH2F*            fCompleteSignalD;
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;
+  TH2F*            fdEdxTPCpT;
   TH2F*            fdEdxTPCproj;
   TH2F*            fdEdxTPCSignal;
   TH1F*            fdEdxTPCSignalCounts[3];
