@@ -234,37 +234,72 @@ Bool_t AODSelector::Process(Long64_t entry)
     fCentrality->Fill(centrality);
   }
   
-  if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
-    fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-    if (pTPC < 1.f) {
-      fdEdxTPCSignalCounts[cent]->Fill(pT);
-      fdEdxTPCSignalCountsAD[cent]->Fill(-pT);
-    }
-    if (TOFtime > 0.f && length > 0.f) {
-      Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
-      fBeta->Fill(beta);
-      fBeta2D->Fill(pTPC,beta);
-      if (beta < (1.f - EPSILON)) {
-        Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
-        fGamma->Fill(gamma);
-        const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-        const int j = GetPtBin(TMath::Abs(pT));
-        if (j < 0) {
-          return kTRUE;
+  if (pTPC > 1.3) {
+    if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
+      fdEdxTPCSignal->Fill(pTPC,TPCsignal);
+      if (pTPC < 1.f) {
+        fdEdxTPCSignalCounts[cent]->Fill(pT);
+        fdEdxTPCSignalCountsAD[cent]->Fill(-pT);
+      }
+      if (TOFtime > 0.f && length > 0.f) {
+        Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
+        fBeta->Fill(beta);
+        fBeta2D->Fill(pTPC,beta);
+        if (beta < (1.f - EPSILON)) {
+          Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
+          fGamma->Fill(gamma);
+          const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
+          const int j = GetPtBin(TMath::Abs(pT));
+          if (j < 0) {
+            return kTRUE;
+          }
+          
+          if(pT > 0) {
+            fSignal[16 * cent + j]->Fill(dm);
+            fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
+            fMassdEdxD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
+            fCompleteSignalD->Fill(pT,dm);
+          } else {
+            fSignalAD[16 * cent + j]->Fill(dm);
+            fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
+            fMassdEdxAD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
+            fCompleteSignalAD->Fill(-pT,dm);
+          }
+          
         }
-
-        if(pT > 0) {
-          fSignal[16 * cent + j]->Fill(dm);
-          fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
-          fMassdEdxD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
-          fCompleteSignalD->Fill(pT,dm);
-        } else {
-          fSignalAD[16 * cent + j]->Fill(dm);
-          fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
-          fMassdEdxAD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
-          fCompleteSignalAD->Fill(-pT,dm);
+      }
+    } else {
+      fdEdxTPCSignal->Fill(pTPC,TPCsignal);
+      if (pTPC < 1.f) {
+        fdEdxTPCSignalCounts[cent]->Fill(pT);
+        fdEdxTPCSignalCountsAD[cent]->Fill(-pT);
+      }
+      if (TOFtime > 0.f && length > 0.f) {
+        Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
+        fBeta->Fill(beta);
+        fBeta2D->Fill(pTPC,beta);
+        if (beta < (1.f - EPSILON)) {
+          Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
+          fGamma->Fill(gamma);
+          const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
+          const int j = GetPtBin(TMath::Abs(pT));
+          if (j < 0) {
+            return kTRUE;
+          }
+          
+          if(pT > 0) {
+            fSignal[16 * cent + j]->Fill(dm);
+            fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
+            fMassdEdxD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
+            fCompleteSignalD->Fill(pT,dm);
+          } else {
+            fSignalAD[16 * cent + j]->Fill(dm);
+            fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
+            fMassdEdxAD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
+            fCompleteSignalAD->Fill(-pT,dm);
+          }
+          
         }
-        
       }
     }
   }
