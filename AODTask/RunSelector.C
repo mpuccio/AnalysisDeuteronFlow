@@ -3,8 +3,8 @@
   if (!gProof) return;
 
   TDSet *manual_dset = new TDSet("TTree", "deuterons");
-  TString user[4] = {"m/mpuccio","s/scapodic","e/ebruna","s/strogolo"}; 
-  for (int i = 0; i < 4; ++i)
+  TString user[5] = {"m/mpuccio","m/masera","s/scapodic","s/sbufalin","s/strogolo"};
+  for (int i = 0; i < 5; ++i)
   {
     TString ddset = Form("Find;BasePath=/alice/cern.ch/user/%s/NucleiPbPb2011/output;FileName=*/root_archive.zip;Anchor=mpuccio_Flowdnt.root;Tree=/deuterons;Mode=local",user[i].Data());
 
