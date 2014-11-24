@@ -97,18 +97,18 @@ void AODdEfficiency::UserCreateOutputObjects(){
   fOutput->Add(fAntiDMCYield);
   fOutput->Add(fEtaPhiCoverage);
   for (int iCent = 0; iCent < 3; ++iCent) {
-    fDCAxyPrimariesD[iCent] = new TH1F(Form("fDCAxyPrimariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
-    fDCAxySecondariesD[iCent] = new TH1F(Form("fDCAxySecondariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
-    fDCAzPrimariesD[iCent] = new TH1F(Form("fDCAzPrimariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
-    fDCAzSecondariesD[iCent] = new TH1F(Form("fDCAzSecondariesD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAxyPrimariesD[iCent] = new TH1F(Form("fDCAxyPrimariesD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
+    fDCAxySecondariesD[iCent] = new TH1F(Form("fDCAxySecondariesD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
+    fDCAzPrimariesD[iCent] = new TH1F(Form("fDCAzPrimariesD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
+    fDCAzSecondariesD[iCent] = new TH1F(Form("fDCAzSecondariesD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
     fOutput->Add(fDCAxyPrimariesD[iCent]);
     fOutput->Add(fDCAxySecondariesD[iCent]);
     fOutput->Add(fDCAzPrimariesD[iCent]);
     fOutput->Add(fDCAzSecondariesD[iCent]);
-    fDCAxyPrimariesAD[iCent] = new TH1F(Form("fDCAxyPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
-    fDCAxySecondariesAD[iCent] = new TH1F(Form("fDCAxySecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
-    fDCAzPrimariesAD[iCent] = new TH1F(Form("fDCAzPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
-    fDCAzSecondariesAD[iCent] = new TH1F(Form("fDCAzSecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",200,-2,2);
+    fDCAxyPrimariesAD[iCent] = new TH1F(Form("fDCAxyPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
+    fDCAxySecondariesAD[iCent] = new TH1F(Form("fDCAxySecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
+    fDCAzPrimariesAD[iCent] = new TH1F(Form("fDCAzPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
+    fDCAzSecondariesAD[iCent] = new TH1F(Form("fDCAzSecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
     fOutput->Add(fDCAxyPrimariesAD[iCent]);
     fOutput->Add(fDCAxySecondariesAD[iCent]);
     fOutput->Add(fDCAzPrimariesAD[iCent]);
@@ -235,12 +235,12 @@ void AODdEfficiency::UserExec(Option_t *){
         fDYield->Fill(part->Pt());
         if (hasTOF)
           fDYieldTOF->Fill(part->Pt());
-        if (cent > 0) {
+        if (cent >= 0) {
           fDCAxyPrimariesD[cent]->Fill(dca_tr[0]);
           fDCAzPrimariesD[cent]->Fill(dca_tr[1]);
         }
       } else {
-        if (cent > 0) {
+        if (cent >= 0) {
           fDCAxySecondariesD[cent]->Fill(dca_tr[0]);
           fDCAzSecondariesD[cent]->Fill(dca_tr[1]);
         }
@@ -251,12 +251,12 @@ void AODdEfficiency::UserExec(Option_t *){
         fAntiDYield->Fill(part->Pt());
         if (hasTOF)
           fAntiDYieldTOF->Fill(part->Pt());
-        if (cent > 0) {
+        if (cent >= 0) {
           fDCAxyPrimariesAD[cent]->Fill(dca_tr[0]);
           fDCAzPrimariesAD[cent]->Fill(dca_tr[1]);
         }
       } else {
-        if (cent > 0) {
+        if (cent >= 0) {
           fDCAxySecondariesAD[cent]->Fill(dca_tr[0]);
           fDCAzSecondariesAD[cent]->Fill(dca_tr[1]);
         }
