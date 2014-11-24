@@ -84,6 +84,7 @@ private:
   Int_t            GetPtBin(float pt);
   TH1F*            fBeta;
   TH2F*            fBeta2D;
+  TH2F*            fBeta2DPt;
   Float_t          fBins[17];
   TH1F*            fDCAxy;
   TH1F*            fDCAz;

@@ -127,6 +127,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   fBeta = new TH1F("fBeta",";#beta;Entries",100,0.f,1.f);
   fBeta2D = new TH2F("fBeta2D","TOF; #frac{p}{z} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
+  fBeta2DPt = new TH2F("fBeta2D","TOF; p_{T} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
   fCentrality = new TH1F("fCentrality",";Centrality;Events / 1%",100,0,100);
   fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
@@ -150,13 +151,13 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
       GetOutputList()->Add(fSignal[cent*16+i]);
       fSignalAD[cent*16+i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),nbin,llim,hlim);
       GetOutputList()->Add(fSignalAD[cent*16+i]);
-      fMassSpectra[cent*16+i] = new TH1F(Form("fMassSpectra%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),100,0,3.);
+      fMassSpectra[cent*16+i] = new TH1F(Form("fMassSpectra%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c^{2});Entries",fBins[i],fBins[i+1]),100,0,3.);
       GetOutputList()->Add(fMassSpectra[cent*16+i]);
-      fMassSpectraAD[cent*16+i] = new TH1F(Form("fMassSpectraAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c);Entries",fBins[i],fBins[i+1]),100,0,3.);
+      fMassSpectraAD[cent*16+i] = new TH1F(Form("fMassSpectraAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c^{2});Entries",fBins[i],fBins[i+1]),100,0,3.);
       GetOutputList()->Add(fMassSpectraAD[cent*16+i]);
-      fMassdEdxD[cent*16+i] = new TH2F(Form("fMassdEdxD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c); #beta; Entries",fBins[i],fBins[i+1]),600,0,3.,500,0,500);
+      fMassdEdxD[cent*16+i] = new TH2F(Form("fMassdEdxD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c^{2}); #beta; Entries",fBins[i],fBins[i+1]),600,0,3.,500,0,500);
       GetOutputList()->Add(fMassdEdxD[cent*16+i]);
-      fMassdEdxAD[cent*16+i] = new TH2F(Form("fMassdEdxAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c); #beta; Entries",fBins[i],fBins[i+1]),600,0,3.,500,0,500);
+      fMassdEdxAD[cent*16+i] = new TH2F(Form("fMassdEdxAD%i_%i",cent,i),Form("%4.1f #leq p_{T} < %4.1f ; m (GeV/c^{2}); #beta; Entries",fBins[i],fBins[i+1]),600,0,3.,500,0,500);
       GetOutputList()->Add(fMassdEdxAD[cent*16+i]);
     }
   }
@@ -179,6 +180,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fCentrality);
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fBeta2D);
+  GetOutputList()->Add(fBeta2DPt);
   GetOutputList()->Add(fGamma);
   GetOutputList()->Add(fDCAxy);
   GetOutputList()->Add(fDCAz);
@@ -243,7 +245,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (DCAz > 2.f) return kTRUE;
   if (DCAxy > 2.f) return kTRUE;
   
-  if (pTPC < 1.3) {
+  if (pTPC < 3.5) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
       if (pTPC < 1.f) {
@@ -254,6 +256,7 @@ Bool_t AODSelector::Process(Long64_t entry)
         Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
         fBeta->Fill(beta);
         fBeta2D->Fill(pTPC,beta);
+        fBeta2DPt->Fill(TMath::Abs(pT),beta);
         if (beta < (1.f - EPSILON)) {
           Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
           fGamma->Fill(gamma);
@@ -392,6 +395,11 @@ void AODSelector::Terminate()
   fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
   if (fBeta2D) {
     fBeta2D->Write();
+  }
+  
+  fBeta2DPt = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2DPt"));
+  if (fBeta2DPt) {
+    fBeta2DPt->Write();
   }
   
   fDCAz = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fDCAz"));
