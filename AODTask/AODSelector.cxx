@@ -129,6 +129,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fBeta2D = new TH2F("fBeta2D","TOF; #frac{p}{z} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
   fCentrality = new TH1F("fCentrality",";Centrality;Events / 1%",100,0,100);
   fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
+  fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
+  fDCAz = new TH1F("fDCAz",";DCA_{z} (cm);Entries",4000,-4.f,4.f);
   fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
   fdEdxTPCpT = new TH2F("fdEdxTPCpT",";p_{T} (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,2000,0,2000);
@@ -178,6 +180,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fBeta2D);
   GetOutputList()->Add(fGamma);
+  GetOutputList()->Add(fDCAxy);
+  GetOutputList()->Add(fDCAz);
   
   fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
 }
@@ -233,6 +237,11 @@ Bool_t AODSelector::Process(Long64_t entry)
     fPrevious = centrality;
     fCentrality->Fill(centrality);
   }
+  fDCAxy->Fill(DCAxy);
+  fDCAz->Fill(DCAz);
+  
+  if (DCAz > 2.f) return kTRUE;
+  if (DCAxy > 2.f) return kTRUE;
   
   if (pTPC < 1.3) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
@@ -383,6 +392,16 @@ void AODSelector::Terminate()
   fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
   if (fBeta2D) {
     fBeta2D->Write();
+  }
+  
+  fDCAz = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fDCAz"));
+  if (fDCAz) {
+    fDCAz->Write();
+  }
+  
+  fDCAxy = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fDCAxy"));
+  if (fDCAxy) {
+    fDCAxy->Write();
   }
   
   f.mkdir("MassSpectra");
