@@ -239,11 +239,13 @@ Bool_t AODSelector::Process(Long64_t entry)
     fPrevious = centrality;
     fCentrality->Fill(centrality);
   }
+  
+  if (TMath::Abs(DCAz) > 2.f) return kTRUE;
   fDCAxy->Fill(DCAxy);
   fDCAz->Fill(DCAz);
   
-  if (DCAz > 2.f) return kTRUE;
-  if (DCAxy > 2.f) return kTRUE;
+  
+  if (TMath::Abs(DCAxy) > 2.f) return kTRUE;
   
   if (pTPC < 3.5) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
