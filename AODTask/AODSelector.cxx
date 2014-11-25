@@ -131,7 +131,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fCentrality = new TH1F("fCentrality",";Centrality;Events / 1%",100,0,100);
   fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
-  fDCA2D = new TH2F("fDCA2D",";DCA_{xy} (cm);DCA_{z} (cm);Entries",4000,-4.f,4.f,4000,-4.f,4.f);
+  fDCA2D = new TH2F("fDCA2D",";DCA_{xy} (cm);DCA_{z} (cm);Entries",500,-0.5f,0.5f,600,-0.6f,0.6f);
   fDCAz = new TH1F("fDCAz",";DCA_{z} (cm);Entries",4000,-4.f,4.f);
   fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
   fdEdxTPCpT = new TH2F("fdEdxTPCpT",";p_{T} (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
