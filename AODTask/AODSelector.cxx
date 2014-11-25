@@ -288,11 +288,11 @@ Bool_t AODSelector::Process(Long64_t entry)
     }
   } else {
     fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-    fBeta2DPt->Fill(TMath::Abs(pT),beta);
     if (TOFtime > 0.f && length > 0.f) {
       Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
       fBeta->Fill(beta);
       fBeta2D->Fill(pTPC,beta);
+      fBeta2DPt->Fill(TMath::Abs(pT),beta);
       if (beta < (1.f - EPSILON)) {
         Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
         fGamma->Fill(gamma);
