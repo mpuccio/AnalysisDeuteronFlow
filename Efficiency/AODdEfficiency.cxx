@@ -219,7 +219,7 @@ void AODdEfficiency::UserExec(Option_t *){
     }
     if (nSPD < 1 || nITS < 2) continue;
     if (!aodtr->PropagateToDCA(primaryVtx, b, 100, dca_tr, covar_tr)) continue;
-    if (dca_tr[1] > 2.f) continue;
+    if (TMath::Sqrt(dca_tr[1]) > 2.f) continue;
     // Has the track a nice prolongation in TOF? Answer in hasTOF.
     Bool_t hasTOFout  = aodtr->GetStatus() & AliESDtrack::kTOFout;
     Bool_t hasTOFtime = aodtr->GetStatus() & AliESDtrack::kTIME;
