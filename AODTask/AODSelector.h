@@ -88,6 +88,7 @@ private:
   Float_t          fBins[17];
   TH1F*            fDCAxy;
   TH1F*            fDCAz;
+  TH2F*            fDCA2D;
   TH1F*            fMassSpectra[48];
   TH1F*            fMassSpectraAD[48];
   TH2F*            fMassdEdxD[48];
