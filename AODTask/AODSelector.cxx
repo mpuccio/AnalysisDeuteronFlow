@@ -242,6 +242,7 @@ Bool_t AODSelector::Process(Long64_t entry)
     fCentrality->Fill(centrality);
   }
   
+  if (ITSnClust - ITSnClustPID <= 0) return kTRUE;
   if (TMath::Abs(DCAz) > 2.f) return kTRUE;
   fDCAxy->Fill(DCAxy);
   fDCAz->Fill(DCAz);
