@@ -90,8 +90,8 @@ Bool_t EfficiencySelector::Process(Long64_t entry)
   // The return value is currently not used.
   GetEntry(entry);
   
-  if (TMath::Abs(eta) < 0.8 && IsPrimary && TMath::Abs(yMC) < 0.5) {
-    if (ITSnClusters > 1 && TPCnClusters > 70u && TPCnSignal > 70u) { // reconstructed (anti) deuterons
+  if (TMath::Abs(etaMC) < 0.8 && IsPrimary && TMath::Abs(yMC) < 0.5) {
+    if (ITSnClusters > 1 && TPCnClusters > 70u && TPCnSignal > 70u && chi2 < 4.f && chi2 >= 0.f) { // reconstructed (anti) deuterons
       if (pTMC > 0.f) { // deuteron
         fDYield->Fill(TMath::Abs(pTMC));
         if (beta > 0.f && beta < 1.f) fDYieldTOF->Fill(TMath::Abs(pTMC));

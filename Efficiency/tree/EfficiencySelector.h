@@ -28,6 +28,7 @@ class EfficiencySelector : public TSelector {
   Float_t         pTMC;
   Float_t         etaMC;
   Float_t         phiMC;
+  Float_t         yMC;
   Float_t         p;
   Float_t         pT;
   Float_t         eta;
@@ -35,6 +36,7 @@ class EfficiencySelector : public TSelector {
   Float_t         beta;
   Float_t         DCAxy;
   Float_t         DCAz;
+  Float_t         chi2;
   Float_t         centrality;
   UShort_t        TPCnClusters;
   UShort_t        TPCnSignal;
@@ -47,6 +49,7 @@ class EfficiencySelector : public TSelector {
   TBranch        *b_pTMC;   //!
   TBranch        *b_etaMC;   //!
   TBranch        *b_phiMC;   //!
+  TBranch        *b_yMC;   //!
   TBranch        *b_p;   //!
   TBranch        *b_pT;   //!
   TBranch        *b_eta;   //!
@@ -54,6 +57,7 @@ class EfficiencySelector : public TSelector {
   TBranch        *b_beta;   //!
   TBranch        *b_DCAxy;   //!
   TBranch        *b_DCAz;   //!
+  TBranch        *b_chi2;   //!
   TBranch        *b_centrality;   //
   TBranch        *b_TPCnClusters;   //!
   TBranch        *b_TPCnSignal;   //!
@@ -109,6 +113,7 @@ void EfficiencySelector::Init(TTree *tree)
   fChain->SetBranchAddress("pTMC", &pTMC, &b_pTMC);
   fChain->SetBranchAddress("etaMC", &etaMC, &b_etaMC);
   fChain->SetBranchAddress("phiMC", &phiMC, &b_phiMC);
+  fChain->SetBranchAddress("yMC", &yMC, &b_yMC);
   fChain->SetBranchAddress("p", &p, &b_p);
   fChain->SetBranchAddress("pT", &pT, &b_pT);
   fChain->SetBranchAddress("eta", &eta, &b_eta);
@@ -116,6 +121,7 @@ void EfficiencySelector::Init(TTree *tree)
   fChain->SetBranchAddress("beta", &beta, &b_beta);
   fChain->SetBranchAddress("DCAxy", &DCAxy, &b_DCAxy);
   fChain->SetBranchAddress("DCAz", &DCAz, &b_DCAz);
+  fChain->SetBranchAddress("chi2", &chi2, &b_chi2);
   fChain->SetBranchAddress("centrality", &centrality, &b_centrality);
   fChain->SetBranchAddress("TPCnClusters", &TPCnClusters, &b_TPCnClusters);
   fChain->SetBranchAddress("TPCnSignal", &TPCnSignal, &b_TPCnSignal);
