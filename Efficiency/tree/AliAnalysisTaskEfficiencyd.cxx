@@ -58,6 +58,7 @@ fTphi(0.f),
 fTbeta(0.f),
 fTDCAxy(0.f),
 fTDCAz(0.f),
+fTchi2(-1.f),
 fTcentrality(-1.f),
 fTTPCnClusters(0u),
 fTTPCnSignal(0u),
@@ -261,7 +262,6 @@ void AliAnalysisTaskEfficiencyd::UserExec(Option_t *){
   fTTPCnSignal = 0;
   fTITSnClusters = 0;
   fTITSnSignal = 0;
-  fTIsPrimary = kTRUE;
 
   TListIter nextD(&mcD);
   AliAODMCParticle *part;
@@ -271,6 +271,7 @@ void AliAnalysisTaskEfficiencyd::UserExec(Option_t *){
     fTetaMC = part->Eta();
     fTphiMC = part->Phi();
     fTyMC = part->Y();
+    fTIsPrimary = part->IsPhysicalPrimary();
     fTree->Fill();
   }
   
@@ -281,6 +282,7 @@ void AliAnalysisTaskEfficiencyd::UserExec(Option_t *){
     fTetaMC = part->Eta();
     fTphiMC = part->Phi();
     fTyMC = part->Y();
+    fTIsPrimary = part->IsPhysicalPrimary();
     fTree->Fill();
   }
   //  Post output data.
