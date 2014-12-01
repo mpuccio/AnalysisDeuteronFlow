@@ -110,6 +110,10 @@ private:
   
   TH2F            *fDdcaXY;
   TH2F            *fDdcaZ;
+  TH2F            *fDdcaXYfine;
+  TH2F            *fDdcaZfine;
+  TH2F            *fDdcaXYcoarse;
+  TH2F            *fDdcaZcoarse;
   
   Float_t          fPrevious;
   ClassDef(AODSelector,0);
