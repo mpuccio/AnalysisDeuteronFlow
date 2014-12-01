@@ -108,6 +108,9 @@ private:
   TH1F*            fSignal[48];
   TH1F*            fSignalAD[48];
   
+  TH2F            *fDdcaXY;
+  TH2F            *fDdcaZ;
+  
   Float_t          fPrevious;
   ClassDef(AODSelector,0);
 };
