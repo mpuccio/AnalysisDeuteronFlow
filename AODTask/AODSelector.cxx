@@ -257,20 +257,18 @@ Bool_t AODSelector::Process(Long64_t entry)
   fDCAxy->Fill(DCAxy);
   fDCAz->Fill(DCAz);
   fDCA2D->Fill(DCAxy,DCAz);
-  fDdcaXY->Fill(pT,DCAxy);
-  fDdcaZ->Fill(pT,DCAz);
-
   
   if (TMath::Abs(DCAxy) > 2.f) return kTRUE;
   
   if (pTPC < 3.5) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      if (pTPC < 1.f) {
+      if (pTPC < 0.8f) {
         fdEdxTPCSignalCounts[cent]->Fill(pT);
         fdEdxTPCSignalCountsAD[cent]->Fill(-pT);
-      }
-      if (TOFtime > 0.f && length > 0.f) {
+        fDdcaXY->Fill(pT,DCAxy);
+        fDdcaZ->Fill(pT,DCAz);
+      } else if (TOFtime > 0.f && length > 0.f) {
         Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
         fBeta->Fill(beta);
         fBeta2D->Fill(pTPC,beta);
@@ -289,6 +287,8 @@ Bool_t AODSelector::Process(Long64_t entry)
             fMassSpectra[16 * cent + j]->Fill(p/(beta*gamma));
             fMassdEdxD[16 * cent + j]->Fill(p/(beta*gamma),TPCsignal);
             fCompleteSignalD->Fill(pT,dm);
+            fDdcaXY->Fill(pT,DCAxy);
+            fDdcaZ->Fill(pT,DCAz);
           } else {
             fSignalAD[16 * cent + j]->Fill(dm);
             fMassSpectraAD[16 * cent + j]->Fill(p/(beta*gamma));
