@@ -192,8 +192,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 5.0, 6.0, 8.0,
     10.0
   };
-  fDdcaXY = new TH2F("fDdcaXY",";p_{T} (GeV/c); DCA_{xy} (cm)",18,binDCA,120,-3.0f,3.0f);
-  fDdcaZ = new TH2F("fDdcaZ",";p_{T} (GeV/c); DCA_{z} (cm)",18,binDCA,120,-3.0f,3.0f);
+  fDdcaXY = new TH2F("fDdcaXY",";p_{T} (GeV/c); DCA_{xy} (cm)",18,binDCA,60,-0.5f,0.5f);
+  fDdcaZ = new TH2F("fDdcaZ",";p_{T} (GeV/c); DCA_{z} (cm)",18,binDCA,60,-0.5f,0.5f);
   GetOutputList()->Add(fDdcaXY);
   GetOutputList()->Add(fDdcaZ);
   
@@ -479,10 +479,17 @@ void AODSelector::Terminate()
   if (!fDdcaXY || !fDdcaZ) {f.Close(); return;}
   f.mkdir("dcas");
   f.cd("dcas");
-  
+  Double_t binDCA[] = {
+    0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
+    2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 5.0, 6.0, 8.0,
+    10.0
+  };
+
   for (int i = 0; i < 18; ++i) {
     TH1D *hprim = fDdcaXY->ProjectionY(Form("dcaxy_%i",i),i + 1, i + 2);
     TH1D *hseco = fDdcaXY->ProjectionY(Form("dcaz_%i",i),i + 1, i + 2);
+    hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCA[i],binDCA[i+1]));
+    hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCA[i],binDCA[i+1]));
     hprim->Write();
     hseco->Write();
   }
