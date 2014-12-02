@@ -40,10 +40,6 @@ private:
   TH1F    *fAntiDMCYield;
   TH1F    *fAntiDYield;
   TH1F    *fAntiDYieldTOF;
-  TH1F    *fDCAxyPrimariesAD[3];
-  TH1F    *fDCAxySecondariesAD[3];
-  TH1F    *fDCAzPrimariesAD[3];
-  TH1F    *fDCAzSecondariesAD[3];
   TH1F    *fDCAxyPrimariesD[3];
   TH1F    *fDCAxySecondariesD[3];
   TH1F    *fDCAzPrimariesD[3];

@@ -46,10 +46,6 @@ fOutput(0),
 fAntiDMCYield(0),
 fAntiDYield(0),
 fAntiDYieldTOF(0),
-fDCAxyPrimariesAD(),
-fDCAxySecondariesAD(),
-fDCAzPrimariesAD(),
-fDCAzSecondariesAD(),
 fDCAxyPrimariesD(),
 fDCAxySecondariesD(),
 fDCAzPrimariesD(),
@@ -105,14 +101,6 @@ void AODdEfficiency::UserCreateOutputObjects(){
     fOutput->Add(fDCAxySecondariesD[iCent]);
     fOutput->Add(fDCAzPrimariesD[iCent]);
     fOutput->Add(fDCAzSecondariesD[iCent]);
-    fDCAxyPrimariesAD[iCent] = new TH1F(Form("fDCAxyPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
-    fDCAxySecondariesAD[iCent] = new TH1F(Form("fDCAxySecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
-    fDCAzPrimariesAD[iCent] = new TH1F(Form("fDCAzPrimariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
-    fDCAzSecondariesAD[iCent] = new TH1F(Form("fDCAzSecondariesAD%i",iCent),";DCA_{xy} (cm);Entries",500,-5,5);
-    fOutput->Add(fDCAxyPrimariesAD[iCent]);
-    fOutput->Add(fDCAxySecondariesAD[iCent]);
-    fOutput->Add(fDCAzPrimariesAD[iCent]);
-    fOutput->Add(fDCAzSecondariesAD[iCent]);
   }
   PostData(1,fOutput);
 }
@@ -251,15 +239,6 @@ void AODdEfficiency::UserExec(Option_t *){
         fAntiDYield->Fill(part->Pt());
         if (hasTOF)
           fAntiDYieldTOF->Fill(part->Pt());
-        if (cent >= 0) {
-          fDCAxyPrimariesAD[cent]->Fill(dca_tr[0]);
-          fDCAzPrimariesAD[cent]->Fill(dca_tr[1]);
-        }
-      } else {
-        if (cent >= 0) {
-          fDCAxySecondariesAD[cent]->Fill(dca_tr[0]);
-          fDCAzSecondariesAD[cent]->Fill(dca_tr[1]);
-        }
       }
     }
   } // End AOD track loop
