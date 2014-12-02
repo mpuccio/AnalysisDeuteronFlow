@@ -537,8 +537,8 @@ void AODSelector::Terminate()
   };
   
   for (int i = 0; i < 21; ++i) {
-    TH1D *hprim = fDdcaXY->ProjectionY(Form("dcaxyF_%i",i),i + 1, i + 2);
-    TH1D *hseco = fDdcaXY->ProjectionY(Form("dcazF_%i",i),i + 1, i + 2);
+    TH1D *hprim = fDdcaXYfine->ProjectionY(Form("dcaxyF_%i",i),i + 1, i + 2);
+    TH1D *hseco = fDdcaXYfine->ProjectionY(Form("dcazF_%i",i),i + 1, i + 2);
     hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
     hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
     hprim->Write();
@@ -552,8 +552,8 @@ void AODSelector::Terminate()
   f.cd("dcasCoarse");
   
   for (int i = 0; i < 21; ++i) {
-    TH1D *hprim = fDdcaXY->ProjectionY(Form("dcaxyC_%i",i),i + 1, i + 2);
-    TH1D *hseco = fDdcaXY->ProjectionY(Form("dcazC_%i",i),i + 1, i + 2);
+    TH1D *hprim = fDdcaXYcoarse->ProjectionY(Form("dcaxyC_%i",i),i + 1, i + 2);
+    TH1D *hseco = fDdcaXYcoarse->ProjectionY(Form("dcazC_%i",i),i + 1, i + 2);
     hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
     hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
     hprim->Write();
