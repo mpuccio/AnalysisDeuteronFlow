@@ -201,12 +201,12 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
     1.8, 1.9, 2.0 , 2.1, 2.2
   };
-  fDdcaXY = new TH2F("fDdcaXY",";p_{T} (GeV/c); DCA_{xy} (cm)",18,binDCA,60,-0.5f,0.5f);
-  fDdcaZ = new TH2F("fDdcaZ",";p_{T} (GeV/c); DCA_{z} (cm)",18,binDCA,60,-0.5f,0.5f);
+  fDdcaXY = new TH2F("fDdcaXY",";p_{T} (GeV/c); DCA_{xy} (cm)",18,binDCA,80,-1.f,1.f);
+  fDdcaZ = new TH2F("fDdcaZ",";p_{T} (GeV/c); DCA_{z} (cm)",18,binDCA,80,-1.f,1.f);
   fDdcaXYfine = new TH2F("fDdcaXYfine",";p_{T} (GeV/c); DCA_{xy} (cm)",21,binDCAfine,60,-0.5f,0.5f);
   fDdcaZfine = new TH2F("fDdcaZfine",";p_{T} (GeV/c); DCA_{z} (cm)",21,binDCAfine,60,-0.5f,0.5f);
-  fDdcaXYcoarse = new TH2F("fDdcaXYcoarse",";p_{T} (GeV/c); DCA_{xy} (cm)",21,binDCAfine,40,-1.f,1.f);
-  fDdcaZcoarse = new TH2F("fDdcaZcoarse",";p_{T} (GeV/c); DCA_{z} (cm)",21,binDCAfine,40,-1.f,1.f);
+  fDdcaXYcoarse = new TH2F("fDdcaXYcoarse",";p_{T} (GeV/c); DCA_{xy} (cm)",21,binDCAfine,80,-1.f,1.f);
+  fDdcaZcoarse = new TH2F("fDdcaZcoarse",";p_{T} (GeV/c); DCA_{z} (cm)",21,binDCAfine,80,-1.f,1.f);
   GetOutputList()->Add(fDdcaXY);
   GetOutputList()->Add(fDdcaZ);
   GetOutputList()->Add(fDdcaXYfine);
@@ -524,32 +524,32 @@ void AODSelector::Terminate()
     hseco->Write();
   }
 
-  fDdcaXYfine = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYfine"));
-  fDdcaZfine = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZfine"));
-  if (!fDdcaXYfine || !fDdcaZfine) {f.Close(); return;}
+//  fDdcaXYfine = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYfine"));
+//  fDdcaZfine = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZfine"));
+//  if (!fDdcaXYfine || !fDdcaZfine) {f.Close(); return;}
   f.mkdir("dcasFine");
   f.cd("dcasFine");
   
-  Double_t binDCAfine[] = {
-    0.35, 0.425, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
-    0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
-    1.8, 1.9, 2.0 , 2.1, 2.2
-  };
-  
-  for (int i = 0; i < 21; ++i) {
-    TH1D *hprim = fDdcaXYfine->ProjectionY(Form("dcaxyF_%i",i),i + 1, i + 2);
-    TH1D *hseco = fDdcaZfine->ProjectionY(Form("dcazF_%i",i),i + 1, i + 2);
-    hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
-    hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
-    hprim->Write();
-    hseco->Write();
-  }
+//  Double_t binDCAfine[] = {
+//    0.35, 0.425, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
+//    0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
+//    1.8, 1.9, 2.0 , 2.1, 2.2
+//  };
+//  
+//  for (int i = 0; i < 21; ++i) {
+//    TH1D *hprim = fDdcaXYfine->ProjectionY(Form("dcaxyF_%i",i),i + 1, i + 2);
+//    TH1D *hseco = fDdcaZfine->ProjectionY(Form("dcazF_%i",i),i + 1, i + 2);
+//    hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
+//    hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
+//    hprim->Write();
+//    hseco->Write();
+//  }
 
   fDdcaXYcoarse = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYcoarse"));
   fDdcaZcoarse = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZcoarse"));
   if (!fDdcaXYcoarse || !fDdcaZcoarse) {f.Close(); return;}
-  f.mkdir("dcasCoarse");
-  f.cd("dcasCoarse");
+//  f.mkdir("dcasCoarse");
+//  f.cd("dcasCoarse");
   
   for (int i = 0; i < 21; ++i) {
     TH1D *hprim = fDdcaXYcoarse->ProjectionY(Form("dcaxyC_%i",i),i + 1, i + 2);
