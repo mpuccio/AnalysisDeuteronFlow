@@ -530,12 +530,12 @@ void AODSelector::Terminate()
   f.mkdir("dcasFine");
   f.cd("dcasFine");
   
-//  Double_t binDCAfine[] = {
-//    0.35, 0.425, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
-//    0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
-//    1.8, 1.9, 2.0 , 2.1, 2.2
-//  };
-//  
+  Double_t binDCAfine[] = {
+    0.35, 0.425, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
+    0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
+    1.8, 1.9, 2.0 , 2.1, 2.2
+  };
+//
 //  for (int i = 0; i < 21; ++i) {
 //    TH1D *hprim = fDdcaXYfine->ProjectionY(Form("dcaxyF_%i",i),i + 1, i + 2);
 //    TH1D *hseco = fDdcaZfine->ProjectionY(Form("dcazF_%i",i),i + 1, i + 2);
