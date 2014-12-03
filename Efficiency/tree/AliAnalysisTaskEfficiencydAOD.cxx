@@ -16,6 +16,7 @@
 #include <TH2F.h>
 #include <TList.h>
 #include <TParticle.h>
+#include <TClonesArray.h>
 #include <TTree.h>
 
 // ALIROOT includes
@@ -34,6 +35,7 @@
 #include "AliVEventHandler.h"
 #include "AliStack.h"
 #include "AliAODTrack.h"
+#include "AliAODMCParticle.h"
 #include "AliAODVertex.h"
 
 using TMath::TwoPi;
@@ -124,12 +126,13 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     return;
   }
   
-  AliMCEvent* mcEvent = MCEvent();
-  if (!mcEvent) {
-    Printf("ERROR: Could not retrieve MC event");
+  // get branch "mcparticles"
+  TClonesArray *stack = (TClonesArray*)ev->GetList()->FindObject(AliAODMCParticle::StdBranchName());
+  if (!stack) {
+    PostData(1, fTree);
     return;
   }
-  AliStack* stack = mcEvent->Stack();
+  
   
   AliCentrality *centr=ev->GetCentrality();
   
@@ -162,15 +165,12 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
   TList mcD, mcDbar;
   mcD.SetOwner(kFALSE);
   mcDbar.SetOwner(kFALSE);
-  for (int iMC = 0; iMC < stack->GetNtrack(); ++iMC) {
-    TParticle *part = stack->Particle(iMC);
+  for (int iMC = 0; iMC < stack->GetEntriesFast(); ++iMC) {
+    AliAODMCParticle *part = (AliAODMCParticle*)stack->UncheckedAt(iMC);
+    if (TMath::Abs(part->Eta()) > 1.) continue;
+    if (TMath::Abs(part->Y()) > 1.) continue;
+    const float pt = part->Pt();
     const int pdg = part->GetPdgCode();
-    if (stack->IsPhysicalPrimary(iMC))
-      part->SetFirstMother(-1);
-    else if (stack->IsSecondaryFromMaterial(iMC))
-      part->SetFirstMother(-2);
-    else
-      part->SetFirstMother(0);
     if (pdg == 1000010020) {
       mcD.Add(part);
     } else if (pdg == -1000010020) {
@@ -205,7 +205,7 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     Bool_t hasTOF = Bool_t(hasTOFout & hasTOFtime) && length > 350.f;
     
     // Getting the particle and checking if it is in one of the two lists of MC particles
-    TParticle *part = stack->Particle(TMath::Abs(track->GetLabel()));
+    AliAODMCParticle *part = (AliAODMCParticle*)stack->At(track->GetLabel());
     if (!part) continue;
     
     int isDeuteron = 2;
@@ -222,7 +222,7 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     fTphiMC = part->Phi();
     fTyMC = part->Y();
     fTp = track->P();
-    fTpT = track->Charge() * track->Pt() / TMath::Abs(track->Charge());
+    fTpT = isDeuteron * track->Pt();
     fTeta = track->Eta();
     fTphi = track->Phi();
     if (hasTOF) {
@@ -231,14 +231,17 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
       fTbeta = len / (2.99792457999999984e-02 * tim);
     } else
       fTbeta = -1.f;
-    track->GetImpactParameters(fTDCAxy, fTDCAz);
+    Double_t dca[2],cov[3];
+    if (!track->PropagateToDCA(primaryVtx, ev->GetMagneticField(), 100, dca, cov)) continue;
+    fTDCAxy = dca[0];
+    fTDCAz = dca[1];
     fTchi2 = track->Chi2perNDF();
     fTTPCnClusters = track->GetTPCNcls();
     fTTPCnSignal = track->GetTPCsignalN();
-    fTITSnClusters = track->GetNcls(0);
+    fTITSnClusters = nITS;
     fTITSnSignal = nITS - nSPD;
-    fTIsPrimary = Bool_t(part->GetFirstMother() == -1);
-    fTIsSecondaryFromMaterial = Bool_t(part->GetFirstMother() == -2);
+    fTIsPrimary = part->IsPhysicalPrimary();
+    fTIsSecondaryFromMaterial = part->IsSecondaryFromMaterial();
     
     fTree->Fill();
     if (isDeuteron == 1)
@@ -262,27 +265,27 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
   fTITSnSignal = 0;
   
   TListIter nextD(&mcD);
-  TParticle *part;
-  while ((part = (TParticle*)nextD())) {
+  AliAODMCParticle *part;
+  while ((part = (AliAODMCParticle*)nextD())) {
     fTpMC = part->P();
     fTpTMC = part->Pt();
     fTetaMC = part->Eta();
     fTphiMC = part->Phi();
     fTyMC = part->Y();
-    fTIsPrimary = Bool_t(part->GetFirstMother() == -1);
-    fTIsSecondaryFromMaterial = Bool_t(part->GetFirstMother() == -2);
+    fTIsPrimary = part->IsPhysicalPrimary();
+    fTIsSecondaryFromMaterial = part->IsSecondaryFromMaterial();
     fTree->Fill();
   }
   
   TListIter nextDbar(&mcDbar);
-  while ((part = (TParticle*)nextDbar())) {
+  while ((part = (AliAODMCParticle*)nextDbar())) {
     fTpMC = part->P();
     fTpTMC = -part->Pt();
     fTetaMC = part->Eta();
     fTphiMC = part->Phi();
     fTyMC = part->Y();
-    fTIsPrimary = Bool_t(part->GetFirstMother() == -1);
-    fTIsSecondaryFromMaterial = Bool_t(part->GetFirstMother() == -2);
+    fTIsPrimary = part->IsPhysicalPrimary();
+    fTIsSecondaryFromMaterial = part->IsSecondaryFromMaterial();
     fTree->Fill();
   }
   //  Post output data.

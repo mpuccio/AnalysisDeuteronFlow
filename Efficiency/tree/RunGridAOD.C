@@ -32,8 +32,8 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     nRuns = 20;
   }
   else {
-    start = 0;
-    nRuns = 45;
+    start = 45;
+    nRuns = 44;
   }
   return;
 }
@@ -96,8 +96,8 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
     plugin = CreateAlienHandler(who,taskname, gridmode.Data(), proofcluster, proofdataset);
     if(!plugin) return;
   } else {
-    gROOT->LoadMacro("$ALICE_ROOT/PWGCF/Correlations/macros/dphicorrelations/CreateESDChain.C");
-    chain = CreateESDChain("ESDs.txt");
+    gROOT->LoadMacro("$ALICE_ROOT/PWG/EMCAL/macros/CreateAODChain.C");
+    chain = CreateAODChain("AODs.txt");
   }
   
   //---- Create the analysis manager
@@ -105,24 +105,27 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
   if(plugin) mgr->SetGridHandler(plugin);
   
   //  Input
+  AliMCEventHandler*  mcHandler = new AliMCEventHandler();
+  if (plugin) mgr->SetMCtruthEventHandler(mcHandler);
   
   AliAODInputHandler* iH = new AliAODInputHandler("handler","handler for my analisys");
   mgr->SetInputEventHandler(iH);
   
+
   //--------------------------------------------------------------
   // Other tasks
 
   // PID response
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDResponse.C");
-  AliAnalysisTaskPIDResponse *pidTask = AddTaskPIDResponse(kFALSE); // useMC
+  AliAnalysisTaskPIDResponse *pidTask = AddTaskPIDResponse(kTRUE); // useMC
   // PID QA
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
   AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
   
-  gROOT->LoadMacro("./AliAnalysisTaskEfficiencydAOD.cxx+g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
-  gROOT->LoadMacro("./AddTaskEfficiencyd.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
-  AliAnalysisTaskEfficiencydAOD *task = AddTaskEfficiencyd(kTRUE);//kTRUE);
-  
+  gROOT->LoadMacro("./AliAnalysisTaskEfficiencydAOD.cxx++g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
+  gROOT->LoadMacro("./AddTaskEfficiencydAOD.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
+  AliAnalysisTaskEfficiencydAOD *task = AddTaskEfficiencydAOD();//kTRUE);
+  if(!task) ::Error("Task uninitialized.");
 
   
   //__________________________________________________________________________
@@ -166,30 +169,43 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   // plugin->SetGridDataDir(" /alice/data/2011/LHC11h_2/"); //sim
   // plugin->SetDataPattern("pass2/*AliAOD.root"); // sim
   
-  plugin->SetGridDataDir("/alice/sim/2013/LHC13d15/"); //sim
-//  plugin->SetGridDataDir("/alice/sim/2014/LHC14a6/"); //sim
+  //plugin->SetGridDataDir("/alice/sim/2014/LHC14a6/"); //sim
+  plugin->SetGridDataDir("/alice/sim/2012/LHC12d3/"); //sim
   plugin->SetDataPattern("*/AliAOD.root"); // sim
   plugin->SetRunPrefix("");   // mc
   
-  Int_t runlist[89] = {
-//    139510, 139507, 139505, 139503, 139465, 139438, 139437, 139360, 139329, 139328,
-//    139314, 139310, 139309, 139173, 139107, 139105, 139038, 139037, 139036, 139029,
-//    139028, 138872, 138871, 138870, 138837, 138732, 138730, 138666, 138662, 138653,
-//    138652, 138638, 138624, 138621, 138583, 138582, 138579, 138578, 138534, 138469,
-//    138442, 138439, 138438, 138396, 138364, 138275, 138225, 138201, 138197, 138192,
-//    138190, 137848, 137844, 137752, 137751, 137724, 137722, 137718, 137704, 137693,
-//    137692, 137691, 137686, 137685, 137639, 137638, 137608, 137595, 137549, 137546,
-//    137544, 137541, 137539, 137531, 137530, 137443, 137441, 137440, 137439, 137434,
-//    137432, 137431, 137366, 137243, 137236, 137235, 137232, 137231, 137162, 137161 // Counter
-    137161, 137162, 137231, 137232, 137235, 137236, 137243, 137366, 137431, 137432,
-    137434, 137439, 137440, 137441, 137443, 137530, 137531, 137539, 137541, 137544,
-    137546, 137549, 137595, 137608, 137638, 137639, 137685, 137686, 137691, 137692,
-    137693, 137704, 137718, 137722, 137724, 137751, 137752, 137844, 137848, 138190,
-    138192, 138197, 138201, 138225, 138275, 138364, 138396, 138438, 138439, 138442,
-    138469, 138534, 138578, 138579, 138582, 138583, 138621, 138638, 138652, 138653,
-    138662, 138666, 138730, 138732, 138837, 138870, 138871, 138872, 139028, 139029,
-    139036, 139037, 139038, 139105, 139107, 139173, 139309, 139310, 139314, 139328,
-    139329, 139360, 139437, 139438, 139465, 139503, 139505, 139507, 139510
+  Int_t runlist[108] = {
+//    167915, 169099, 169858, 167920, 169138, 169859, 167985, 169144, 169923, 167987,
+//    169145, 169965, 167988, 169148, 170027, 168069, 169156, 170040, 168076, 169160,
+//    170081, 168105, 169167, 170083, 168107, 169238, 170084, 168108, 169411, 170085,
+//    168115, 169415, 170088, 168310, 169417, 170089, 168311, 169418, 170091, 168322,
+//    169419, 170155, 168325, 169420, 170159, 168341, 169475, 170163, 168342, 169498,
+//    170193, 168361, 169504, 170203, 168362, 169506, 170204, 168458, 169512, 170207,
+//    168460, 169515, 170228, 168464, 169550, 170230, 168467, 169553, 170268, 168511,
+//    169554, 170269, 168512, 169555, 170270, 168514, 169557, 170306, 168777, 169586,
+//    170308, 168826, 169587, 170309, 168988, 169588, 170311, 168992, 169590, 170312,
+//    169035, 169591, 170313, 169040, 169835, 170315, 169044, 169837, 170387, 169045,
+//    169838, 170388, 169091, 169846, 170572, 169094, 169855, 170593                  // LHC14a6
+//    137161, 137162, 137231, 137232, 137235, 137236, 137243, 137366, 137431, 137432,
+//    137434, 137439, 137440, 137441, 137443, 137530, 137531, 137539, 137541, 137544,
+//    137546, 137549, 137595, 137608, 137638, 137639, 137685, 137686, 137691, 137692,
+//    137693, 137704, 137718, 137722, 137724, 137751, 137752, 137844, 137848, 138190,
+//    138192, 138197, 138201, 138225, 138275, 138364, 138396, 138438, 138439, 138442,
+//    138469, 138534, 138578, 138579, 138582, 138583, 138621, 138638, 138652, 138653,
+//    138662, 138666, 138730, 138732, 138837, 138870, 138871, 138872, 139028, 139029,
+//    139036, 139037, 139038, 139105, 139107, 139173, 139309, 139310, 139314, 139328,
+//    139329, 139360, 139437, 139438, 139465, 139503, 139505, 139507, 139510
+    167915, 167920, 167985, 167987, 167988, 168069, 168076, 168105, 168107, 168108,
+    168115, 168310, 168311, 168322, 168325, 168341, 168342, 168361, 168362, 168458,
+    168460, 168464, 168467, 168511, 168512, 168514, 168777, 168826, 168988, 168992,
+    169035, 169040, 169044, 169045, 169091, 169094, 169099, 169138, 169144, 169145,
+    169148, 169156, 169160, 169167, 169238, 169411, 169415, 169417, 169418, 169419,
+    169420, 169475, 169498, 169504, 169506, 169512, 169515, 169550, 169553, 169554,
+    169555, 169557, 169586, 169587, 169588, 169590, 169591, 169835, 169837, 169838,
+    169846, 169855, 169858, 169859, 169923, 169965, 170027, 170040, 170081, 170083,
+    170084, 170085, 170088, 170089, 170091, 170155, 170159, 170163, 170193, 170203,
+    170204, 170207, 170228, 170230, 170268, 170269, 170270, 170306, 170308, 170309,
+    170311, 170312, 170313, 170315, 170387, 170388, 170572, 170593                  // LHC12d3
   };
   
   Int_t start = 0, nrun = 0;
