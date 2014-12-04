@@ -38,3 +38,10 @@
 # Results and logs
 *.log
 *.png
+
+# Grid xml 
+*.xml
+*.jdl
+
+# Finder file
+*DS*Store
