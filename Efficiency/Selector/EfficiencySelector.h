@@ -76,10 +76,10 @@ class EfficiencySelector : public TSelector {
   , fDMCYield(0x0)
   , fDYield(0x0)
   , fDYieldTOF(0x0)
-  , fDdcaXYprimaries(0x0)
-  , fDdcaZprimaries(0x0)
-  , fDdcaXYsecondaries(0x0)
-  , fDdcaZsecondaries(0x0) { }
+  , fDdcaXYprimaries()
+  , fDdcaZprimaries()
+  , fDdcaXYsecondaries()
+  , fDdcaZsecondaries() { }
   
   virtual ~EfficiencySelector() { }
   virtual Int_t   Version() const { return 2; }
@@ -103,10 +103,10 @@ private:
   TH1F    *fDYield;
   TH1F    *fDYieldTOF;
   
-  TH2F    *fDdcaXYprimaries;
-  TH2F    *fDdcaZprimaries;
-  TH2F    *fDdcaXYsecondaries;
-  TH2F    *fDdcaZsecondaries;
+  TH2F    *fDdcaXYprimaries[5];
+  TH2F    *fDdcaZprimaries[5];
+  TH2F    *fDdcaXYsecondaries[5];
+  TH2F    *fDdcaZsecondaries[5];
 
   ClassDef(EfficiencySelector,0);
 };

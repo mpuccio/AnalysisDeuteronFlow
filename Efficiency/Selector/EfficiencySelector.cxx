@@ -37,7 +37,17 @@
 #include <TFile.h>
 #include <TH1D.h>
 #include <TLatex.h>
+#include <TString.h>
 
+static int GetCentrality(float cent) {
+  if (cent < 0) return -1;
+  if (cent <= 10) return 0;
+  else if (cent <= 20) return 1;
+  else if (cent <= 40) return 2;
+  else if (cent <= 60) return 3;
+  else if (cent <= 80) return 4;
+  return -1;
+}
 
 void EfficiencySelector::Begin(TTree * /*tree*/)
 {
@@ -58,34 +68,35 @@ void EfficiencySelector::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   
   Double_t bins[] = {
-    0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-    2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 5.0, 6.0, 8.0,
-    10.0
+    0.35, 0.5 , 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
+    2.0 , 2.2 , 2.4, 2.6, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0,
+    8.0 , 10.0
   };
   
-  fDYield = new TH1F("fDYield",";p_{T} (GeV/c);Number of d tracks",20,bins);
-  fAntiDYield = new TH1F("fAntiDYield",";p_{T} (GeV/c);Number of #bar{d} tracks",20,bins);
-  fDYieldTOF = new TH1F("fDYieldTOF",";p_{T} (GeV/c);Number of d tracks",20,bins);
-  fAntiDYieldTOF = new TH1F("fAntiDYieldTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",20,bins);
-  fAntiDMCYield = new TH1F("fAntiDMCYield",";p_{T} (GeV/c);Number of MC #bar{d}",20,bins);
-  fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",20,bins);
+  fDYield = new TH1F("fDYield",";p_{T} (GeV/c);Number of d tracks",21,bins);
+  fAntiDYield = new TH1F("fAntiDYield",";p_{T} (GeV/c);Number of #bar{d} tracks",21,bins);
+  fDYieldTOF = new TH1F("fDYieldTOF",";p_{T} (GeV/c);Number of d tracks",21,bins);
+  fAntiDYieldTOF = new TH1F("fAntiDYieldTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",21,bins);
+  fAntiDMCYield = new TH1F("fAntiDMCYield",";p_{T} (GeV/c);Number of MC #bar{d}",21,bins);
+  fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",21,bins);
   
-  fDdcaXYprimaries = new TH2F("fDdcaXYprimaries",";p_{T} (GeV/c); DCA_{xy} (cm)",18,bins,20,-1.0f,1.0f);
-  fDdcaZprimaries = new TH2F("fDdcaZprimaries",";p_{T} (GeV/c); DCA_{z} (cm)",18,bins,20,-1.0f,1.0f);
-  fDdcaXYsecondaries = new TH2F("fDdcaXYsecondaries",";p_{T} (GeV/c); DCA_{xy} (cm)",18,bins,20,-1.0f,1.0f);
-  fDdcaZsecondaries = new TH2F("fDdcaZsecondaries",";p_{T} (GeV/c); DCA_{z} (cm)",18,bins,20,-1.0f,1.0f);
-  
+  for (int i = 0; i < 5; ++i) {
+    fDdcaXYprimaries[i] = new TH2F(Form("fDdcaXYprimaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,20,-1.0f,1.0f);
+    fDdcaZprimaries[i] = new TH2F(Form("fDdcaZprimaries_%i",i),";p_{T} (GeV/c); DCA_{z} (cm)",10,bins,20,-1.0f,1.0f);
+    fDdcaXYsecondaries[i] = new TH2F(Form("fDdcaXYsecondaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,20,-1.0f,1.0f);
+    fDdcaZsecondaries[i] = new TH2F(Form("fDdcaZsecondaries_%i",i),";p_{T} (GeV/c); DCA_{z} (cm)",10,bins,20,-1.0f,1.0f);
+    GetOutputList()->Add(fDdcaXYprimaries[i]);
+    GetOutputList()->Add(fDdcaZprimaries[i]);
+    GetOutputList()->Add(fDdcaXYsecondaries[i]);
+    GetOutputList()->Add(fDdcaZsecondaries[i]);
+  }
+    
   GetOutputList()->Add(fAntiDMCYield);
   GetOutputList()->Add(fAntiDYield);
   GetOutputList()->Add(fAntiDYieldTOF);
   GetOutputList()->Add(fDMCYield);
   GetOutputList()->Add(fDYield);
   GetOutputList()->Add(fDYieldTOF);
-
-  GetOutputList()->Add(fDdcaXYprimaries);
-  GetOutputList()->Add(fDdcaZprimaries);
-  GetOutputList()->Add(fDdcaXYsecondaries);
-  GetOutputList()->Add(fDdcaZsecondaries);
 
 }
 
@@ -116,17 +127,20 @@ Bool_t EfficiencySelector::Process(Long64_t entry)
         if (pTMC > 0.f) { // deuteron
           fDYield->Fill(TMath::Abs(pTMC));
           if (centrality <= 10 && centrality > 0) {
-            fDdcaXYprimaries->Fill(TMath::Abs(pT), DCAxy);
-            fDdcaZprimaries->Fill(TMath::Abs(pT),DCAz);
+            fDdcaXYprimaries[i]->Fill(TMath::Abs(pT), DCAxy);
+            fDdcaZprimaries[i]->Fill(TMath::Abs(pT),DCAz);
           }
           if (beta > 0.f && beta < 1.f) fDYieldTOF->Fill(TMath::Abs(pTMC));
         } else {        // anti-deuteron
           fAntiDYield->Fill(TMath::Abs(pTMC));
           if (beta > 0.f && beta < 1.f) fAntiDYieldTOF->Fill(TMath::Abs(pTMC));
         }
-      } else if(IsSecondaryFromMaterial && pTMC > 0.f && centrality <= 10 && centrality > 0) {
-        fDdcaXYsecondaries->Fill(TMath::Abs(pT), DCAxy);
-        fDdcaZsecondaries->Fill(TMath::Abs(pT),DCAz);
+      } else if(IsSecondaryFromMaterial && pTMC > 0.f) {
+        int i = GetCentrality(centrality);
+        if (i > 0 && (pT < 0.8 || beta > 0)) {
+          fDdcaXYsecondaries[i]->Fill(TMath::Abs(pT), DCAxy);
+          fDdcaZsecondaries[i]->Fill(TMath::Abs(pT),DCAz);
+        }
       }
     }
     if (IsPrimary) {
@@ -162,11 +176,6 @@ void EfficiencySelector::Terminate()
   if (!fAntiDYieldTOF || !fAntiDYield || !fAntiDMCYield || !fDMCYield || !fDYieldTOF || !fDYield) {
     return;
   }
-  
-  fDdcaXYprimaries = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYprimaries"));
-  fDdcaZprimaries = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZprimaries"));
-  fDdcaXYsecondaries = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYsecondaries"));
-  fDdcaZsecondaries = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZsecondaries"));
   
   TCanvas *effCv = new TCanvas();
   effCv->cd();
@@ -225,43 +234,56 @@ void EfficiencySelector::Terminate()
   TFile f("EfficiencyOutput.root","recreate");
   f.cd();
   effCv->Write();
-  fDdcaXYprimaries->Write();
-  fDdcaZprimaries->Write();
-  fDdcaXYsecondaries->Write();
-  fDdcaZsecondaries->Write();
-  f.mkdir("dcas");
-  f.cd("dcas");
+  
   Double_t bins[] = {
     0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-    2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 5.0, 6.0, 8.0,
-    10.0
+    2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0,
+    8.0 , 10.0
   };
-
-  TLatex latex;
-  latex.SetTextSize(0.042);
-  latex.SetTextAlign(13);
-  latex.SetTextFont(12);
-  for (int i = 0; i < 18; ++i) {
-    TCanvas c(Form("DCAxy_%i",i),Form("DCAxy %4.2f < pT < %4.2f",bins[i],bins[i + 1]));
-    c.cd();
-    TH1D *hprim = fDdcaXYprimaries->ProjectionY(Form("primxy_%i",i),i + 1, i + 2);
-    TH1D *hseco = fDdcaXYsecondaries->ProjectionY(Form("secoxy_%i",i),i + 1, i + 2);
-    TH1D sum(*hprim);
-    sum.GetXaxis()->CenterTitle();
-    sum.GetYaxis()->CenterTitle();
-    sum.Add(hseco);
-    sum.SetLineWidth(3);
-    sum.SetLineColor(kBlue - 2);
-    sum.SetName(Form("sumxy_%i",i));
-    sum.SetTitle(";DCA_{xy} (cm); Entries");
-    sum.Draw();
-    hprim->SetLineColor(kBlue);
-    hprim->Draw("same");
-    hseco->SetLineColor(kRed);
-    hseco->Draw("same");
-    latex.DrawLatexNDC(0.135,0.85,Form("#splitline{%4.2f GeV/c < p_{T} #leq %4.2f GeV/c}"
-                                      "{Centrality 0-10%%}",bins[i],bins[i+1]));
-    c.Write();
+  TString centString[5] = {"0-10%","10-20%","20-40%","40-60%","60-80%"};
+  for (int k = 0; k < 5; ++k) {
+    f.mkdir(Form("Cent%i",k));
+    fDdcaXYprimaries[k] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaXYprimaries_%i",k)));
+    fDdcaXYsecondaries[k] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaXYsecondaries_%i",k)));
+    fDdcaZprimaries[k] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaZprimaries_%i",k)));
+    fDdcaZsecondaries[k] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaZsecondaries_%i",k)));
+    
+    f.cd(Form("Cent%i",k));
+    fDdcaXYprimaries[k]->Write();
+    fDdcaZprimaries[k]->Write();
+    fDdcaXYsecondaries[k]->Write();
+    fDdcaZsecondaries[k]->Write();
+    f.cd();
+    f.mkdir(Form("Cent%i/dca_xy",k));
+    f.cd(Form("Cent%i/dca_xy",k));
+    
+    TLatex latex;
+    latex.SetTextSize(0.042);
+    latex.SetTextAlign(13);
+    latex.SetTextFont(12);
+    for (int i = 0; i < 10; ++i) {
+      TCanvas c(Form("DCAxy_%i",i),Form("DCAxy %4.2f < pT < %4.2f",bins[i],bins[i + 1]));
+      c.cd();
+      TH1D *hprim = fDdcaXYprimaries[k]->ProjectionY(Form("primxy_%i",i),i + 1, i + 2);
+      TH1D *hseco = fDdcaXYsecondaries[k]->ProjectionY(Form("secoxy_%i",i),i + 1, i + 2);
+      TH1D sum(*hprim);
+      sum.GetXaxis()->CenterTitle();
+      sum.GetYaxis()->CenterTitle();
+      sum.Add(hseco);
+      sum.SetLineWidth(3);
+      sum.SetLineColor(kBlue - 2);
+      sum.SetName(Form("sumxy_%i",i));
+      sum.SetTitle(";DCA_{xy} (cm); Entries");
+      sum.Draw();
+      hprim->SetLineColor(kBlue);
+      hprim->Draw("same");
+      hseco->SetLineColor(kRed);
+      hseco->Draw("same");
+      latex.DrawLatexNDC(0.135,0.85,Form("#splitline{%4.2f GeV/c < p_{T} #leq %4.2f GeV/c}"
+                                         "{Centrality %s}",centString[k].Data(),bins[i],bins[i+1]));
+      c.Write();
+    }
+    f.cd();
   }
   f.Close();
 }
