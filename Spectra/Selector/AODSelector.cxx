@@ -94,22 +94,12 @@ void AODSelector::Begin(TTree * /*tree*/)
 }
 
 Int_t AODSelector::GetCentBin(float cent) {
-  Float_t centBin[] = {0.f,5.f,20.f,40.f,60.f};
-  for (int i = 0; i < 4; ++i) {
-    if (cent < centBin[i+1] && cent >= centBin[i]) {
-      switch (i) {
-        case 0:
-          return 0;
-          break;
-        case 1:
-          return -1;
-          break;
-        default:
-          return i - 1;
-          break;
-      }
-    }
-  }
+  if (cent < 0) return -1;
+  if (cent <= 10) return 0;
+  else if (cent <= 20) return 1;
+  else if (cent <= 40) return 2;
+  else if (cent <= 60) return 3;
+  else if (cent <= 80) return 4;
   return -1;
 }
 
@@ -154,8 +144,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int cent = 0; cent < 5; ++cent) {
     for (int i = 0; i < 17; ++i) {
       fBins[i+1] = bins[i+1];
-      fSignalAD[cent * 17 + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",85,-3.4,3.4);
-      fSignalD[cent * 17 + i] = new TH1F(Form("fSignalD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",85,-3.4,3.4);
+      fSignalAD[cent * 17 + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",50,-2.0,2.0);
+      fSignalD[cent * 17 + i] = new TH1F(Form("fSignalD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",50,-2.0,2.0);
       GetOutputList()->Add(fSignalD[cent * 17 + i]);
       GetOutputList()->Add(fSignalAD[cent * 17 + i]);
     }
