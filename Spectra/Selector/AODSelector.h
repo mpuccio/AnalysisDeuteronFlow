@@ -89,12 +89,8 @@ private:
   TH1F*            fDCAxy;
   TH1F*            fDCAz;
   TH2F*            fDCA2D;
-  TH1F*            fMassSpectra[48];
-  TH1F*            fMassSpectraAD[48];
-  TH2F*            fMassdEdxD[48];
-  TH2F*            fMassdEdxAD[48];
-  TH2F*            fCompleteSignalAD;
-  TH2F*            fCompleteSignalD;
+  TH2F*            fCompleteSignalAD[5];
+  TH2F*            fCompleteSignalD[5];
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;
@@ -105,8 +101,6 @@ private:
   TH1F*            fdEdxTPCSignalCountsAD[3];
   TH1F*            fCentrality;
   TH1F*            fGamma;
-  TH1F*            fSignal[48];
-  TH1F*            fSignalAD[48];
   
   TH2F            *fDdcaXY;
   TH2F            *fDdcaZ;
