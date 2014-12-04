@@ -89,8 +89,8 @@ private:
   TH1F*            fDCAxy;
   TH1F*            fDCAz;
   TH2F*            fDCA2D;
-  TH2F*            fCompleteSignalAD[5];
-  TH2F*            fCompleteSignalD[5];
+  TH1F*            fSignalAD[85];
+  TH1F*            fSignalD[85];
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;

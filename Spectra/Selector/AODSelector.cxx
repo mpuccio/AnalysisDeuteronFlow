@@ -152,11 +152,13 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   const float step = 6.8f / 85.f;
   for (int i = 1; i < 85; ++i) binM[i] = -3.4f + i * step;
   for (int cent = 0; cent < 5; ++cent) {
-    for (int i = 0; i < 17; ++i) fBins[i+1] = bins[i+1];
-    fCompleteSignalAD[cent] = new TH2F(Form("fCompleteSignalAD%i",cent),";p_{T};m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",17,bins,85,binM);
-    fCompleteSignalD[cent] = new TH2F(Form("fCompleteSignalD%i",cent),";p_{T};m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",17,bins,85,binM);
-    GetOutputList()->Add(fCompleteSignalD[cent]);
-    GetOutputList()->Add(fCompleteSignalAD[cent]);
+    for (int i = 0; i < 17; ++i) {
+      fBins[i+1] = bins[i+1];
+      fSignalAD[cent * 17 + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",85,-3.4,3.4);
+      fSignalD[cent * 17 + i] = new TH1F(Form("fSignalD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",85,-3.4,3.4);
+      GetOutputList()->Add(fSignalD[cent * 17 + i]);
+      GetOutputList()->Add(fSignalAD[cent * 17 + i]);
+    }
   }
   
   GetOutputList()->Add(fdEdxTPC);
@@ -292,7 +294,7 @@ Bool_t AODSelector::Process(Long64_t entry)
           }
           
           if(pT > 0) {
-            fCompleteSignalD[cent]->Fill(pT,dm);
+            fSignalD[17 * cent + j]->Fill(dm);
             fDdcaXY->Fill(pT,DCAxy);
             fDdcaZ->Fill(pT,DCAz);
             fDdcaXYfine->Fill(pT,DCAxy);
@@ -300,7 +302,7 @@ Bool_t AODSelector::Process(Long64_t entry)
             fDdcaXYcoarse->Fill(pT,DCAxy);
             fDdcaZcoarse->Fill(pT,DCAz);
           } else {
-            fCompleteSignalAD[cent]->Fill(-pT,dm);
+            fSignalAD[17 * cent + j]->Fill(dm);
           }     
         }
       }
@@ -322,7 +324,7 @@ Bool_t AODSelector::Process(Long64_t entry)
         }
         
         if(pT > 0) {
-          fCompleteSignalD[cent]->Fill(pT,dm);
+          fSignalD[cent * 17 + j]->Fill(dm);
           fDdcaXY->Fill(pT,DCAxy);
           fDdcaZ->Fill(pT,DCAz);
           fDdcaXYfine->Fill(pT,DCAxy);
@@ -330,7 +332,7 @@ Bool_t AODSelector::Process(Long64_t entry)
           fDdcaXYcoarse->Fill(pT,DCAxy);
           fDdcaZcoarse->Fill(pT,DCAz);
         } else {
-          fCompleteSignalAD[cent]->Fill(-pT,dm);
+          fSignalAD[cent * 17 + j]->Fill(dm);
         }
         
       }
@@ -435,17 +437,20 @@ void AODSelector::Terminate()
   
   f.mkdir("MassSpectra");
   f.mkdir("MassdEdx");
-  f.mkdir("Signal");
   for (int cent=0; cent < 5; ++cent) {
-    f.cd("Signal");
-    fCompleteSignalAD[cent] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fCompleteSignalAD%i",cent)));
-    if (fCompleteSignalAD[cent]) {
-      fCompleteSignalAD[cent]->Write();
-    }
-    
-    fCompleteSignalD[cent] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fCompleteSignalD%i",cent)));
-    if (fCompleteSignalD[cent]) {
-      fCompleteSignalD[cent]->Write();
+    f.cd();
+    f.mkdir(Form("Signal%i",cent));
+    f.cd(Form("Signal%i",cent));
+    for (int j = 0; j < 17; ++j) {
+      fSignalAD[cent * 17 + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,j)));
+      if (fSignalAD[cent * 17 + j]) {
+        fSignalAD[cent * 17 + j]->Write();
+      }
+      
+      fSignalD[cent * 17 + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalD%i_%i",cent,j)));
+      if (fSignalD[cent * 17 + j]) {
+        fSignalD[cent * 17 + j]->Write();
+      }
     }
   }
 
@@ -470,44 +475,6 @@ void AODSelector::Terminate()
     hseco->Write();
   }
 
-//  fDdcaXYfine = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYfine"));
-//  fDdcaZfine = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZfine"));
-//  if (!fDdcaXYfine || !fDdcaZfine) {f.Close(); return;}
-//  f.mkdir("dcasFine");
-//  f.cd("dcasFine");
-//  
-//  Double_t binDCAfine[] = {
-//    0.35, 0.425, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
-//    0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
-//    1.8, 1.9, 2.0 , 2.1, 2.2
-//  };
-////
-////  for (int i = 0; i < 21; ++i) {
-////    TH1D *hprim = fDdcaXYfine->ProjectionY(Form("dcaxyF_%i",i),i + 1, i + 2);
-////    TH1D *hseco = fDdcaZfine->ProjectionY(Form("dcazF_%i",i),i + 1, i + 2);
-////    hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
-////    hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCAfine[i],binDCAfine[i+1]));
-////    hprim->Write();
-////    hseco->Write();
-////  }
-//
-//  fDdcaXYcoarse = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaXYcoarse"));
-//  fDdcaZcoarse = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDdcaZcoarse"));
-//  if (!fDdcaXYcoarse || !fDdcaZcoarse) {f.Close(); return;}
-////  f.mkdir("dcasCoarse");
-////  f.cd("dcasCoarse");
-//  
-//  for (int i = 0; i < 18; ++i) {
-//    TH1D *hprim = fDdcaXYcoarse->ProjectionY(Form("dcaxyC_%i",i),i + 1, i + 2);
-//    TH1D *hseco = fDdcaZcoarse->ProjectionY(Form("dcazC_%i",i),i + 1, i + 2);
-//    hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCA[i],binDCA[i+1]));
-//    hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCA[i],binDCA[i+1]));
-//    hprim->Write();
-//    hseco->Write();
-//  }
-//
-
   f.Close();
 
-  
 }
