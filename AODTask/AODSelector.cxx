@@ -205,8 +205,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fDdcaZ = new TH2F("fDdcaZ",";p_{T} (GeV/c); DCA_{z} (cm)",18,binDCA,80,-1.f,1.f);
   fDdcaXYfine = new TH2F("fDdcaXYfine",";p_{T} (GeV/c); DCA_{xy} (cm)",21,binDCAfine,60,-0.5f,0.5f);
   fDdcaZfine = new TH2F("fDdcaZfine",";p_{T} (GeV/c); DCA_{z} (cm)",21,binDCAfine,60,-0.5f,0.5f);
-  fDdcaXYcoarse = new TH2F("fDdcaXYcoarse",";p_{T} (GeV/c); DCA_{xy} (cm)",21,binDCAfine,80,-1.f,1.f);
-  fDdcaZcoarse = new TH2F("fDdcaZcoarse",";p_{T} (GeV/c); DCA_{z} (cm)",21,binDCAfine,80,-1.f,1.f);
+  fDdcaXYcoarse = new TH2F("fDdcaXYcoarse",";p_{T} (GeV/c); DCA_{xy} (cm)",18,binDCA,20,-1.f,1.f);
+  fDdcaZcoarse = new TH2F("fDdcaZcoarse",";p_{T} (GeV/c); DCA_{z} (cm)",18,binDCA,20,-1.f,1.f);
   GetOutputList()->Add(fDdcaXY);
   GetOutputList()->Add(fDdcaZ);
   GetOutputList()->Add(fDdcaXYfine);
