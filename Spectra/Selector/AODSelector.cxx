@@ -144,8 +144,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int cent = 0; cent < 5; ++cent) {
     for (int i = 0; i < 17; ++i) {
       fBins[i+1] = bins[i+1];
-      fSignalAD[cent * 17 + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",50,-2.0,2.0);
-      fSignalD[cent * 17 + i] = new TH1F(Form("fSignalD%i_%i",cent,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",50,-2.0,2.0);
+      fSignalAD[cent * 17 + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",bins[i],bins[i+1]),50,-2.0,2.0);
+      fSignalD[cent * 17 + i] = new TH1F(Form("fSignalD%i_%i",cent,i),Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",bins[i],bins[i+1]),50,-2.0,2.0);
       GetOutputList()->Add(fSignalD[cent * 17 + i]);
       GetOutputList()->Add(fSignalAD[cent * 17 + i]);
     }
