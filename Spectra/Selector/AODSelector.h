@@ -97,8 +97,8 @@ private:
   TH2F*            fdEdxTPCpT;
   TH2F*            fdEdxTPCproj;
   TH2F*            fdEdxTPCSignal;
-  TH1F*            fdEdxTPCSignalCounts[3];
-  TH1F*            fdEdxTPCSignalCountsAD[3];
+  TH1F*            fdEdxTPCSignalCounts[5];
+  TH1F*            fdEdxTPCSignalCountsAD[5];
   TH1F*            fCentrality;
   TH1F*            fGamma;
   

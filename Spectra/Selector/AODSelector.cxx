@@ -162,7 +162,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fdEdxTPC);
   GetOutputList()->Add(fdEdxTPCpT);
   GetOutputList()->Add(fdEdxTPCSignal);
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 5; ++i) {
     fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",5,d);
     GetOutputList()->Add(fdEdxTPCSignalCounts[i]);
     fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",5,d);
@@ -336,7 +336,7 @@ void AODSelector::Terminate()
     fdEdxTPCSignal->Write();
   }
   
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 5; ++i) {
     fdEdxTPCSignalCounts[i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fdEdxTPCSignalCounts%i",i)));
     fdEdxTPCSignalCountsAD[i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fdEdxTPCSignalCountsAD%i",i)));
     if (fdEdxTPCSignalCounts[i])
