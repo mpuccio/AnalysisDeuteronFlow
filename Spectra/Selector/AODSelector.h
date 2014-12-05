@@ -102,12 +102,8 @@ private:
   TH1F*            fCentrality;
   TH1F*            fGamma;
   
-  TH2F            *fDdcaXY;
-  TH2F            *fDdcaZ;
-  TH2F            *fDdcaXYfine;
-  TH2F            *fDdcaZfine;
-  TH2F            *fDdcaXYcoarse;
-  TH2F            *fDdcaZcoarse;
+  TH2F            *fDdcaXY[5];
+  TH2F            *fDdcaZ[5];
   
   Float_t          fPrevious;
   ClassDef(AODSelector,0);
