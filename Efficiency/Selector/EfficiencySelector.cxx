@@ -120,26 +120,25 @@ Bool_t EfficiencySelector::Process(Long64_t entry)
   //
   // The return value is currently not used.
   GetEntry(entry);
+  int cent = GetCentrality(centrality);
+  if (cent < 0) return kTRUE;
   
   if (TMath::Abs(etaMC) < 0.8 && TMath::Abs(yMC) < 0.5) {
     if ((ITSnClusters - ITSnSignal) > 0 && TPCnClusters > 70u && TPCnSignal > 70 && chi2 >= 0.f) { // reconstructed (anti) deuterons
       if (IsPrimary) {
         if (pTMC > 0.f) { // deuteron
           fDYield->Fill(TMath::Abs(pTMC));
-          if (centrality <= 10 && centrality > 0) {
-            fDdcaXYprimaries[i]->Fill(TMath::Abs(pT), DCAxy);
-            fDdcaZprimaries[i]->Fill(TMath::Abs(pT),DCAz);
-          }
+          fDdcaXYprimaries[cent]->Fill(TMath::Abs(pT), DCAxy);
+          fDdcaZprimaries[cent]->Fill(TMath::Abs(pT),DCAz);
           if (beta > 0.f && beta < 1.f) fDYieldTOF->Fill(TMath::Abs(pTMC));
         } else {        // anti-deuteron
           fAntiDYield->Fill(TMath::Abs(pTMC));
           if (beta > 0.f && beta < 1.f) fAntiDYieldTOF->Fill(TMath::Abs(pTMC));
         }
       } else if(IsSecondaryFromMaterial && pTMC > 0.f) {
-        int i = GetCentrality(centrality);
-        if (i > 0 && (pT < 0.8 || beta > 0)) {
-          fDdcaXYsecondaries[i]->Fill(TMath::Abs(pT), DCAxy);
-          fDdcaZsecondaries[i]->Fill(TMath::Abs(pT),DCAz);
+        if (pT < 0.8 || beta > 0) {
+          fDdcaXYsecondaries[cent]->Fill(TMath::Abs(pT), DCAxy);
+          fDdcaZsecondaries[cent]->Fill(TMath::Abs(pT),DCAz);
         }
       }
     }
@@ -234,7 +233,13 @@ void EfficiencySelector::Terminate()
   TFile f("EfficiencyOutput.root","recreate");
   f.cd();
   effCv->Write();
-  
+  f.mkdir("Efficiencies");
+  f.cd("Efficiencies");
+  effAcc->Write();
+  effAccTof->Write();
+  effAccAD->Write();
+  effAccTofAD->Write();
+  f.cd();
   Double_t bins[] = {
     0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
     2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0,
@@ -280,7 +285,7 @@ void EfficiencySelector::Terminate()
       hseco->SetLineColor(kRed);
       hseco->Draw("same");
       latex.DrawLatexNDC(0.135,0.85,Form("#splitline{%4.2f GeV/c < p_{T} #leq %4.2f GeV/c}"
-                                         "{Centrality %s}",centString[k].Data(),bins[i],bins[i+1]));
+                                         "{Centrality %s}",bins[i],bins[i+1],centString[k].Data()));
       c.Write();
     }
     f.cd();
