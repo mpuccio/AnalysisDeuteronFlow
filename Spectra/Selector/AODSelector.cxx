@@ -105,7 +105,7 @@ Int_t AODSelector::GetCentBin(float cent) {
 
 Int_t AODSelector::GetPtBin(float pt) {
   float bins[18] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,3.0f,3.5f,4.0f,4.5f,5.0f,6.f,8.f,10.f};
-  for (int i = 0; i < 16; ++i) {
+  for (int i = 0; i < 17; ++i) {
     if (pt < bins[i+1] && pt >= bins[i]) {
       return i;
     }
