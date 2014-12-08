@@ -68,17 +68,17 @@ void EfficiencySelector::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   
   Double_t bins[] = {
-    0.35, 0.5 , 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-    2.0 , 2.2 , 2.4, 2.6, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0,
-    8.0 , 10.0
+    0.35, 0.5 , 0.6 , 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
+    2.0 , 2.2 , 2.4 , 2.6, 2.8, 3.0, 3.5, 4.0, 4.5, 5.0,
+    6.0 , 8.0 , 10.0
   };
   
-  fDYield = new TH1F("fDYield",";p_{T} (GeV/c);Number of d tracks",21,bins);
-  fAntiDYield = new TH1F("fAntiDYield",";p_{T} (GeV/c);Number of #bar{d} tracks",21,bins);
-  fDYieldTOF = new TH1F("fDYieldTOF",";p_{T} (GeV/c);Number of d tracks",21,bins);
-  fAntiDYieldTOF = new TH1F("fAntiDYieldTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",21,bins);
-  fAntiDMCYield = new TH1F("fAntiDMCYield",";p_{T} (GeV/c);Number of MC #bar{d}",21,bins);
-  fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",21,bins);
+  fDYield = new TH1F("fDYield",";p_{T} (GeV/c);Number of d tracks",22,bins);
+  fAntiDYield = new TH1F("fAntiDYield",";p_{T} (GeV/c);Number of #bar{d} tracks",22,bins);
+  fDYieldTOF = new TH1F("fDYieldTOF",";p_{T} (GeV/c);Number of d tracks",22,bins);
+  fAntiDYieldTOF = new TH1F("fAntiDYieldTOF",";p_{T} (GeV/c);Number of #bar{d} tracks",22,bins);
+  fAntiDMCYield = new TH1F("fAntiDMCYield",";p_{T} (GeV/c);Number of MC #bar{d}",22,bins);
+  fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",22,bins);
   
   for (int i = 0; i < 5; ++i) {
     fDdcaXYprimaries[i] = new TH2F(Form("fDdcaXYprimaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,20,-1.0f,1.0f);
@@ -241,9 +241,9 @@ void EfficiencySelector::Terminate()
   effAccTofAD->Write();
   f.cd();
   Double_t bins[] = {
-    0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-    2.0 , 2.2, 2.4, 2.6, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0,
-    8.0 , 10.0
+    0.35, 0.5, 0.6 , 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
+    2.0 , 2.2, 2.4 , 2.6, 2.8, 3.0, 3.5, 4.0, 4.5, 5.0,
+    6.0 , 8.0, 10.0
   };
   TString centString[5] = {"0-10%","10-20%","20-40%","40-60%","60-80%"};
   for (int k = 0; k < 5; ++k) {
