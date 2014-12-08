@@ -81,10 +81,10 @@ void EfficiencySelector::SlaveBegin(TTree * /*tree*/)
   fDMCYield = new TH1F("fDMCYield",";p_{T} (GeV/c);Number of MC d",22,bins);
   
   for (int i = 0; i < 5; ++i) {
-    fDdcaXYprimaries[i] = new TH2F(Form("fDdcaXYprimaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,20,-1.0f,1.0f);
-    fDdcaZprimaries[i] = new TH2F(Form("fDdcaZprimaries_%i",i),";p_{T} (GeV/c); DCA_{z} (cm)",10,bins,20,-1.0f,1.0f);
-    fDdcaXYsecondaries[i] = new TH2F(Form("fDdcaXYsecondaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,20,-1.0f,1.0f);
-    fDdcaZsecondaries[i] = new TH2F(Form("fDdcaZsecondaries_%i",i),";p_{T} (GeV/c); DCA_{z} (cm)",10,bins,20,-1.0f,1.0f);
+    fDdcaXYprimaries[i] = new TH2F(Form("fDdcaXYprimaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,10,-0.5f,0.5f);
+    fDdcaZprimaries[i] = new TH2F(Form("fDdcaZprimaries_%i",i),";p_{T} (GeV/c); DCA_{z} (cm)",10,bins,10,-0.5f,0.5f);
+    fDdcaXYsecondaries[i] = new TH2F(Form("fDdcaXYsecondaries_%i",i),";p_{T} (GeV/c); DCA_{xy} (cm)",10,bins,10,-0.5f,0.5f);
+    fDdcaZsecondaries[i] = new TH2F(Form("fDdcaZsecondaries_%i",i),";p_{T} (GeV/c); DCA_{z} (cm)",10,bins,10,-0.5f,0.5f);
     GetOutputList()->Add(fDdcaXYprimaries[i]);
     GetOutputList()->Add(fDdcaZprimaries[i]);
     GetOutputList()->Add(fDdcaXYsecondaries[i]);
