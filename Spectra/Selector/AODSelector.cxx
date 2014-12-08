@@ -150,8 +150,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
       0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
       2.0
     };
-    fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",10,binDCA,80,-1.f,1.f);
-    fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",10,binDCA,80,-1.f,1.f);
+    fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",10,binDCA,40,-0.5f,0.5f);
+    fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",10,binDCA,40,-0.5f,0.5f);
     GetOutputList()->Add(fDdcaXY[cent]);
     GetOutputList()->Add(fDdcaZ[cent]);
   }
