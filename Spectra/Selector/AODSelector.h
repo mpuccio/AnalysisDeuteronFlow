@@ -63,8 +63,8 @@ class AODSelector : public TSelector {
   
   
   
-  AODSelector(TTree * /*tree*/ =0) : fChain(0),fkNBins(18) {
-    float bins[19] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8,3.0f,3.5f,4.0f,4.5f,5.0f,6.f,8.f,10.f};
+  AODSelector(TTree * /*tree*/ =0) : fChain(0),fkNBins(20) {
+    float bins[21] = {0.8f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8,3.0f,3.2f,3.4f,3.6f,4.0f,4.5f,5.0f,6.f,8.f,10.f};
     for (int i = 0; i < fkNBins + 1; ++i) {
       fBins[i] = bins[i];
     }
@@ -94,8 +94,8 @@ private:
   TH1F*            fDCAxy;
   TH1F*            fDCAz;
   TH2F*            fDCA2D;
-  TH1F*            fSignalAD[90];
-  TH1F*            fSignalD[90];
+  TH1F*            fSignalAD[100];
+  TH1F*            fSignalD[100];
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;
@@ -109,6 +109,7 @@ private:
   
   TH2F            *fDdcaXY[5];
   TH2F            *fDdcaZ[5];
+  TH2F            *fDCASignal[10];
   
   const Int_t      fkNBins;
   
