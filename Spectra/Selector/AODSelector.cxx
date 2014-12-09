@@ -168,7 +168,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   
   for (int k = 0; k < 5; ++k) {
     for (int i = 0; i < 2; ++i) {
-      fDCASignal[k * 5 + i] = new TH2F(Form("fDCASignal%i_%i",k,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",50,-2.0,2.0,40,-0.5f,0.5f);
+      fDCASignal[k * 2 + i] = new TH2F(Form("fDCASignal%i_%i",k,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",50,-2.0,2.0,40,-0.5f,0.5f);
       GetOutputList()->Add(fDCASignal[k * 2 + i]);
     }
   }
