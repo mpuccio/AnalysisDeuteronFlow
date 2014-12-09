@@ -166,7 +166,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   }
   
   for (int k = 0; k < 5; ++k) {
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 5; ++i) {
       fDCASignal[k * 2 + i] = new TH2F(Form("fDCASignal%i_%i",k,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",50,-2.0,2.0,40,-0.5f,0.5f);
       GetOutputList()->Add(fDCASignal[k * 2 + i]);
     }
@@ -252,12 +252,13 @@ Bool_t AODSelector::Process(Long64_t entry)
       if (TMath::Abs(pT) < 0.8f) {
         if (pT >= 0.35f) {
           fdEdxTPCSignalCounts[cent]->Fill(pT);
-          fDdcaXY[cent]->Fill(pT,DCAxy);
-          fDdcaZ[cent]->Fill(pT,DCAz);
+//          fDdcaXY[cent]->Fill(pT,DCAxy);
+//          fDdcaZ[cent]->Fill(pT,DCAz);
         } else if (pT <= -0.35f) {
           fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(pT));
         }
-      } else if (TOFtime > 0.f && length > 0.f) {
+      }
+      if (TOFtime > 0.f && length > 0.f) {
         Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
         fBeta->Fill(beta);
         fBeta2D->Fill(pTPC,beta);
@@ -275,8 +276,8 @@ Bool_t AODSelector::Process(Long64_t entry)
             fSignalD[fkNBins * cent + j]->Fill(dm);
             fDdcaXY[cent]->Fill(pT,DCAxy);
             fDdcaZ[cent]->Fill(pT,DCAz);
-            if (j < 2) {
-              fDCASignal[2 * cent + j]->Fill(dm, DCAxy);
+            if (j < 5) {
+              fDCASignal[5 * cent + j]->Fill(dm, DCAxy);
             }
           } else {
             fSignalAD[fkNBins * cent + j]->Fill(dm);
@@ -442,7 +443,7 @@ void AODSelector::Terminate()
   f.cd();
   f.mkdir("DCASignal");
   f.cd("DCASignal");
-  for (int k = 0; k < 2; ++k) {
+  for (int k = 0; k < 5; ++k) {
     for (int i = 0; i < 5; ++i) {
       fDCASignal[k * 5 + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",i,k)));
       if (fDCASignal[k * 5 + i]) {
