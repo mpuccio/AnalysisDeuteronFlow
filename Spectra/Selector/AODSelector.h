@@ -90,7 +90,7 @@ private:
   TH1F*            fBeta;
   TH2F*            fBeta2D;
   TH2F*            fBeta2DPt;
-  Float_t          fBins[19];
+  Float_t          fBins[21];
   TH1F*            fDCAxy;
   TH1F*            fDCAz;
   TH2F*            fDCA2D;

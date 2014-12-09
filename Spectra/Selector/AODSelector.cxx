@@ -131,7 +131,6 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTPCpT = new TH2F("fdEdxTPCpT",";p_{T} (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,2000,0,2000);
   fTPCSignalN = new TH1F("fTPCSignalN",";#clusters for PID;Entries",161,-0.5f,160.5f);
-  Double_t d[6] = {0.35,0.5,0.6,0.7,0.8,1.};
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
 
@@ -160,9 +159,9 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fdEdxTPCpT);
   GetOutputList()->Add(fdEdxTPCSignal);
   for (int i = 0; i < 5; ++i) {
-    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",5,d);
+    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",5,binDCA);
     GetOutputList()->Add(fdEdxTPCSignalCounts[i]);
-    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",5,d);
+    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",5,binDCA);
     GetOutputList()->Add(fdEdxTPCSignalCountsAD[i]);
   }
   
@@ -251,11 +250,11 @@ Bool_t AODSelector::Process(Long64_t entry)
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
       if (TMath::Abs(pT) < 0.8f) {
-        if (pT > 0) {
+        if (pT >= 0.35f) {
           fdEdxTPCSignalCounts[cent]->Fill(pT);
           fDdcaXY[cent]->Fill(pT,DCAxy);
           fDdcaZ[cent]->Fill(pT,DCAz);
-        } else {
+        } else if (pT <= -0.35f) {
           fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(pT));
         }
       } else if (TOFtime > 0.f && length > 0.f) {
@@ -428,14 +427,6 @@ void AODSelector::Terminate()
       0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
       2.0
     };
-    for (int k = 0; k < 2; ++k) {
-      for (int i = 0; i < 5; ++i) {
-        fDCASignal[k * 5 + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",i,k)));
-        if (fDCASignal[k * 5 + i]) {
-          fDCASignal[k * 5 + i]->Write();
-        }
-      }
-    }
     
     for (int i = 0; i < 10; ++i) {
       TH1D *hprim = fDdcaXY[cent]->ProjectionY(Form("dcaxy_%i",i),i + 1, i + 2);
@@ -446,6 +437,18 @@ void AODSelector::Terminate()
       hseco->Write();
     }
 
+  }
+  
+  f.cd();
+  f.mkdir("DCASignal");
+  f.cd("DCASignal");
+  for (int k = 0; k < 2; ++k) {
+    for (int i = 0; i < 5; ++i) {
+      fDCASignal[k * 5 + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",i,k)));
+      if (fDCASignal[k * 5 + i]) {
+        fDCASignal[k * 5 + i]->Write();
+      }
+    }
   }
 
   f.Close();
