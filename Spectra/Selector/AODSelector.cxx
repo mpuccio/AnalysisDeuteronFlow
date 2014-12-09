@@ -137,6 +137,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   float binM[86];
   binM[0] = -3.4f;
   const float step = 6.8f / 85.f;
+  Double_t binDCA[] = {
+    0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
+    2.0
+  };
   for (int i = 1; i < 85; ++i) binM[i] = -3.4f + i * step;
   for (int cent = 0; cent < 5; ++cent) {
     for (int i = 0; i < fkNBins; ++i) {
@@ -145,10 +149,6 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
       GetOutputList()->Add(fSignalD[cent * fkNBins + i]);
       GetOutputList()->Add(fSignalAD[cent * fkNBins + i]);
     }
-    Double_t binDCA[] = {
-      0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-      2.0
-    };
     fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",10,binDCA,40,-0.5f,0.5f);
     fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",10,binDCA,40,-0.5f,0.5f);
     GetOutputList()->Add(fDdcaXY[cent]);
