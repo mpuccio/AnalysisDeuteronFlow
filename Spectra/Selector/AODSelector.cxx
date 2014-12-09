@@ -429,8 +429,8 @@ void AODSelector::Terminate()
     };
     
     for (int i = 0; i < 10; ++i) {
-      TH1D *hprim = fDdcaXY[cent]->ProjectionY(Form("dcaxy_%i",i),i + 1, i + 2);
-      TH1D *hseco = fDdcaZ[cent]->ProjectionY(Form("dcaz_%i",i),i + 1, i + 2);
+      TH1D *hprim = fDdcaXY[cent]->ProjectionY(Form("dcaxy_%i",i),i + 1, i + 1);
+      TH1D *hseco = fDdcaZ[cent]->ProjectionY(Form("dcaz_%i",i),i + 1, i + 1);
       hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCA[i],binDCA[i+1]));
       hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCA[i],binDCA[i+1]));
       hprim->Write();
