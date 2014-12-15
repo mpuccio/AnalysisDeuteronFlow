@@ -23,7 +23,7 @@ class TF1;
 #define MD 1.875612859f
 #define M2D MD*MD
 #define kNCent 5
-#define kNBins 27
+#define kNBins 28
 #define kNBinsTPC 3
 #define kNDCABins 9
 #define kNBinsTOF (kNBins - kNBinsTPC)
@@ -81,7 +81,7 @@ class AODSelector : public TSelector {
     float bins[kNBins + 1] = {
       0.4f,0.5f,0.6f,0.7f,0.8f,0.9f,1.0f,1.1f,1.2f,1.4f,
       1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
-      3.6f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
+      3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
     };
     for (int i = 0; i < kNBins + 1; ++i) fBins[i] = bins[i];
     
