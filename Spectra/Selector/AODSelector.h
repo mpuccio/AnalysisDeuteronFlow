@@ -107,6 +107,7 @@ private:
   TH1F*            fdEdxTPCSignalCounts[5];
   TH1F*            fdEdxTPCSignalCountsAD[5];
   TH1F*            fCentrality;
+  TH1F*            fCentralityClass;
   TH1F*            fGamma;
   
   TH2F            *fDdcaXY[5];
