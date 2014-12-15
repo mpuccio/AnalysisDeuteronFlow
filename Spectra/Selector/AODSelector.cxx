@@ -277,10 +277,10 @@ Bool_t AODSelector::Process(Long64_t entry)
             fDdcaXY[cent]->Fill(c_pT, DCAxy);
             fDdcaZ[cent]->Fill(c_pT, DCAz);
             if (j - kNBinsTPC < kNDCAbinsTOF) {
-              fDCASignal[cent * kNDCAbinsTOF + j]->Fill(dm, DCAxy);
+              fDCASignal[cent * kNDCAbinsTOF + j - kNBinsTPC]->Fill(dm, DCAxy);
             }
           } else {
-            fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
+            fSignalAD[cent * kNBinsTOF + j]->Fill(dm);
           }
         }
       }
