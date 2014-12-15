@@ -280,7 +280,7 @@ Bool_t AODSelector::Process(Long64_t entry)
               fDCASignal[cent * kNDCAbinsTOF + j]->Fill(dm, DCAxy);
             }
           } else {
-            fSignalAD[cent * kNBinsTOF + j]->Fill(dm);
+            fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
           }
         }
       }
