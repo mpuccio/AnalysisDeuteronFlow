@@ -212,10 +212,8 @@ Bool_t AODSelector::Process(Long64_t entry)
   GetEntry(entry);
   if (TMath::Abs(eta) > 0.8)
     return kTRUE;
-  if (pTPC == p) {
-    return kTRUE;
-  }
 
+  
   Double_t pz = TMath::Sqrt(p * p - pT * pT);
   Double_t e = TMath::Sqrt(p * p + M2D);
   Double_t y = 0.5 * TMath::Log((e + pz) / (e - pz));
@@ -250,36 +248,43 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   if (TMath::Abs(DCAxy) > 0.5f) return kTRUE;
   
+  Float_t c_pT = pT;
+  if (c_pT > 0) {
+    c_pT -= fCorrectionD(c_pT);
+  } else {
+    c_pT += fCorrectionAD(-c_pT)
+  }
+  
   if (pTPC < 3.5) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      if (TMath::Abs(pT) < 0.8f) {
-        if (pT >= 0.35f) {
-          fdEdxTPCSignalCounts[cent]->Fill(pT);
-//          fDdcaXY[cent]->Fill(pT,DCAxy);
-//          fDdcaZ[cent]->Fill(pT,DCAz);
-        } else if (pT <= -0.35f) {
-          fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(pT));
+      if (TMath::Abs(c_pT) < 0.8f) {
+        if (c_pT >= 0.35f) {
+          fdEdxTPCSignalCounts[cent]->Fill(c_pT);
+//          fDdcaXY[cent]->Fill(c_pT,DCAxy);
+//          fDdcaZ[cent]->Fill(c_pT,DCAz);
+        } else if (c_pT <= -0.35f) {
+          fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(c_pT));
         }
       }
       if (TOFtime > 0.f && length > 0.f) {
         Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
         fBeta->Fill(beta);
         fBeta2D->Fill(pTPC,beta);
-        fBeta2DPt->Fill(TMath::Abs(pT),beta);
+        fBeta2DPt->Fill(TMath::Abs(c_pT),beta);
         if (beta < (1.f - EPSILON)) {
           Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
           fGamma->Fill(gamma);
           const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-          const int j = GetPtBin(TMath::Abs(pT));
+          const int j = GetPtBin(TMath::Abs(c_pT));
           if (j < 0) {
             return kTRUE;
           }
           
-          if(pT > 0) {
+          if(c_pT > 0) {
             fSignalD[fkNBins * cent + j]->Fill(dm);
-            fDdcaXY[cent]->Fill(pT,DCAxy);
-            fDdcaZ[cent]->Fill(pT,DCAz);
+            fDdcaXY[cent]->Fill(c_pT,DCAxy);
+            fDdcaZ[cent]->Fill(c_pT,DCAz);
             if (j < 5) {
               fDCASignal[5 * cent + j]->Fill(dm, DCAxy);
             }
@@ -295,17 +300,17 @@ Bool_t AODSelector::Process(Long64_t entry)
       Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
       fBeta->Fill(beta);
       fBeta2D->Fill(pTPC,beta);
-      fBeta2DPt->Fill(TMath::Abs(pT),beta);
+      fBeta2DPt->Fill(TMath::Abs(c_pT),beta);
       if (beta < (1.f - EPSILON)) {
         Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
         fGamma->Fill(gamma);
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-        const int j = GetPtBin(TMath::Abs(pT));
+        const int j = GetPtBin(TMath::Abs(c_pT));
         if (j < 0) {
           return kTRUE;
         }
         
-        if(pT > 0) {
+        if(c_pT > 0) {
           fSignalD[cent * fkNBins + j]->Fill(dm);
         } else {
           fSignalAD[cent * fkNBins + j]->Fill(dm);

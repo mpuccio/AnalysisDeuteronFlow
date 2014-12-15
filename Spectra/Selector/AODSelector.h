@@ -12,6 +12,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TSelector.h>
+#include <TF1.h>
 
 class TH1F;
 class TH2F;
@@ -63,13 +64,17 @@ class AODSelector : public TSelector {
   
   
   
-  AODSelector(TTree * /*tree*/ =0) : fChain(0),fkNBins(23) {
+  AODSelector(TTree * /*tree*/ =0) : fChain(0),fkNBins(23),
+  fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10),
+  fCorrectionD("fCorrectionD","[0]+[1]*exp([2]*x)",0,10) {
     float bins[24] = {0.6f,0.7f,0.8f,0.9f,1.0f,1.2f,1.4f,1.6f,1.8f,2.0f,
                       2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,3.6f,4.0f,4.5f,
                       5.0f,6.f,8.f,10.f};
     for (int i = 0; i < fkNBins + 1; ++i) {
       fBins[i] = bins[i];
     }
+    fCorrectionAD.SetParameters(-2.10154e-03,-4.53472e-01,-3.01246e+00);
+    fCorrectionD.SetParameters(-2.00277e-03,-4.93461e-01,-3.05463e+00);
   }
   virtual ~AODSelector() { }
   virtual Int_t   Version() const { return 2; }
@@ -113,6 +118,9 @@ private:
   TH2F            *fDdcaXY[5];
   TH2F            *fDdcaZ[5];
   TH2F            *fDCASignal[25];
+  
+  TF1              fCorrectionAD;
+  TF1              fCorrectionD;
   
   const Int_t      fkNBins;
   
