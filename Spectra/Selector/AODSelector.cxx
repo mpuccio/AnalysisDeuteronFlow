@@ -32,12 +32,6 @@
 #include <TH1F.h>
 #include <TF1.h>
 #include <TCanvas.h>
-#include <TFractionFitter.h>
-
-#define EPSILON 1E-5
-#define MD 1.875612859f
-#define M2D MD*MD
-
 
 static void BinLogAxis(const TH1 *h)
 {
@@ -94,17 +88,17 @@ void AODSelector::Begin(TTree * /*tree*/)
 }
 
 Int_t AODSelector::GetCentBin(float cent) {
-  if (cent < 0) return -1;
-  if (cent <= 10) return 0;
-  else if (cent <= 20) return 1;
-  else if (cent <= 40) return 2;
-  else if (cent <= 60) return 3;
-  else if (cent <= 80) return 4;
+  if (cent < fCentralityClasses[0]) return -1;
+
+  for (int i = 0; i < kNCent; ++i)
+    if (cent <= fCentralityClasses[i + 1])
+      return i;
+  
   return -1;
 }
 
 Int_t AODSelector::GetPtBin(float pt) {
-  for (int i = 0; i < fkNBins; ++i) {
+  for (int i = 0; i < kNBins; ++i) {
     if (pt < fBins[i+1] && pt >= fBins[i]) {
       return i;
     }
@@ -123,8 +117,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fBeta2D = new TH2F("fBeta2D","TOF; #frac{p}{z} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
   fBeta2DPt = new TH2F("fBeta2DPt","TOF; p_{T} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
   fCentrality = new TH1F("fCentrality",";Centrality;Events / 1%",100,0,100);
-  Double_t centralityClasses[6] = {0,10,20,40,60,80};
-  fCentralityClass = new TH1F("fCentralityClass",";Centrality Class; Events / Class",5,centralityClasses);
+  fCentralityClass = new TH1F("fCentralityClass",";Centrality Class; Events / Class",kNCent,fCentralityClasses);
   fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
   fDCA2D = new TH2F("fDCA2D",";DCA_{xy} (cm);DCA_{z} (cm);Entries",500,-0.5f,0.5f,600,-0.6f,0.6f);
@@ -136,23 +129,19 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
 
-  float binM[86];
-  binM[0] = -3.4f;
-  const float step = 6.8f / 85.f;
-  Double_t binDCA[] = {
-    0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-    2.0
-  };
-  for (int i = 1; i < 85; ++i) binM[i] = -3.4f + i * step;
-  for (int cent = 0; cent < 5; ++cent) {
-    for (int i = 0; i < fkNBins; ++i) {
-      fSignalAD[cent * fkNBins + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),50,-2.0,2.0);
-      fSignalD[cent * fkNBins + i] = new TH1F(Form("fSignalD%i_%i",cent,i),Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),50,-2.0,2.0);
-      GetOutputList()->Add(fSignalD[cent * fkNBins + i]);
-      GetOutputList()->Add(fSignalAD[cent * fkNBins + i]);
+  for (int cent = 0; cent < kNCent; ++cent) {
+    for (int i = 0; i < kNBinsTOF; ++i) {
+      fSignalAD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),
+                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),50,-2.0,2.0);
+      fSignalD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalD%i_%i",cent,i),
+                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),50,-2.0,2.0);
+      GetOutputList()->Add(fSignalD[cent * kNBinsTOF + i]);
+      GetOutputList()->Add(fSignalAD[cent * kNBinsTOF + i]);
     }
-    fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",10,binDCA,40,-0.5f,0.5f);
-    fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",10,binDCA,40,-0.5f,0.5f);
+    fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",
+                             10,fBins,40,-0.5f,0.5f);
+    fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",
+                            10,fBins,40,-0.5f,0.5f);
     GetOutputList()->Add(fDdcaXY[cent]);
     GetOutputList()->Add(fDdcaZ[cent]);
   }
@@ -160,17 +149,19 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fdEdxTPC);
   GetOutputList()->Add(fdEdxTPCpT);
   GetOutputList()->Add(fdEdxTPCSignal);
-  for (int i = 0; i < 5; ++i) {
-    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",5,binDCA);
+  for (int i = 0; i < kNCent; ++i) {
+    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",kNBinsTPC,fBins);
     GetOutputList()->Add(fdEdxTPCSignalCounts[i]);
-    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",5,binDCA);
+    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",kNBinsTPC,fBins);
     GetOutputList()->Add(fdEdxTPCSignalCountsAD[i]);
   }
   
-  for (int k = 0; k < 5; ++k) {
-    for (int i = 0; i < 5; ++i) {
-      fDCASignal[k * 5 + i] = new TH2F(Form("fDCASignal%i_%i",k,i),";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",50,-2.0,2.0,40,-0.5f,0.5f);
-      GetOutputList()->Add(fDCASignal[k * 5 + i]);
+  for (int k = 0; k < kNCent; ++k) {
+    for (int i = 0; i < kNDCAbinsTOF; ++i) {
+      fDCASignal[k * kNDCAbinsTOF + i] = new TH2F(Form("fDCASignal%i_%i",k,i),
+                                       ";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",
+                                       50,-2.0,2.0,40,-0.5f,0.5f);
+      GetOutputList()->Add(fDCASignal[k * kNDCAbinsTOF + i]);
     }
   }
   
@@ -255,15 +246,16 @@ Bool_t AODSelector::Process(Long64_t entry)
     c_pT += fCorrectionAD(-c_pT);
   }
   
+  const int j = GetPtBin(TMath::Abs(c_pT));
   if (pTPC < 3.5) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      if (TMath::Abs(c_pT) < 0.8f) {
-        if (c_pT >= 0.35f) {
+      if (TMath::Abs(c_pT) < fBins[kNBinsTPC]) {
+        if (c_pT >= fBins[0]) {
           fdEdxTPCSignalCounts[cent]->Fill(c_pT);
-//          fDdcaXY[cent]->Fill(c_pT,DCAxy);
-//          fDdcaZ[cent]->Fill(c_pT,DCAz);
-        } else if (c_pT <= -0.35f) {
+          fDdcaXY[cent]->Fill(c_pT,DCAxy);
+          fDdcaZ[cent]->Fill(c_pT,DCAz);
+        } else if (c_pT <= -fBins[0]) {
           fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(c_pT));
         }
       }
@@ -273,23 +265,22 @@ Bool_t AODSelector::Process(Long64_t entry)
         fBeta2D->Fill(pTPC,beta);
         fBeta2DPt->Fill(TMath::Abs(c_pT),beta);
         if (beta < (1.f - EPSILON)) {
-          Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
+          Float_t gamma = 1. / TMath::Sqrt(1 - (beta * beta));
           fGamma->Fill(gamma);
           const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-          const int j = GetPtBin(TMath::Abs(c_pT));
-          if (j < 0) {
+          if (j < kNBinsTPC) {
             return kTRUE;
           }
           
-          if(c_pT > 0) {
-            fSignalD[fkNBins * cent + j]->Fill(dm);
-            fDdcaXY[cent]->Fill(c_pT,DCAxy);
-            fDdcaZ[cent]->Fill(c_pT,DCAz);
-            if (j < 5) {
-              fDCASignal[5 * cent + j]->Fill(dm, DCAxy);
+          if(c_pT > 0.) {
+            fSignalD[cent * kNBinsTOF + j]->Fill(dm);
+            fDdcaXY[cent]->Fill(c_pT, DCAxy);
+            fDdcaZ[cent]->Fill(c_pT, DCAz);
+            if (j - kNBinsTPC < kNDCAbinsTOF) {
+              fDCASignal[cent * kNDCAbinsTOF + j]->Fill(dm, DCAxy);
             }
           } else {
-            fSignalAD[fkNBins * cent + j]->Fill(dm);
+            fSignalAD[cent * kNBinsTOF + j]->Fill(dm);
           }
         }
       }
@@ -305,15 +296,14 @@ Bool_t AODSelector::Process(Long64_t entry)
         Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
         fGamma->Fill(gamma);
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-        const int j = GetPtBin(TMath::Abs(c_pT));
-        if (j < 0) {
+        if (j < kNBinsTPC) {
           return kTRUE;
         }
         
         if(c_pT > 0) {
-          fSignalD[cent * fkNBins + j]->Fill(dm);
+          fSignalD[cent * kNBinsTOF + j]->Fill(dm);
         } else {
-          fSignalAD[cent * fkNBins + j]->Fill(dm);
+          fSignalAD[cent * kNBinsTOF + j]->Fill(dm);
         }
         
       }
@@ -351,7 +341,7 @@ void AODSelector::Terminate()
     fdEdxTPCSignal->Write();
   }
   
-  for (int i = 0; i < 5; ++i) {
+  for (int i = 0; i < kNCent; ++i) {
     fdEdxTPCSignalCounts[i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fdEdxTPCSignalCounts%i",i)));
     fdEdxTPCSignalCountsAD[i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fdEdxTPCSignalCountsAD%i",i)));
     if (fdEdxTPCSignalCounts[i])
@@ -418,19 +408,19 @@ void AODSelector::Terminate()
   f.cd();
   f.mkdir("MassSpectra");
   f.mkdir("MassdEdx");
-  for (int cent=0; cent < 5; ++cent) {
+  for (int cent = 0; cent < kNCent; ++cent) {
     f.cd();
     f.mkdir(Form("Signal%i",cent));
     f.cd(Form("Signal%i",cent));
-    for (int j = 0; j < fkNBins; ++j) {
-      fSignalAD[cent * fkNBins + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,j)));
-      if (fSignalAD[cent * fkNBins + j]) {
-        fSignalAD[cent * fkNBins + j]->Write();
+    for (int j = 0; j < kNBinsTOF; ++j) {
+      fSignalAD[cent * kNBinsTOF + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,j)));
+      if (fSignalAD[cent * kNBinsTOF + j]) {
+        fSignalAD[cent * kNBinsTOF + j]->Write();
       }
       
-      fSignalD[cent * fkNBins + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalD%i_%i",cent,j)));
-      if (fSignalD[cent * fkNBins + j]) {
-        fSignalD[cent * fkNBins + j]->Write();
+      fSignalD[cent * kNBinsTOF + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalD%i_%i",cent,j)));
+      if (fSignalD[cent * kNBinsTOF + j]) {
+        fSignalD[cent * kNBinsTOF + j]->Write();
       }
     }
     fDdcaXY[cent] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaXY%i",cent)));
@@ -438,16 +428,12 @@ void AODSelector::Terminate()
     if (!fDdcaXY[cent] || !fDdcaZ[cent]) {f.Close(); return;}
     f.mkdir(Form("DCA%i",cent));
     f.cd(Form("DCA%i",cent));
-    Double_t binDCA[] = {
-      0.35, 0.5, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,
-      2.0
-    };
     
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < kNDCABins; ++i) {
       TH1D *hprim = fDdcaXY[cent]->ProjectionY(Form("dcaxy_%i",i),i + 1, i + 1);
       TH1D *hseco = fDdcaZ[cent]->ProjectionY(Form("dcaz_%i",i),i + 1, i + 1);
-      hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",binDCA[i],binDCA[i+1]));
-      hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",binDCA[i],binDCA[i+1]));
+      hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",fBins[i],fBins[i + 1]));
+      hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",fBins[i],fBins[i + 1]));
       hprim->Write();
       hseco->Write();
     }
@@ -457,11 +443,11 @@ void AODSelector::Terminate()
   f.cd();
   f.mkdir("DCASignal");
   f.cd("DCASignal");
-  for (int k = 0; k < 5; ++k) {
-    for (int i = 0; i < 5; ++i) {
-      fDCASignal[k * 5 + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",i,k)));
-      if (fDCASignal[k * 5 + i]) {
-        fDCASignal[k * 5 + i]->Write();
+  for (int k = 0; k < kNCent; ++k) {
+    for (int i = 0; i < kNDCAbinsTOF; ++i) {
+      fDCASignal[k * kNDCAbinsTOF + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",i,k)));
+      if (fDCASignal[k * kNDCAbinsTOF + i]) {
+        fDCASignal[k * kNDCAbinsTOF + i]->Write();
       }
     }
   }
