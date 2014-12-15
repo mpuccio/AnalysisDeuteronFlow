@@ -252,7 +252,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (c_pT > 0) {
     c_pT -= fCorrectionD(c_pT);
   } else {
-    c_pT += fCorrectionAD(-c_pT)
+    c_pT += fCorrectionAD(-c_pT);
   }
   
   if (pTPC < 3.5) {

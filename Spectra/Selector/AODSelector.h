@@ -119,10 +119,10 @@ private:
   TH2F            *fDdcaZ[5];
   TH2F            *fDCASignal[25];
   
+  const Int_t      fkNBins;
+  
   TF1              fCorrectionAD;
   TF1              fCorrectionD;
-  
-  const Int_t      fkNBins;
   
   Float_t          fPrevious;
   ClassDef(AODSelector,0);
