@@ -131,10 +131,11 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
 
   for (int cent = 0; cent < kNCent; ++cent) {
     for (int i = 0; i < kNBinsTOF; ++i) {
+      int j = i + kNBinsTPC;
       fSignalAD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),
-                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),50,-2.0,2.0);
+                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),50,-2.0,2.0);
       fSignalD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalD%i_%i",cent,i),
-                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[i],fBins[i+1]),50,-2.0,2.0);
+                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),50,-2.0,2.0);
       GetOutputList()->Add(fSignalD[cent * kNBinsTOF + i]);
       GetOutputList()->Add(fSignalAD[cent * kNBinsTOF + i]);
     }
@@ -273,14 +274,14 @@ Bool_t AODSelector::Process(Long64_t entry)
           }
           
           if(c_pT > 0.) {
-            fSignalD[cent * kNBinsTOF + j]->Fill(dm);
+            fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
             fDdcaXY[cent]->Fill(c_pT, DCAxy);
             fDdcaZ[cent]->Fill(c_pT, DCAz);
             if (j - kNBinsTPC < kNDCAbinsTOF) {
               fDCASignal[cent * kNDCAbinsTOF + j - kNBinsTPC]->Fill(dm, DCAxy);
             }
           } else {
-            fSignalAD[cent * kNBinsTOF + j]->Fill(dm);
+            fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
           }
         }
       }
@@ -301,9 +302,9 @@ Bool_t AODSelector::Process(Long64_t entry)
         }
         
         if(c_pT > 0) {
-          fSignalD[cent * kNBinsTOF + j]->Fill(dm);
+          fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
         } else {
-          fSignalAD[cent * kNBinsTOF + j]->Fill(dm);
+          fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
         }
         
       }
