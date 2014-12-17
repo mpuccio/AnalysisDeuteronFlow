@@ -119,6 +119,7 @@ private:
   TH2F*            fDCA2D;
   TH1F*            fSignalAD[kNBinsTOF * kNCent]; // length = nbinstof x 5
   TH1F*            fSignalD[kNBinsTOF * kNCent];  // length = nbinstof x 5
+  TH1F*            fTOFSignal[kNBinsTOF];
   TF1*             fDeutBB;
   TH1F*            fTPCSignalN;
   TH2F*            fdEdxTPC;

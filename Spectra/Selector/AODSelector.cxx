@@ -129,6 +129,13 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
 
+  for (int i = 0; i < kNBinsTOF; ++i) {
+    fTOFSignal[i] = new TH1F(Form("fTOFSignal%i",i),
+                             Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",
+                                  fBins[i],fBins[i+1]),50,-2.0,2.0);
+    GetOutputList()->Add(fTOFSignal[i]);
+  }
+  
   for (int cent = 0; cent < kNCent; ++cent) {
     for (int i = 0; i < kNBinsTOF; ++i) {
       int j = i + kNBinsTPC;
@@ -274,6 +281,7 @@ Bool_t AODSelector::Process(Long64_t entry)
           }
           
           if(c_pT > 0.) {
+            fTOFSignal[j - kNBinsTPC]->Fill(dm);
             fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
             fDdcaXY[cent]->Fill(c_pT, DCAxy);
             fDdcaZ[cent]->Fill(c_pT, DCAz);
@@ -441,6 +449,15 @@ void AODSelector::Terminate()
 
   }
   
+  f.mkdir("TOFSignal");
+  f.cd("TOFSignal");
+  for (int j = 0; j < kNBinsTOF; ++j) {
+    fTOFSignal[j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fTOFSignal%i",j)));
+    if (fTOFSignal[j]) {
+      fTOFSignal[j]->Write();
+    }
+  }
+    
   f.cd();
   f.mkdir("DCASignal");
   f.cd("DCASignal");
