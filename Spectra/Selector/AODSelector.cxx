@@ -132,7 +132,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int i = 0; i < kNBinsTOF; ++i) {
     fTOFSignal[i] = new TH1F(Form("fTOFSignal%i",i),
                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",
-                                  fBins[i],fBins[i+1]),50,-2.0,2.0);
+                                  fBins[i+kNBinsTPC],fBins[i+1+kNBinsTPC]),50,-2.0,2.0);
     GetOutputList()->Add(fTOFSignal[i]);
   }
   
@@ -311,6 +311,7 @@ Bool_t AODSelector::Process(Long64_t entry)
         
         if(c_pT > 0) {
           fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
+          fTOFSignal[j - kNBinsTPC]->Fill(dm);
         } else {
           fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
         }
