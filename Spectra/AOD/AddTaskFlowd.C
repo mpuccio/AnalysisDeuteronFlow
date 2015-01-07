@@ -30,7 +30,7 @@ AliAnalysisTask *AddTaskFlowd(Bool_t fillTree = kFALSE){
   mgr->ConnectOutput (task,  1, coutput1);
   task->SetFillTree(fillTree);
   if (fillTree) {
-    AliAnalysisDataContainer *coutput2 = mgr->CreateContainer("mpuccio_FlowdTree", TNtuple::Class(),
+    AliAnalysisDataContainer *coutput2 = mgr->CreateContainer("mpuccio_FlowdTree", TTree::Class(),
                                                               AliAnalysisManager::kOutputContainer,
                                                               "mpuccio_Flowdnt.root");
     coutput2->SetSpecialOutput();
