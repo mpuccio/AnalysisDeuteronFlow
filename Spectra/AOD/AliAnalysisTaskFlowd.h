@@ -10,11 +10,14 @@
 
 class TH1F;
 class TH2F;
+class AliInputEventHandler;
+class TList;
 class AliAODEvent;
 class AliAODVertex;
 class AliAODpidUtil;
-class TNtuple;
+class TTree;
 
+#include <Rtypes.h>
 #include "AliAnalysisTaskSE.h"
 
 class AliAnalysisTaskFlowd : public AliAnalysisTaskSE {
@@ -51,9 +54,30 @@ private:
   TH1F                 *fHistTriggerStat;                   //! Trigger statistic
   TH1F                 *fHistTriggerStatAfterEventSelection;//! Trigger statistic after selection
   Int_t                 fNCounter;                          //  # points in the signal graph
-  TNtuple              *fNtuple;                            //! Deuteron ntuple
   TList                *fOutputContainer;                   //! Output data container
-  Int_t                 fTrigger;                           //  "Trigger mask"
+  
+  TTree   *fTTree;                                          //! Candidates tree
+  Float_t  fTCentrality;
+  Float_t  fTEta;
+  Float_t  fTTPCsignal;
+  Float_t  fTchi2NDF;
+  Float_t  fTITSsignal;
+  Float_t  fTTOFtime;
+  Float_t  fTDCAxy;
+  Float_t  fTDCAz;
+  Float_t  fTp;
+  Float_t  fTpTPC;
+  Float_t  fTpT;
+  Float_t  fTLength;
+  Float_t  fTTPCsigmad;
+  Float_t  fTTPCsigmat;
+  Int_t    fTFilterMap;
+  UShort_t fTITSnClust;
+  UShort_t fTITSnSignal;
+  UShort_t fTTPCnClust;
+  UShort_t fTTPCnClustShared;
+  UShort_t fTTPCnSignal;
+  UShort_t fTTrigger;
   
   // Constants
   const Int_t           fkNTriggers;                        //  Number of used triggers
