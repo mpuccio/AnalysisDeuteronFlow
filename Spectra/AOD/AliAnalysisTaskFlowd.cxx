@@ -456,6 +456,7 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
         fTCentrality = -fTCentrality;
         fTTree->Fill();
         fTCentrality = -fTCentrality;
+        first = false;
       } else
         fTTree->Fill();
       PostData(2, fTTree);
