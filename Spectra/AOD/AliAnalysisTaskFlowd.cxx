@@ -454,9 +454,10 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       fTFilterMap  = track->GetFilterMap();
       if (first) {
         fTCentrality = -fTCentrality;
-        first = false;
-      }
-      fTTree->Fill();
+        fTTree->Fill();
+        fTCentrality = -fTCentrality;
+      } else
+        fTTree->Fill();
       PostData(2, fTTree);
     }
   }//end loop over tracks
