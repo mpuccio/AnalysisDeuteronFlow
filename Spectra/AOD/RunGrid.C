@@ -11,11 +11,11 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     start = 0;
     nRuns = 20;
   }
-  else if (who.Contains("simone",TString::kIgnoreCase)) {
+  else if (who.Contains("stefania",TString::kIgnoreCase)) {
     start = 20;
     nRuns = 20;
   }
-  else if (who.Contains("stefania",TString::kIgnoreCase)) {
+  else if (who.Contains("elena",TString::kIgnoreCase)) {
     start = 40;
     nRuns = 20;
   }
@@ -27,7 +27,7 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     start = 80;
     nRuns = 20;
   }
-  else if (who.Contains("elena",TString::kIgnoreCase)) {
+  else if (who.Contains("simone",TString::kIgnoreCase)) {
     start = 100;
     nRuns = 20;
   }
