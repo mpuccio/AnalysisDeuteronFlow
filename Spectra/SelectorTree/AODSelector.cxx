@@ -268,7 +268,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   fdEdxTPCpT->Fill(TMath::Abs(pT),TPCsignal);
   fdEdxTPCproj->Fill(pTPC,TPCsignal);
   
-  if (ITSnClust - ITSnClustPID <= 0) return kTRUE;
+  if (ITSnClust - ITSnSignal <= 0) return kTRUE;
   if (TMath::Abs(DCAz) > 2.f) return kTRUE;
   fDCAxy->Fill(DCAxy);
   fDCAz->Fill(DCAz);
