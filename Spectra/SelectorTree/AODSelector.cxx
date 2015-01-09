@@ -236,6 +236,8 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (centrality < 0) {
     fTriggerHist->Fill(Log2Int(trigger));
     fSkipEvent = kFALSE;
+    fCentrality->Fill(TMath::Abs(centrality));
+    fCentralityClass->Fill(TMath::Abs(centrality));
     if (-centrality < 10.f)
       fSkipEvent = Flatten(-centrality);
     else if (-centrality < 20.f)
@@ -245,8 +247,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   const int cent = GetCentBin(TMath::Abs(centrality));
   if (cent < 0) return kTRUE;
-  fCentrality->Fill(TMath::Abs(centrality));
-  fCentralityClass->Fill(TMath::Abs(centrality));
+
   
   if (TMath::Abs(eta) > 0.8)
     return kTRUE;
