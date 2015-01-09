@@ -236,8 +236,8 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (centrality < 0) {
     fTriggerHist->Fill(Log2Int(trigger));
     fSkipEvent = kFALSE;
-    fCentrality->Fill(TMath::Abs(centrality));
-    fCentralityClass->Fill(TMath::Abs(centrality));
+    fCentrality->Fill(-centrality);
+    fCentralityClass->Fill(-centrality);
     if (-centrality < 10.f)
       fSkipEvent = Flatten(-centrality);
     else if (-centrality < 20.f)
