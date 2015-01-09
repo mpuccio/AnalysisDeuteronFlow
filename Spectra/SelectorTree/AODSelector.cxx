@@ -119,10 +119,10 @@ Int_t AODSelector::GetPtBin(float pt) {
 }
 
 Bool_t AODSelector::Flatten(float cent) {
-  float prob[9] = {0.,0.,0.,0.,0.,0.,0.,0.,0.};
+  float prob[9] = {0.855363,0.84502,0.828482,0.827993,0.829833,0.84903,0.842821,0.850087};
   for (int i = 1; i < 10; ++i) {
     if ((cent - i) >= 0.f && (cent - i) < 1.f)
-      return (gRandom->Rndm() < prob[i - 1]);
+      return (gRandom->Rndm() > prob[i - 1]);
   }
   return kFALSE;
 }
@@ -409,6 +409,11 @@ void AODSelector::Terminate()
   fTPCSignalN = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTPCSignalN"));
   if (fTPCSignalN) {
     fTPCSignalN->Write();
+  }
+  
+  fTriggerHist = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTriggerHist"));
+  if (fTriggerHist) {
+    fTriggerHist->Write();
   }
   
   
