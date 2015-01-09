@@ -151,6 +151,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
 
+  const Char_t* aTriggerNames[] = { "kMB", "kCentral", "kSemiCentral", "kEMCEJE", "kEMCEGA" };
+  for (Int_t ii = 1; ii <= 5; ++ii)
+    fTriggerHist->GetXaxis()->SetBinLabel(ii, aTriggerNames[ii - 1]);
+  
   for (int i = 0; i < kNBinsTOF; ++i) {
     fTOFSignal[i] = new TH1F(Form("fTOFSignal%i",i),
                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",
@@ -234,14 +238,17 @@ Bool_t AODSelector::Process(Long64_t entry)
   GetEntry(entry);
   
   if (centrality < 0) {
-    fTriggerHist->Fill(Log2Int(trigger));
     fSkipEvent = kFALSE;
-    fCentrality->Fill(-centrality);
-    fCentralityClass->Fill(-centrality);
     if (-centrality < 10.f)
       fSkipEvent = Flatten(-centrality);
     else if (-centrality < 20.f)
       fSkipEvent = trigger & kCentral;
+    
+    if (!fSkipEvent) {
+      fCentrality->Fill(-centrality);
+      fCentralityClass->Fill(-centrality);
+      fTriggerHist->Fill(Log2Int(trigger));
+    }
   }
   if (fSkipEvent) return kTRUE;
   
