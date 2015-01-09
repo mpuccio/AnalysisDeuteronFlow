@@ -118,7 +118,7 @@ Int_t AODSelector::GetPtBin(float pt) {
   return -1;
 }
 
-Bool_t Flatten(float cent) {
+Bool_t AODSelector::Flatten(float cent) {
   float prob[9] = {0.,0.,0.,0.,0.,0.,0.,0.,0.};
   for (int i = 1; i < 10; ++i) {
     if ((cent - i) >= 0.f && (cent - i) < 1.f)
