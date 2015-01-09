@@ -124,6 +124,7 @@ Bool_t Flatten(float cent) {
     if ((cent - i) >= 0.f && (cent - i) < 1.f)
       return (gRandom->Rndm() < prob[i - 1]);
   }
+  return kFALSE;
 }
 
 void AODSelector::SlaveBegin(TTree * /*tree*/)
