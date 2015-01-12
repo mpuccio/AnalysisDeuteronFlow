@@ -119,12 +119,8 @@ Int_t AODSelector::GetPtBin(float pt) {
 }
 
 Bool_t AODSelector::Flatten(float cent) {
-  float prob[9] = {0.855363,0.84502,0.828482,0.827993,0.829833,0.84903,0.842821,0.850087};
-  for (int i = 0; i < 9; ++i) {
-    if (TMath::Floor(cent) - i == 0)
-      return (gRandom->Rndm() > prob[i]);
-  }
-  return kFALSE;
+  float prob[10] = {0.855363f,0.84502f,0.828482f,0.827993f,0.829833f,0.84903f,0.842821f,0.850087f,0.f};
+  return gRandom->Rndm() > prob[int(cent)];
 }
 
 void AODSelector::SlaveBegin(TTree * /*tree*/)
