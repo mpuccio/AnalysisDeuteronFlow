@@ -147,7 +147,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTPCpT = new TH2F("fdEdxTPCpT",";p_{T} (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,2000,0,2000);
   fTPCSignalN = new TH1F("fTPCSignalN",";#clusters for PID;Entries",161,-0.5f,160.5f);
-  fTriggerHist = new TH1F("fTriggerHist",";Trigger;Entries",5,0.5,4.5);
+  fTriggerHist = new TH1F("fTriggerHist",";Trigger;Entries",5,-0.5,4.5);
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
 
