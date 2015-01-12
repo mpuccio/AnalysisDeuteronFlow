@@ -119,7 +119,11 @@ Int_t AODSelector::GetPtBin(float pt) {
 }
 
 Bool_t AODSelector::Flatten(float cent) {
-  float prob[10] = {0.855363f,0.84502f,0.828482f,0.827993f,0.829833f,0.84903f,0.842821f,0.850087f,0.f};
+  float prob[13] = {
+    0.856818,0.848524,0.831754,0.831155,0.833068,
+    0.852511,0.846935,0.85406 ,0.87688 ,1.f,
+    0.37199 ,0.643864,0.942675
+  };
   return gRandom->Rndm() > prob[int(cent)];
 }
 
@@ -235,7 +239,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   if (centrality < 0) {
     fSkipEvent = kFALSE;
-    if (-centrality < 10.f)
+    if (-centrality < 13.f)
       fSkipEvent = Flatten(-centrality);
 //    else if (-centrality < 20.f)
 //      fSkipEvent = trigger & kCentral;
