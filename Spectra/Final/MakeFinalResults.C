@@ -25,10 +25,12 @@
 #pragma mark Helper functions declaration
 enum { kDeuteron, kAntideuteron };
 Float_t  CorrectForMaterial(TH1F* data, TObjArray &obj, TFile* output); //!< Function used to return the primary fraction in a pT bin
-void     CorrectForEfficiency(TH1F* rawcounts, TEfficiency* eff, TEfficiency* effTOF);
+void     CorrectForEfficiency(TH1F* rawcounts, TF1* eff, TF1* effTOF);
+void CorrectForEfficiency(TH1F* rawcounts, TEfficiency* eff, TEfficiency* effTOF);
 Double_t CrystalBall(Double_t *x_, Double_t *p_);
 Double_t ExpBkg(Double_t *x, Double_t *p);
 Double_t ExpCB(Double_t *x_, Double_t *p);
+Double_t ExpGaus(Double_t *x_, Double_t *p);
 Double_t ExpExpBkg(Double_t *x, Double_t *p);
 Double_t ExpExpGaus(Double_t *x, Double_t *p);
 Double_t GausSgl(Double_t *x, Double_t *p);
@@ -65,6 +67,7 @@ void MakeFinalResults() {
   TFile *fDATA = TFile::Open(kDataFile.Data());
   TFile *fDATAH = TFile::Open("mpuccio_Flowd.root");
   TFile *fMC = TFile::Open(kMCFile.Data());
+  TFile *fEff = TFile::Open("FittedEfficiencies.root");
   TFile *fOUTPUT = new TFile(kOutputFile.Data(),"recreate");
   if (!fDATA || !fMC || !fOUTPUT) {
     cout << "Missing files." << endl;
@@ -78,8 +81,6 @@ void MakeFinalResults() {
   fOUTPUT->mkdir("Deuteron/Summary");
   fOUTPUT->mkdir("Deuteron/Summary/Fit");
   fOUTPUT->mkdir("Deuteron/Summary/SB");
-  fOUTPUT->mkdir("Deuteron/SB");
-  fOUTPUT->mkdir("Deuteron/Fit");
   fOUTPUT->mkdir("Deuteron/Fractions");
   fOUTPUT->mkdir("Deuteron/Fractions/Fit");
   fOUTPUT->mkdir("Deuteron/Fractions/debug");
@@ -90,20 +91,44 @@ void MakeFinalResults() {
   fOUTPUT->mkdir("AntiDeuteron/Summary");
   fOUTPUT->mkdir("AntiDeuteron/Summary/Fit");
   fOUTPUT->mkdir("AntiDeuteron/Summary/SB");
-  fOUTPUT->mkdir("AntiDeuteron/SB");
-  fOUTPUT->mkdir("AntiDeuteron/Fit");
 
 
 #pragma mark Taking all Monte Carlo information
-  TEfficiency *dEff     = (TEfficiency*)fMC->Get("Efficiencies/d");
-  TEfficiency *dEffTOF  = (TEfficiency*)fMC->Get("Efficiencies/dTOF");
-  TEfficiency *adEff    = (TEfficiency*)fMC->Get("Efficiencies/ad");
-  TEfficiency *adEffTOF = (TEfficiency*)fMC->Get("Efficiencies/adTOF");
-  if (!dEff || !dEffTOF || !adEff || !adEffTOF) {
-    cout << "Missing efficiencies." << endl;
-    return;
-  }
+//  TEfficiency *dEff[4],*adEff[4],*dEffTOF[4],*adEffTOF[4];
+  TF1 *dEff[4],*adEff[4],*dEffTOF[4],*adEffTOF[4];
 
+  TCanvas *cvEff[4];
+  for (int iC = 0; iC < 4; ++iC) {
+//    dEff[iC] = (TEfficiency*)fMC->Get("Efficiencies/d");
+//    adEff[iC] = (TEfficiency*)fMC->Get("Efficiencies/ad");
+//    dEffTOF[iC] = (TEfficiency*)fMC->Get("Efficiencies/dTOF");
+//    adEffTOF[iC] = (TEfficiency*)fMC->Get("Efficiencies/adTOF");
+
+    cvEff[iC] = new TCanvas(Form("EffCv%i",iC),Form("Efficiency canvas %i",iC),1024,1024);
+    cvEff[iC]->Divide(2,2);
+    TGraphAsymmErrors* grd = (TGraphAsymmErrors*)fEff->Get(Form("d%i",iC));
+    TGraphAsymmErrors* grad = (TGraphAsymmErrors*)fEff->Get(Form("ad%i",iC));
+    TGraphAsymmErrors* grdTOF = (TGraphAsymmErrors*)fEff->Get(Form("dTOF%i",iC));
+    TGraphAsymmErrors* gradTOF = (TGraphAsymmErrors*)fEff->Get(Form("adTOF%i",iC));
+    if (!grd || !grad || !grdTOF || !gradTOF) {
+      cout << "Missing efficiencies." << endl;
+      return;
+    }
+    dEff[iC] = static_cast<TF1*>(grd->GetListOfFunctions()->FindObject("g"));
+    adEff[iC] = static_cast<TF1*>(grad->GetListOfFunctions()->FindObject("g"));
+    dEffTOF[iC] = static_cast<TF1*>(grdTOF->GetListOfFunctions()->FindObject("fTOF"));
+    adEffTOF[iC] = static_cast<TF1*>(gradTOF->GetListOfFunctions()->FindObject("f"));
+    
+    cvEff[iC]->cd(1);
+    dEff[iC]->DrawCopy();
+    cvEff[iC]->cd(2);
+    adEff[iC]->DrawCopy();
+    cvEff[iC]->cd(3);
+    dEffTOF[iC]->DrawCopy();
+    cvEff[iC]->cd(4);
+    adEffTOF[iC]->DrawCopy();
+  }
+  
   TH1F hMCPrimaries[kNBinsSecondaries * kNCentralities];
   TH1F hMCSecondaries[kNBinsSecondaries * kNCentralities];
   for (int iC = 0; iC < kNCentralities; ++iC) {
@@ -131,8 +156,8 @@ void MakeFinalResults() {
                    hProjS->GetXaxis()->GetXmax());
       hPrim.Add(hProjP);
       hSec.Add(hProjS);
-      hPrim.Rebin(kRebin);
-      hSec.Rebin(kRebin);
+//      hPrim.Rebin(kRebin);
+//      hSec.Rebin(kRebin);
       delete hProjP;
       delete hProjS;
     }
@@ -145,21 +170,29 @@ void MakeFinalResults() {
     hRawCounts[iC].SetBins(kNBins, kBins);
     hSpectra[iC].SetBins(kNBins, kBins);
   }
-  TList * l = (TList*)fDATAH->Get("mpuccio_Flowd");
-  TH1F* hEventCount = (TH1F*)l->FindObject("fHistCentralityClass10");
-  if (!hEventCount) {
-    cout << "Missing event counter" << endl;
-    return;
-  }
+//  TList * l = (TList*)fDATAH->Get("mpuccio_Flowd");
+//  TH1F* hEventCount = (TH1F*)l->FindObject("fHistCentralityClass10");
+//  if (!hEventCount) {
+//    cout << "Missing event counter" << endl;
+//    return;
+//  }
   double kNEvents[kNCentralities];
   double kNorm[kNCentralities];
 
-  kNEvents[0] = hEventCount->GetBinContent(1);
-  kNEvents[1] = hEventCount->GetBinContent(2);
-  kNEvents[2] = hEventCount->GetBinContent(3) + hEventCount->GetBinContent(4);
-  kNEvents[3] = hEventCount->GetBinContent(5) + hEventCount->GetBinContent(6);
+//  kNEvents[0] = hEventCount->GetBinContent(1);
+//  kNEvents[1] = hEventCount->GetBinContent(2);
+//  kNEvents[2] = hEventCount->GetBinContent(3) + hEventCount->GetBinContent(4);
+//  kNEvents[3] = hEventCount->GetBinContent(5) + hEventCount->GetBinContent(6);
 //  kNEvents[4] = hEventCount->GetBinContent(6) + hEventCount->GetBinContent(7);
 
+  TH1F* centralityClass = (TH1F*)fDATA->Get("fCentralityClass");
+  kNEvents[0] = centralityClass->GetBinContent(1);
+  kNEvents[1] = centralityClass->GetBinContent(2);
+  kNEvents[2] = centralityClass->GetBinContent(3);
+  kNEvents[3] = centralityClass->GetBinContent(4);
+  cout << kNEvents[0] << " " << kNEvents[1] << " " << kNEvents[2] << " " << kNEvents[3] << endl;
+  cout << kNEvents[0] / kNEvents[1] << endl;
+  
   for (int i = 0; i < kNCentralities; ++i)
     kNorm[i] = 1. / (kNEvents[i] * TMath::TwoPi());
   
@@ -198,29 +231,27 @@ void MakeFinalResults() {
     //
     for (int iB = 0; iB < kNBins; ++iB) {
       if (iB < kTPCsize) {
-        if (iB < kNBinsSecondaries) {
-          TH1F *hd = (TH1F*)fDATA->Get(Form("DCA%i/dcaxy_%i",iC,iB));
-          if (!hd) {
-            cout << "Missing " << Form("DCA%i/dcaxy_%i",iC,iB) << endl;
-            return;
-          }
-          Float_t prim = 1.f;
-          hd->Rebin(kRebin);
-          obj.Add(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
-          obj.Add(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
-          prim = CorrectForMaterial(hd, obj, fOUTPUT);
-          fOUTPUT->mkdir(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
-          fOUTPUT->cd(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
-          hd->Write();
-          hMCPrimaries[kNBinsSecondaries * iC + iB].Write();
-          hMCSecondaries[kNBinsSecondaries * iC + iB].Write();
-          obj.Remove(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
-          obj.Remove(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
-          cout << "CAZZO " << prim << endl;
-          hFractions[iC].SetBinContent(iB + 1,prim);
-          cout<< "CAZZO " << prim << endl;
-          hRawCounts[iC].SetBinContent(iB + 1, prim * hTPCcounts->GetBinContent(iB + 1));
-        } else
+//        if (iB < kNBinsSecondaries) {
+//          TH1F *hd = (TH1F*)fDATA->Get(Form("DCA%i/dcaxy_%i",iC,iB));
+//          if (!hd) {
+//            cout << "Missing " << Form("DCA%i/dcaxy_%i",iC,iB) << endl;
+//            return;
+//          }
+//          Float_t prim = 1.f;
+//          hd->Rebin(kRebin);
+//          obj.Add(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
+//          obj.Add(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
+//          prim = CorrectForMaterial(hd, obj, fOUTPUT);
+//          fOUTPUT->mkdir(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
+//          fOUTPUT->cd(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
+//          hd->Write();
+//          hMCPrimaries[kNBinsSecondaries * iC + iB].Write();
+//          hMCSecondaries[kNBinsSecondaries * iC + iB].Write();
+//          obj.Remove(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
+//          obj.Remove(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
+//          hFractions[iC].SetBinContent(iB + 1,prim);
+//          hRawCounts[iC].SetBinContent(iB + 1, prim * hTPCcounts->GetBinContent(iB + 1));
+//        } else
           hRawCounts[iC].SetBinContent(iB + 1, hTPCcounts->GetBinContent(iB + 1));
       } else {
         TH1F *data = (TH1F*)fDATA->Get(Form("Signal%i/fSignalD%i_%i",iC,iC,iB - kTPCsize));
@@ -242,32 +273,32 @@ void MakeFinalResults() {
         TH1F *hTPL = HistoFromFunction("tpl", tpl);
         hTPL->Add(back,-1.f);
         Float_t prim = 1.f;
-        if (iB < kNBinsSecondaries) {
-          TH2F *hDCASig = (TH2F*)fDATA->Get(Form("DCASignal/fDCASignal%i_%i",iC,iB - kTPCsize));
-          if (!hDCASig) {
-            cout << "Missing " << Form("DCASignal/fDCASignal%i_%i",iC,iB) << endl;
-            return;
-          }
-          TH1D *hP = hDCASig->ProjectionY(Form("hDCATOFp%i_%i",iC,iB));/*,
-                                          hTPL->FindBin(pars[1] - 3.f * pars[2]),
-                                          hTPL->FindBin(pars[1] + 3.f * pars[2]));*/
-          TH1F hd(Form("hDCATOF%i_%i",iC,iB),";DCA_{xy} (cm);Entries",hP->GetNbinsX(),
-                  hP->GetXaxis()->GetXmin(),hP->GetXaxis()->GetXmax());
-          hd.Add(hP);
-          hd.Rebin(4);
-          obj.Add(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
-          obj.Add(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
-          prim = CorrectForMaterial(&hd, obj, fOUTPUT);
-          fOUTPUT->mkdir(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
-          fOUTPUT->cd(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
-          hd.Write();
-          hMCPrimaries[kNBinsSecondaries * iC + iB].Write();
-          hMCSecondaries[kNBinsSecondaries * iC + iB].Write();
-          obj.Remove(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
-          obj.Remove(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
-
-          delete hP;
-        }
+//        if (iB < kNBinsSecondaries) {
+//          TH2F *hDCASig = (TH2F*)fDATA->Get(Form("DCASignal/fDCASignal%i_%i",iC,iB - kTPCsize));
+//          if (!hDCASig) {
+//            cout << "Missing " << Form("DCASignal/fDCASignal%i_%i",iC,iB) << endl;
+//            return;
+//          }
+//          TH1D *hP = hDCASig->ProjectionY(Form("hDCATOFp%i_%i",iC,iB));/*,
+//                                          hTPL->FindBin(pars[1] - 3.f * pars[2]),
+//                                          hTPL->FindBin(pars[1] + 3.f * pars[2]));*/
+//          TH1F hd(Form("hDCATOF%i_%i",iC,iB),";DCA_{xy} (cm);Entries",hP->GetNbinsX(),
+//                  hP->GetXaxis()->GetXmin(),hP->GetXaxis()->GetXmax());
+//          hd.Add(hP);
+//          hd.Rebin(4);
+//          obj.Add(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
+//          obj.Add(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
+//          prim = CorrectForMaterial(&hd, obj, fOUTPUT);
+//          fOUTPUT->mkdir(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
+//          fOUTPUT->cd(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
+//          hd.Write();
+//          hMCPrimaries[kNBinsSecondaries * iC + iB].Write();
+//          hMCSecondaries[kNBinsSecondaries * iC + iB].Write();
+//          obj.Remove(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
+//          obj.Remove(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
+//
+//          delete hP;
+//        }
         hFractions[iC].SetBinContent(iB + 1, prim);
         hRawCounts[iC].SetBinContent(iB + 1, prim * hTPL->Integral(hTPL->FindBin(pars[1] - 3.f * pars[2]),
                                                                    hTPL->FindBin(pars[1] + 3.f * pars[2])));
@@ -293,38 +324,26 @@ void MakeFinalResults() {
       fOUTPUT->cd();
     }
     fOUTPUT->cd("Deuteron/Counts");
-    hSpectra[iC].Add(hRawCounts);
+    hSpectra[iC].Add(&hRawCounts[iC]);
     hRawCounts[iC].Write();
     
     fOUTPUT->cd("Deuteron/Fractions");
     hFractions[iC].Write();
     
     fOUTPUT->cd("Deuteron/Spectra");
-    TEfficiency *eff = (TEfficiency*)fMC->Get(Form("Cent%i/Efficiency/d%i",iC,iC));
-    TEfficiency *effTOF = (TEfficiency*)fMC->Get(Form("Cent%i/Efficiency/dTOF%i",iC,iC));
-    if (!eff || !effTOF) {
-      cout << "Missing efficiencies!" << endl;
-      return;
-    }
-    CorrectForEfficiency(&hSpectra[iC], eff, effTOF);
+    CorrectForEfficiency(&hSpectra[iC], dEff[iC], dEffTOF[iC]);
     hSpectra[iC].Scale(kNorm[iC]);
     for (int i = 1; i <= hSpectra[iC].GetNbinsX(); ++i) {
       hSpectra[iC].SetBinContent(i, hSpectra[iC].GetBinContent(i) /
                                  (hSpectra[iC].GetBinCenter(i) * hSpectra[iC].GetBinWidth(i)));
+      if (hRawCounts[iC].GetBinContent(i) > 0.f) {
+        hSpectra[iC].SetBinError(i, hSpectra[iC].GetBinContent(i) *
+                                 TMath::Sqrt(1 / hRawCounts[iC].GetBinContent(i) + 1 / kNEvents[iC]));
+      }
     }
     hSpectra[iC].Write();
   }
-
-  fOUTPUT->cd("Deuteron/Efficiency");
-  TGraphAsymmErrors* grDeff = adEff->CreateGraph();
-  grDeff->SetName("dEffTPC");
-  grDeff->Write();
-  delete grDeff;
-  grDeff = dEffTOF->CreateGraph();
-  grDeff->SetName("dEffTPCTOF");
-  grDeff->Write();
-  delete grDeff;
-
+  
 #pragma mark Analysing anti deuterons
   for (int iC = 0; iC < kNCentralities; ++iC) {
     hRawCounts[iC].Reset();
@@ -349,40 +368,35 @@ void MakeFinalResults() {
       if (iB < kTPCsize) {
         hRawCounts[iC].SetBinContent(iB + 1, hTPCcounts->GetBinContent(iB + 1));
       } else {
-        if (iB < kTPCsize) {
-          hRawCounts[iC].SetBinContent(iB + 1, hTPCcounts->GetBinContent(iB + 1));
-        } else {
-          TH1F *data = (TH1F*)fDATA->Get(Form("Signal%i/fSignalAD%i_%i",iC,iC,iB - kTPCsize));
-          if (!data) {
-            cout << "Missing " << Form("Signal%i/fSignalAD%i_%i",iC,iC,iB - kTPCsize);
-            cout << " from DATA file\n";
-            return;
-          }
-          const int n = (iB - kTPCsize) / 9;
-          int shift = -1;
-          if (n == 1) shift = 9 - 1;
-          else if (n == 2) shift = 18 -1;
-          TH1F *back, *sigl;
-          summaryCv[n]->cd(iB - kTPCsize - shift);
-          TF1 *tpl = TOFfitter(data, back, sigl, iC, iB, kAntideuteron);
-          TH1F *hTPL = HistoFromFunction("tpl", tpl);
-          data->DrawCopy("e");
-          back->DrawCopy("lsame");
-          hTPL->Add(back,-1.f);
-          Double_t *pars = tpl->GetParameters();
-          hRawCounts[iC].SetBinContent(iB, hTPL->Integral(hTPL->FindBin(pars[1] - 3.f * pars[2]),
-                                                          hTPL->FindBin(pars[1] + 3.f * pars[2])));
-          sbCv[n]->cd(iB - kTPCsize - shift);
-          sigl->Divide(tpl);
-          back->Divide(tpl);
-          sigl->DrawCopy("l");
-          back->DrawCopy("lsame");
-          delete hTPL;
-          delete tpl;
-          delete back;
-          delete sigl;
+        TH1F *data = (TH1F*)fDATA->Get(Form("Signal%i/fSignalAD%i_%i",iC,iC,iB - kTPCsize));
+        if (!data) {
+          cout << "Missing " << Form("Signal%i/fSignalAD%i_%i",iC,iC,iB - kTPCsize);
+          cout << " from DATA file\n";
+          return;
         }
-
+        const int n = (iB - kTPCsize) / 9;
+        int shift = -1;
+        if (n == 1) shift = 9 - 1;
+        else if (n == 2) shift = 18 -1;
+        TH1F *back, *sigl;
+        summaryCv[n]->cd(iB - kTPCsize - shift);
+        TF1 *tpl = TOFfitter(data, back, sigl, iC, iB, kAntideuteron);
+        TH1F *hTPL = HistoFromFunction("tpl", tpl);
+        data->DrawCopy("e");
+        back->DrawCopy("lsame");
+        hTPL->Add(back,-1.f);
+        Double_t *pars = tpl->GetParameters();
+        hRawCounts[iC].SetBinContent(iB + 1, hTPL->Integral(hTPL->FindBin(pars[1] - 3.f * pars[2]),
+                                                            hTPL->FindBin(pars[1] + 3.f * pars[2])));
+        sbCv[n]->cd(iB - kTPCsize - shift);
+        sigl->Divide(tpl);
+        back->Divide(tpl);
+        sigl->DrawCopy("l");
+        back->DrawCopy("lsame");
+        delete hTPL;
+        delete tpl;
+        delete back;
+        delete sigl;
       }
     }
     for (int i = 0; i < 3; ++i) {
@@ -395,35 +409,20 @@ void MakeFinalResults() {
       fOUTPUT->cd();
     }
     fOUTPUT->cd("AntiDeuteron/Counts");
-    hSpectra[iC].Add(hRawCounts);
+    hSpectra[iC].Add(&hRawCounts[iC]);
     hRawCounts[iC].Write();
     
     fOUTPUT->cd("AntiDeuteron/Spectra");
-    TEfficiency *eff = (TEfficiency*)fMC->Get(Form("Cent%i/Efficiency/ad%i",iC,iC));
-    TEfficiency *effTOF = (TEfficiency*)fMC->Get(Form("Cent%i/Efficiency/adTOF%i",iC,iC));
-    if (!eff || !effTOF) {
-      cout << "Missing efficiencies!" << endl;
-      return;
-    }
-    CorrectForEfficiency(&hSpectra[iC], eff, effTOF);
+    CorrectForEfficiency(&hSpectra[iC], adEff[iC], adEffTOF[iC]);
     hSpectra[iC].Scale(kNorm[iC]);
     for (int i = 1; i <= hSpectra[iC].GetNbinsX(); ++i) {
       hSpectra[iC].SetBinContent(i, hSpectra[iC].GetBinContent(i) /
                                  (hSpectra[iC].GetBinCenter(i) * hSpectra[iC].GetBinWidth(i)));
+//      hSpectra[iC].SetBinError(i, hSpectra[iC].GetBinContent(i) *
+//                               TMath::Sqrt(1 / hRawCounts[iC].GetBinContent(i) + 1 / kNEvents[iC]));
     }
     hSpectra[iC].Write();
   }
-  
-  fOUTPUT->cd("AntiDeuteron/Efficiency");
-  TGraphAsymmErrors* grADeff = adEff->CreateGraph();
-  grADeff->SetName("adEffTPC");
-  grADeff->Write();
-  delete grADeff;
-  grADeff = adEffTOF->CreateGraph();
-  grADeff->SetName("adEffTPCTOF");
-  grADeff->Write();
-  delete grADeff;
-  fOUTPUT->cd();
 
 #pragma mark Closing files
   fDATA->Close();
@@ -437,42 +436,42 @@ void MakeFinalResults() {
 Float_t CorrectForMaterial(TH1F* hd, TObjArray &obj, TFile* output) {
   TVirtualFitter::SetMaxIterations(10000000);
 
-  Int_t binLow = ((TH1F*)obj[0])->FindBin(-0.5);
-  Int_t binUp = ((TH1F*)obj[0])->FindBin(0.5);
-  TFractionFitter fitter(hd,&obj);
-  fitter.SetRangeX(binLow,binUp);
-  fitter.Constrain(0,0.,1.);
-  fitter.Constrain(1,0.,1.);
-  Int_t result = fitter.Fit();
-  Double_t yieldSec = 0., yieldPri = 1., error = 0.;
-  if (result == 0) {
-    TH1F* hp = (TH1F*)fitter.GetMCPrediction(0);
-    TH1F* hs = (TH1F*)fitter.GetMCPrediction(1);
-    fitter.GetResult(0, yieldPri, error);
-    fitter.GetResult(1, yieldSec, error);
-    TH1F* hfit = (TH1F*)fitter.GetPlot();
-    Float_t dataIntegral = hfit->Integral();
-    hfit->SetLineColor(kGreen + 1);
-    hfit->SetLineWidth(3);
-    hs->Scale(1. / hs->Integral());
-    hp->Scale(1. / hp->Integral());
-    hs->Scale(yieldSec * dataIntegral);
-    hp->Scale(yieldPri * dataIntegral);
-    TCanvas cv(hd->GetName());
-    cv.cd();
-    hd->SetMarkerStyle(20);
-    hd->SetMarkerSize(0.5);
-    hd->SetMarkerColor(kBlack);
-    hd->Draw("e");
-    
-    hfit->DrawCopy("same");
-    hs->SetLineColor(kRed);
-    hp->SetLineColor(kBlue);
-    hs->DrawCopy("same");
-    hp->DrawCopy("same");
-    output->cd("Deuteron/Fractions/Fit");
-    cv.Write();
-  }
+//  Int_t binLow = ((TH1F*)obj[0])->FindBin(-0.5);
+//  Int_t binUp = ((TH1F*)obj[0])->FindBin(0.5);
+//  TFractionFitter fitter(hd,&obj);
+//  fitter.SetRangeX(binLow,binUp);
+//  fitter.Constrain(0,0.,1.);
+//  fitter.Constrain(1,0.,1.);
+//  Int_t result = fitter.Fit();
+//  Double_t yieldSec = 0., yieldPri = 1., error = 0.;
+//  if (result == 0) {
+//    TH1F* hp = (TH1F*)fitter.GetMCPrediction(0);
+//    TH1F* hs = (TH1F*)fitter.GetMCPrediction(1);
+//    fitter.GetResult(0, yieldPri, error);
+//    fitter.GetResult(1, yieldSec, error);
+//    TH1F* hfit = (TH1F*)fitter.GetPlot();
+//    Float_t dataIntegral = hfit->Integral();
+//    hfit->SetLineColor(kGreen + 1);
+//    hfit->SetLineWidth(3);
+//    hs->Scale(1. / hs->Integral());
+//    hp->Scale(1. / hp->Integral());
+//    hs->Scale(yieldSec * dataIntegral);
+//    hp->Scale(yieldPri * dataIntegral);
+//    TCanvas cv(hd->GetName());
+//    cv.cd();
+//    hd->SetMarkerStyle(20);
+//    hd->SetMarkerSize(0.5);
+//    hd->SetMarkerColor(kBlack);
+//    hd->Draw("e");
+//    
+//    hfit->DrawCopy("same");
+//    hs->SetLineColor(kRed);
+//    hp->SetLineColor(kBlue);
+//    hs->DrawCopy("same");
+//    hp->DrawCopy("same");
+//    output->cd("Deuteron/Fractions/Fit");
+//    cv.Write();
+//  }
 //  else {
 //    hd->Rebin(2);
 //    ((TH1F*)obj[0])->Rebin(2);
@@ -480,9 +479,20 @@ Float_t CorrectForMaterial(TH1F* hd, TObjArray &obj, TFile* output) {
 //    if (hd->GetNbinsX() < 4) return 1.f;
 //    return CorrectForMaterial(hd, obj, output);
 //  }
-    cout << "LOREM IPSUM " << yieldPri << " " << yieldSec << " " << obj.GetEntries() << " " << hd->GetName() << endl;
-  return yieldPri;
-  
+//    cout << "LOREM IPSUM " << yieldPri << " " << yieldSec << " " << obj.GetEntries() << " " << hd->GetName() << endl;
+//  return yieldPri;
+  return 1.;
+}
+
+//__________________________________________________________________________________________________
+void CorrectForEfficiency(TH1F* rawcounts, TF1* eff, TF1* effTOF) {
+  for (int iB = 1; iB < kNBins; ++iB) {
+    float e = 0.f;
+    if (iB <= kTPCsize) e = eff->Eval(rawcounts->GetBinCenter(iB));
+    else e = effTOF->Eval(rawcounts->GetBinCenter(iB));
+    if (e < kEfficiencyTolerance) rawcounts->SetBinContent(iB, 0.f);
+    else rawcounts->SetBinContent(iB, rawcounts->GetBinContent(iB) / e);
+  }
 }
 
 //__________________________________________________________________________________________________
@@ -533,6 +543,12 @@ Double_t ExpCB(Double_t *x_, Double_t *p) {
 }
 
 //__________________________________________________________________________________________________
+Double_t ExpGaus(Double_t *x_, Double_t *p) {
+  Double_t &x = x_[0];
+  return GausSgl(x_,p) + p[5] * TMath::Exp(p[6] * x);
+}
+
+//__________________________________________________________________________________________________
 Double_t ExpExpBkg(Double_t *x, Double_t *p) {
   return p[0] * TMath::Exp(p[1] * x[0]) + p[2] * TMath::Exp(p[3] * x[0]);
 }
@@ -575,6 +591,7 @@ TF1* TOFfitter(TH1F* data, TH1F* &back, TH1F* &sigl, int iCent, int iPt, int k) 
   data->SetMarkerSize(0.5);
   data->SetMarkerColor(kBlue);
   TF1 *tpl;
+  
   if (kBins[iPt] < 1.6f) {
     tpl = new TF1(Form("tpl%i_%i",iCent,iPt),ExpCB,-2.4,2.4,7);
     tpl->SetParameters((iCent == 0) ? 20000 : 2500, 0.f, 2.86394e-01, 1, 2, 42,-0.6);
@@ -584,14 +601,24 @@ TF1* TOFfitter(TH1F* data, TH1F* &back, TH1F* &sigl, int iCent, int iPt, int k) 
     if (k == kAntideuteron) {
       if (kBins[iPt] < 1.) {
         if (iCent == 0) {
-          tpl->SetParameters((kBins[iPt] < 0.9) ? 300 : 800, 0.f, 1.86394e-01, 1, 20, 0.84,-0.6);
+          tpl->SetParameters((kBins[iPt] < 0.9) ? 500 : 2700, 0.02f,  0.094, 1.1, 11.6, 0.84,-0.2);
         } else if (iCent == 2) {
-          tpl->SetParameters((kBins[iPt] < 0.9) ? 140 : 800, 0.09f, 1.86394e-01, 1, 20, 0.84,-0.6);
+          tpl->SetParameters((kBins[iPt] < 0.9) ? 140 : 800, 0.05f, 0.1, 0.75, 11.6, 0.6,-0.2);
+//          tpl->SetParameters((kBins[iPt] < 0.9) ? 140 : 800, 0.09f, 1.86394e-01, 1, 20, 0.84,-0.6);
         } else {
           if (kBins[iPt] >= 0.9)
             tpl->SetParameters(800, 0.09f, 1.86394e-01, 1, 20, 0.84,-0.6);
           else
             tpl->SetParameters((iCent == 1) ? 120 : 80, 0.09f, 0.095, 0.7, 12, 0.84,-0.3);
+        }
+      } else {
+        if (iCent == 0) {
+          if (iPt < 6)
+            tpl->SetParameters(2700, 0.02f,  0.094, 1.1, 11.6, 0.84,-0.4);
+          else
+            tpl->SetParameters(8000, 0.02f,  0.094, 1.1, 11.6, 42,-0.6);
+        } else if (iCent == 3) {
+          tpl->SetParameters(500, 0.f, 0.08, 1, 10, 0.8,-0.2);
         }
       }
     }
@@ -599,20 +626,31 @@ TF1* TOFfitter(TH1F* data, TH1F* &back, TH1F* &sigl, int iCent, int iPt, int k) 
   } else {
     tpl = new TF1(Form("tpl%i_%i",iCent,iPt),ExpExpGaus,-2.4,2.4,7);
     tpl->SetParameters((kBins[iPt] > 4.f) ? 500 : 5000, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
-    if (iCent >= 1) {
-      tpl->SetParameters((kBins[iPt] > 4.f) ? 40 : 500, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
+    if (iCent == 1 || iCent == 2) {
+      if (kBins[iPt] < 4.f)
+        tpl->SetParameters(500, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
+      else
+        tpl->SetParameters(104, 0.04, 0.33, 0.74,-3.4, 25.,-3.00000e-01);
     }
     if (iCent > 2) {
       int height = 600;
-      if (kBins[iPt] > 3.2f) height = 20;
-      else if (kBins[iPt] > 1.8f) height = 300;
-      tpl->SetParameters(height, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
+      if (kBins[iPt] < 2.4f)
+        tpl->SetParameters(1000, 5.66003e-02, 1.28, 6.0e-6,-8.0, 50.0,-0.3);
+      else if (kBins[iPt] < 4.f) {
+        if (kBins[iPt] > 3.2f) height = 20;
+        else if (kBins[iPt] > 1.8f) height = 300;
+        tpl->SetParameters(height, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
+      } else {
+        tpl->SetParameters(36.,0.008,0.33,0.33,-3.478,6.253,-0.239);
+      }
     }
     if (k == kAntideuteron) {
       if (iCent == 3) {
         tpl->SetParameters(700, 5.66003e-02, 0.12, 4.28095e-01,-4.04126e-01, 6.51728e+02,-3.00000e-01);
-        if (kBins[iPt] > 3.2f)
+        if (kBins[iPt] > 3.6f)
           tpl->SetParameters(20, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
+        else if (kBins[iPt] > 3.2f)
+          tpl->SetParameters(100, 5.66003e-02, 2.86394e-01, 0.04,-4.04126e+00, 15.,-3.00000e-01);
         else if (kBins[iPt] > 1.8f)
           tpl->SetParameters(300, 5.66003e-02, 2.86394e-01, 4.28095e+00,-4.04126e+00, 6.51728e+02,-3.00000e-01);
 
