@@ -223,7 +223,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   //   plugin->AddDataFile("/alice/data/2008/LHC08c/000057657/raw/Run57657.Merged.RAW.tag.root");
   
   // Define alien work directory where all files will be copied. Relative to alien $HOME.
-  plugin->SetGridWorkingDir("Efficiencyd2013");
+  plugin->SetGridWorkingDir("Efficiencyd2011");
   
   // Declare alien output directory. Relative to working directory.
   plugin->SetGridOutputDir("output"); // In this case will be $HOME/taskname/out
