@@ -44,6 +44,7 @@ private:
   Float_t         fTchi2;
   Float_t         fTcentrality;
   UShort_t        fTTPCnClusters;
+  UShort_t        fTTPCnSharedClusters;
   UShort_t        fTTPCnSignal;
   Char_t          fTITSnClusters;
   Char_t          fTITSnSignal;

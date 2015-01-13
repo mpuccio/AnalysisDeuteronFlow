@@ -32,8 +32,8 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     nRuns = 20;
   }
   else {
-    start = 48;
-    nRuns = 60;
+    start = 0;
+    nRuns = 108;
   }
   return;
 }
@@ -215,7 +215,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
     plugin->AddRunNumber(runlist[i]);
   }
 
-  plugin->SetNrunsPerMaster(15);
+  plugin->SetNrunsPerMaster(27);
   plugin->SetOutputToRunNo();
   
   

@@ -62,6 +62,7 @@ fTDCAz(0.f),
 fTchi2(-1.f),
 fTcentrality(-1.f),
 fTTPCnClusters(0u),
+fTTPCnSharedClusters(0u),
 fTTPCnSignal(0u),
 fTITSnClusters(0),
 fTITSnSignal(0),
@@ -99,6 +100,7 @@ void AliAnalysisTaskEfficiencydAOD::UserCreateOutputObjects(){
   fTree->Branch("chi2", &fTchi2,"chi2/F");
   fTree->Branch("centrality", &fTcentrality,"centrality/F");
   fTree->Branch("TPCnClusters", &fTTPCnClusters,"TPCnClusters/s");
+  fTree->Branch("TPCnSharedClusters", &fTTPCnSharedClusters,"TPCnSharedClusters/s");
   fTree->Branch("TPCnSignal", &fTTPCnSignal,"TPCnSignal/s");
   fTree->Branch("ITSnClusters", &fTITSnClusters,"ITSnClusters/B");
   fTree->Branch("ITSnSignal", &fTITSnSignal,"ITSnSignal/B");
@@ -238,6 +240,7 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     fTchi2 = track->Chi2perNDF();
     fTTPCnClusters = track->GetTPCNcls();
     fTTPCnSignal = track->GetTPCsignalN();
+    fTTPCnSharedClusters = track->GetTPCnclsS();
     fTITSnClusters = nITS;
     fTITSnSignal = nITS - nSPD;
     fTIsPrimary = part->IsPhysicalPrimary();
