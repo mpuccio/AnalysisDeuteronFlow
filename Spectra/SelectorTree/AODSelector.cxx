@@ -260,7 +260,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (TMath::Abs(eta) > 0.8)
     return kTRUE;
   
-  if (TMath::Abs(chi2NDF) > 4)
+  if (TMath::Abs(chi2NDF) > 6)
     return kTRUE;
   
   Double_t pz = TMath::Sqrt(p * p - pT * pT);
