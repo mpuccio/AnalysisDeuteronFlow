@@ -16,6 +16,10 @@
 class TH1F;
 class TH2F;
 
+#define kNCent 5
+#define kNBins 28
+#define kNBinsTPC 5
+
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -79,7 +83,10 @@ class EfficiencySelector : public TSelector {
   , fDdcaXYprimaries()
   , fDdcaZprimaries()
   , fDdcaXYsecondaries()
-  , fDdcaZsecondaries() { }
+  , fDdcaZsecondaries()
+  , fPtCorrectionD()
+  , fPtCorrectionAD()
+  , fPrevious(-1){ }
   
   virtual ~EfficiencySelector() { }
   virtual Int_t   Version() const { return 2; }
@@ -102,12 +109,25 @@ private:
   TH1F    *fDMCYield;
   TH1F    *fDYield;
   TH1F    *fDYieldTOF;
+  TH1F    *fCentrality;
   
-  TH2F    *fDdcaXYprimaries[5];
-  TH2F    *fDdcaZprimaries[5];
-  TH2F    *fDdcaXYsecondaries[5];
-  TH2F    *fDdcaZsecondaries[5];
+  TH1F    *fAntiDMCYieldCent[kNCent];
+  TH1F    *fAntiDYieldCent[kNCent];
+  TH1F    *fAntiDYieldTOFCent[kNCent];
+  TH1F    *fDMCYieldCent[kNCent];
+  TH1F    *fDYieldCent[kNCent];
+  TH1F    *fDYieldTOFCent[kNCent];
 
+  
+  TH2F    *fDdcaXYprimaries[kNCent];
+  TH2F    *fDdcaZprimaries[kNCent];
+  TH2F    *fDdcaXYsecondaries[kNCent];
+  TH2F    *fDdcaZsecondaries[kNCent];
+  TH2F    *fPtCorrectionD;
+  TH2F    *fPtCorrectionAD;
+
+  
+  Float_t fPrevious;
   ClassDef(EfficiencySelector,0);
 };
 
