@@ -173,9 +173,9 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
       GetOutputList()->Add(fSignalAD[cent * kNBinsTOF + i]);
     }
     fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",
-                             10,fBins,40,-0.5f,0.5f);
+                             10,fBins,160,-0.5f,0.5f);
     fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",
-                            10,fBins,40,-0.5f,0.5f);
+                            10,fBins,160,-0.5f,0.5f);
     GetOutputList()->Add(fDdcaXY[cent]);
     GetOutputList()->Add(fDdcaZ[cent]);
   }
@@ -194,7 +194,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     for (int i = 0; i < kNDCAbinsTOF; ++i) {
       fDCASignal[k * kNDCAbinsTOF + i] = new TH2F(Form("fDCASignal%i_%i",k,i),
                                        ";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",
-                                       50,-2.0,2.0,40,-0.5f,0.5f);
+                                       50,-2.0,2.0,160,-0.5f,0.5f);
       GetOutputList()->Add(fDCASignal[k * kNDCAbinsTOF + i]);
     }
   }
