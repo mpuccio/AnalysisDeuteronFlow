@@ -253,12 +253,15 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (fSkipEvent) return kTRUE;
   
   const int cent = GetCentBin(TMath::Abs(centrality));
-  if (cent < 0) return kTRUE;
+  if (cent < 0)
+    return kTRUE;
 
   
   if (TMath::Abs(eta) > 0.8)
     return kTRUE;
   
+  if (TMath::Abs(chi2NDF) > 4)
+    return kTRUE;
   
   Double_t pz = TMath::Sqrt(p * p - pT * pT);
   Double_t e = TMath::Sqrt(p * p + M2D);
