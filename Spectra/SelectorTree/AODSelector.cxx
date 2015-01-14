@@ -38,9 +38,9 @@ Double_t SigmaITS(Double_t sig, Double_t p, Int_t nClust, Bool_t isDeuteron) con
   // isDeuteron == kFALSE -> triton
   // taken from AliITSPIDResponse
   
-  const Double_t bg = p;
-  const Double_t bbParamDeu[5] = ;
-  const Double_t bbParamTri[5] = ;
+  Double_t bg = p;
+  const Double_t bbParamDeu[5] = {76.43,-34.21,113.2,-18.12,0.6019};
+  const Double_t bbParamTri[5] = {13.34,55.17,66.41,-6.601,-0.4134};
   Double_t parResolDeu3={0.06918,0.02498,1.1};
   Double_t parResolDeu4={0.06756,0.02078,1.05};
   Double_t parResolTri3={0.07239,0.0192,1.1};
