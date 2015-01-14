@@ -149,6 +149,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fTPCSignalN = new TH1F("fTPCSignalN",";#clusters for PID;Entries",161,-0.5f,160.5f);
   fTriggerHist = new TH1F("fTriggerHist",";Trigger;Entries",5,-0.5,4.5);
   fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
+  fdEdxTriton = new TH2F("fdEdxTriton",";p (GeV/c);dE/dx (a.u.)",560,0.4,3.2,2000,0,2000);
+  fdEdxDeuteron = new TH2F("fdEdxDeuteron",";p (GeV/c);dE/dx (a.u.)",560,0.4,3.2,2000,0,2000);
   BinLogAxis(fdEdxTPC);
 
   const Char_t* aTriggerNames[] = { "kMB", "kCentral", "kSemiCentral", "kEMCEJE", "kEMCEGA" };
@@ -200,6 +202,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   }
   
   GetOutputList()->Add(fdEdxTPCproj);
+  GetOutputList()->Add(fdEdxTriton);
+  GetOutputList()->Add(fdEdxDeuteron);
   GetOutputList()->Add(fTPCSignalN);
   GetOutputList()->Add(fTriggerHist);
   GetOutputList()->Add(fCentrality);
@@ -211,6 +215,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fDCAxy);
   GetOutputList()->Add(fDCAz);
   GetOutputList()->Add(fDCA2D);
+  
   
   fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
 }
@@ -241,8 +246,6 @@ Bool_t AODSelector::Process(Long64_t entry)
     fSkipEvent = kFALSE;
     if (-centrality < 13.f)
       fSkipEvent = Flatten(-centrality);
-//    else if (-centrality < 20.f)
-//      fSkipEvent = trigger & kCentral;
     
     if (!fSkipEvent) {
       fCentrality->Fill(-centrality);
@@ -279,6 +282,12 @@ Bool_t AODSelector::Process(Long64_t entry)
   fdEdxTPC->Fill(pTPC,TPCsignal);
   fdEdxTPCpT->Fill(TMath::Abs(pT),TPCsignal);
   fdEdxTPCproj->Fill(pTPC,TPCsignal);
+  if (TMath::Abs(TPCsigmad) < 3.) {
+    fdEdxDeuteron->Fill(pTPC,TPCsignal);
+  }
+  if (TMath::Abs(TPCsigmat) < 3.) {
+    fdEdxTriton->Fill(pTPC,TPCsignal);
+  }
   
   if (ITSnClust - ITSnSignal <= 0) return kTRUE;
   if (TMath::Abs(DCAz) > 2.f) return kTRUE;
@@ -416,6 +425,16 @@ void AODSelector::Terminate()
     fdEdxTPCproj->Write();
   }
   
+  fdEdxTriton = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTriton"));
+  if (fdEdxTriton) {
+    fdEdxTriton->Write();
+  }
+  
+  fdEdxDeuteron = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxDeuteron"));
+  if (fdEdxDeuteron) {
+    fdEdxDeuteron->Write();
+  }
+  
   fTPCSignalN = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTPCSignalN"));
   if (fTPCSignalN) {
     fTPCSignalN->Write();
@@ -461,6 +480,8 @@ void AODSelector::Terminate()
   if (fDCA2D) {
     fDCA2D->Write();
   }
+  
+  
   f.cd();
   f.mkdir("MassSpectra");
   f.mkdir("MassdEdx");

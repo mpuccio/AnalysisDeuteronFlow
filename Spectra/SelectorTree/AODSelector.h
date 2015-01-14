@@ -144,6 +144,8 @@ private:
   TH1F*            fCentrality;
   TH1F*            fCentralityClass;
   TH1F*            fGamma;
+  TH2F*            fdEdxTriton;
+  TH2F*            fdEdxDeuteron;
   
   TH2F            *fDdcaXY[kNCent];
   TH2F            *fDdcaZ[kNCent];
