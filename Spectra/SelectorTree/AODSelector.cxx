@@ -49,12 +49,14 @@ Double_t SigmaITS(Double_t sig, Double_t p, Int_t nClust, Bool_t isDeuteron) {
   if (isDeuteron) {
     bg /= 1.875612;
     resPar = parResolDeu3;
+    par = bbParamDeu;
     if (nClust == 4) {
       resPar = parResolDeu4;
     }
   } else {
     bg /= 2.808921;
     resPar = parResolTri3;
+    par = bbParamTri;
     if (nClust == 4) {
       resPar = parResolTri4;
     }
@@ -343,7 +345,7 @@ Bool_t AODSelector::Process(Long64_t entry)
     c_pT += fCorrectionAD(-c_pT);
   }
   
-  if (TMath::Abs(pT) < 0.7 && (ITSnSignal < 3 || TMath::Abs(SigmaITS(ITSsignal, p, ITSnSignal, kTRUE)) > 3.)
+  if (TMath::Abs(pT) < 0.7 && (ITSnSignal < 3 || TMath::Abs(SigmaITS(ITSsignal, p, ITSnSignal, kTRUE)) > 3.))
     return kTRUE;
   
   
