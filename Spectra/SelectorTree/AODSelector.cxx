@@ -34,6 +34,45 @@
 #include <TCanvas.h>
 #include <TRandom3.h>
 
+Double_t SigmaITS(Double_t sig, Double_t p, Int_t nClust, Bool_t isDeuteron) const {
+  // isDeuteron == kFALSE -> triton
+  // taken from AliITSPIDResponse
+  
+  const Double_t bg = p;
+  const Double_t bbParamDeu[5] = ;
+  const Double_t bbParamTri[5] = ;
+  Double_t parResolDeu3={0.06918,0.02498,1.1};
+  Double_t parResolDeu4={0.06756,0.02078,1.05};
+  Double_t parResolTri3={0.07239,0.0192,1.1};
+  Double_t parResolTri4={0.06083,0.02579,1.15};
+  Double_t *par,*resPar;
+  if (isDeuteron) {
+    bg /= 1.875612;
+    resPar = parResolDeu3;
+    if (nClust == 4) {
+      resPar = parResolDeu4;
+    }
+  } else {
+    bg /= 2.808921;
+    resPar = parResolTri3;
+    if (nClust == 4) {
+      resPar = parResolTri4;
+    }
+  }
+  const Double_t beta = bg/TMath::Sqrt(1.+ bg*bg);
+  const Double_t gamma=bg / beta;
+  Double_t bb = 1.;
+  
+  if(gamma>=0. && beta>0.)
+    bb = par[0] + par[1]/bg + par[2]/(bg*bg) + par[3]/(bg*bg*bg) + par[4]/(bg*bg*bg*bg);
+  
+  const Double_t &c = resPar[2];
+  const Double_t &r = resPar[0] + resPar[1] * p;
+  
+  return (sig - bb) / (r * bb * c);
+}
+
+
 static void BinLogAxis(const TH1 *h)
 {
   //
@@ -303,6 +342,10 @@ Bool_t AODSelector::Process(Long64_t entry)
   } else {
     c_pT += fCorrectionAD(-c_pT);
   }
+  
+  if (TMath::Abs(pT) < 0.7 && (ITSnSignal < 3 || TMath::Abs(SigmaITS(ITSsignal, p, ITSnSignal, kTRUE)) > 3.)
+    return kTRUE;
+  
   
   const int j = GetPtBin(TMath::Abs(c_pT));
   if (pTPC < 3.5f) {
