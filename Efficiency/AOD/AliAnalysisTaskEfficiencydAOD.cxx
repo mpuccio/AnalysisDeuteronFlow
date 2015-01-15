@@ -66,6 +66,7 @@ fTTPCnSharedClusters(0u),
 fTTPCnSignal(0u),
 fTITSnClusters(0),
 fTITSnSignal(0),
+fTParticleSpecie(0),
 fTIsPrimary(false),
 fTIsSecondaryFromMaterial(false)
 {
@@ -104,6 +105,7 @@ void AliAnalysisTaskEfficiencydAOD::UserCreateOutputObjects(){
   fTree->Branch("TPCnSignal", &fTTPCnSignal,"TPCnSignal/s");
   fTree->Branch("ITSnClusters", &fTITSnClusters,"ITSnClusters/B");
   fTree->Branch("ITSnSignal", &fTITSnSignal,"ITSnSignal/B");
+  fTree->Branch("specie", &fTParticleSpecie,"specie/B");
   fTree->Branch("IsPrimary", &fTIsPrimary,"IsPrimary/O");
   fTree->Branch("IsSecondaryFromMaterial",&fTIsSecondaryFromMaterial,"IsSecondaryFromMaterial/O");
   PostData(1,fTree);
@@ -164,7 +166,7 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
   }
   
   // Making the list of deuterons in acceptance
-  TList mcD, mcDbar;
+  TList mcD, mcDbar,mcT,mcTbar,mcHe,mcHebar;
   mcD.SetOwner(kFALSE);
   mcDbar.SetOwner(kFALSE);
   for (int iMC = 0; iMC < stack->GetEntriesFast(); ++iMC) {
@@ -173,10 +175,19 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     if (TMath::Abs(part->Y()) > 1.) continue;
     const float pt = part->Pt();
     const int pdg = part->GetPdgCode();
+    
     if (pdg == 1000010020) {
       mcD.Add(part);
     } else if (pdg == -1000010020) {
       mcDbar.Add(part);
+    } else if (pdg == 1000010030) {
+      mcT.Add(part);
+    } else if (pdg == -1000010030) {
+      mcTbar.Add(part);
+    } else if (pdg == 1000020030) {
+      mcHe.Add(part);
+    } else if (pdg == -1000020030) {
+      mcHebar.Add(part);
     }
   }
   
@@ -210,13 +221,23 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     AliAODMCParticle *part = (AliAODMCParticle*)stack->At(track->GetLabel());
     if (!part) continue;
     
-    int isDeuteron = 2;
+    int isDeuteron = 4;
     if (mcD.Contains(part)) {
       isDeuteron = 1;
     } else if (mcDbar.Contains(part)) {
       isDeuteron = -1;
+    } else if (mcT.Contains(part)) {
+      isDeuteron = 2;
+    } else if (mcTbar.Contains(part)) {
+      isDeuteron = -2;
+    } else if (mcHe.Contains(part)) {
+      isDeuteron = 3;
+    } else if (mcHebar.Contains(part)) {
+      isDeuteron = -3;
     }
-    if (isDeuteron == 2) continue;
+
+    if (isDeuteron == 4) continue;
+    fTParticleSpecie = isDeuteron;
     
     fTpMC = part->P();
     fTpTMC = isDeuteron * part->Pt();
@@ -247,10 +268,29 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     fTIsSecondaryFromMaterial = part->IsSecondaryFromMaterial();
     
     fTree->Fill();
+    
+    switch (isDeuteron) {
+      case 1:
+        mcD.Remove(part);
+        break;
+      case -1:
+        mcDbar.Remove(part);
+        break;
+      case 2:
+        mcT.Remove(part);
+        break;
+      case -2:
+        mcTbar.Remove(part);
+        break;
+      case 3:
+        mcHe.Remove(part);
+        break;
+      case -3:
+        mcHebar.Remove(part);
+        break;
+    }
     if (isDeuteron == 1)
-      mcD.Remove(part);
     else
-      mcDbar.Remove(part);
     
   } // End AOD track loop
   

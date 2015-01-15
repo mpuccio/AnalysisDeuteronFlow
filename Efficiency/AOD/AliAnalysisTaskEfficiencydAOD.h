@@ -48,6 +48,7 @@ private:
   UShort_t        fTTPCnSignal;
   Char_t          fTITSnClusters;
   Char_t          fTITSnSignal;
+  Char_t          fTParticleSpecie;
   Bool_t          fTIsPrimary;
   Bool_t          fTIsSecondaryFromMaterial;
   
