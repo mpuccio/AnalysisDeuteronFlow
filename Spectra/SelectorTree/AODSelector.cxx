@@ -45,7 +45,7 @@ Double_t SigmaITS(Double_t sig, Double_t p, Int_t nClust, Bool_t isDeuteron) {
   Double_t parResolDeu4[3]={0.06756,0.02078,1.05};
   Double_t parResolTri3[3]={0.07239,0.0192,1.1};
   Double_t parResolTri4[3]={0.06083,0.02579,1.15};
-  Double_t *par,*resPar;
+  const Double_t *par,*resPar;
   if (isDeuteron) {
     bg /= 1.875612;
     resPar = parResolDeu3;
