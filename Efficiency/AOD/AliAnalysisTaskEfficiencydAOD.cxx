@@ -173,7 +173,6 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     AliAODMCParticle *part = (AliAODMCParticle*)stack->UncheckedAt(iMC);
     if (TMath::Abs(part->Eta()) > 1.) continue;
     if (TMath::Abs(part->Y()) > 1.) continue;
-    const float pt = part->Pt();
     const int pdg = part->GetPdgCode();
     
     if (pdg == 1000010020) {
@@ -288,9 +287,9 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
       case -3:
         mcHebar.Remove(part);
         break;
+      default:
+        break;
     }
-    if (isDeuteron == 1)
-    else
     
   } // End AOD track loop
   
