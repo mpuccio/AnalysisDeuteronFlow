@@ -11,7 +11,7 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     start = 0;
     nRuns = 36;
   }
-  else if (who.Contains("stefania",TString::kIgnoreCase)) {
+  else if (who.Contains("vanessa",TString::kIgnoreCase)) {
     start = 36;
     nRuns = 36;
   }
@@ -274,7 +274,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   plugin->SetExecutable(Form("%s.sh",taskname));
   
   // set number of test files to use in "test" mode
-  plugin->SetNtestFiles(2);
+  plugin->SetNtestFiles(10);
   
   // file containing a list of chuncks to be used for testin
   plugin->SetFileForTestMode("testdata");
