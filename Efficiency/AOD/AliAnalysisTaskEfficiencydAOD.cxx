@@ -190,12 +190,14 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     }
   }
   
+  int mcEntries = stack->GetEntries();
+  
   // Checking how many deuterons in acceptance are reconstructed well
   for (Int_t iT = 0; iT < (Int_t)ev->GetNumberOfTracks(); ++iT) {
     AliAODTrack *track = dynamic_cast<AliAODTrack*>(ev->GetTrack(iT));
     // Skip fake tracks
-    if (track->GetLabel() < 0) continue;
     if (track->GetID() <= 0) continue;
+    if (TMath::Abs(track->GetLabel()) >= mcEntries) continue;
     // Track cuts
     ULong_t status = track->GetStatus();
     if (!(status & AliVTrack::kITSrefit)) continue;
@@ -217,7 +219,7 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     Bool_t hasTOF = Bool_t(hasTOFout & hasTOFtime) && length > 350.f;
     
     // Getting the particle and checking if it is in one of the two lists of MC particles
-    AliAODMCParticle *part = (AliAODMCParticle*)stack->At(track->GetLabel());
+    AliAODMCParticle *part = (AliAODMCParticle*)stack->At(TMath::Abs(track->GetLabel()));
     if (!part) continue;
     
     int isDeuteron = 4;

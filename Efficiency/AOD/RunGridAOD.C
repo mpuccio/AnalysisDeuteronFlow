@@ -9,28 +9,18 @@ Int_t iAODAddMCBranch  = 0;
 void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
   if (who.Contains("maximiliano",TString::kIgnoreCase)) {
     start = 0;
-    nRuns = 20;
-  }
-  else if (who.Contains("simone",TString::kIgnoreCase)) {
-    start = 20;
-    nRuns = 20;
+    nRuns = 36;
   }
   else if (who.Contains("stefania",TString::kIgnoreCase)) {
-    start = 40;
-    nRuns = 20;
+    start = 36;
+    nRuns = 36;
   }
-  else if (who.Contains("stefano",TString::kIgnoreCase)) {
-    start = 60;
-    nRuns = 20;
-  }
+
   else if (who.Contains("massimo",TString::kIgnoreCase)) {
-    start = 80;
-    nRuns = 20;
+    start = 72;
+    nRuns = 36;
   }
-  else if (who.Contains("elena",TString::kIgnoreCase)) {
-    start = 100;
-    nRuns = 20;
-  }
+
   else {
     start = 0;
     nRuns = 108;
@@ -122,7 +112,7 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
   AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
   
-  gROOT->LoadMacro("./AliAnalysisTaskEfficiencydAOD.cxx++g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
+  gROOT->LoadMacro("./AliAnalysisTaskEfficiencydAOD.cxx+");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
   gROOT->LoadMacro("./AddTaskEfficiencydAOD.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
   AliAnalysisTaskEfficiencydAOD *task = AddTaskEfficiencydAOD();//kTRUE);
   if(!task) ::Error("Task uninitialized.");
@@ -215,7 +205,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
     plugin->AddRunNumber(runlist[i]);
   }
 
-  plugin->SetNrunsPerMaster(27);
+  plugin->SetNrunsPerMaster(12);
   plugin->SetOutputToRunNo();
   
   
@@ -278,7 +268,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   plugin->SetAnalysisMacro(Form("%s.C",taskname));
   
   // Optionally set maximum number of input files/subjob (default 100, put 0 to ignore)
-  plugin->SetSplitMaxInputFileNumber(35);
+  plugin->SetSplitMaxInputFileNumber(25);
   
   // Optionally modify the executable name (default analysis.sh)
   plugin->SetExecutable(Form("%s.sh",taskname));
