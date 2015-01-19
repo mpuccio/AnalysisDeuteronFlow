@@ -61,7 +61,6 @@ private:
   Float_t  fTEta;
   Float_t  fTTPCsignal;
   Float_t  fTchi2NDF;
-  Float_t  fTITSsignal;
   Float_t  fTTOFtime;
   Float_t  fTDCAxy;
   Float_t  fTDCAz;
@@ -69,15 +68,17 @@ private:
   Float_t  fTpTPC;
   Float_t  fTpT;
   Float_t  fTLength;
+  Float_t  fTITSsigmad;
+  Float_t  fTITSsigmat;
   Float_t  fTTPCsigmad;
   Float_t  fTTPCsigmat;
   Int_t    fTFilterMap;
-  UShort_t fTITSnClust;
-  UShort_t fTITSnSignal;
   UShort_t fTTPCnClust;
   UShort_t fTTPCnClustShared;
   UShort_t fTTPCnSignal;
   UShort_t fTTrigger;
+  UChar_t  fTITSnClust;
+  UChar_t  fTITSnSignal;
   
   // Constants
   const Int_t           fkNTriggers;                        //  Number of used triggers

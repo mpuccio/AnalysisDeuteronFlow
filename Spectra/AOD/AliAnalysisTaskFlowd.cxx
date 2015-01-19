@@ -66,7 +66,6 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fTEta(0)
 ,fTTPCsignal(0)
 ,fTchi2NDF(0)
-,fTITSsignal(0)
 ,fTTOFtime(0)
 ,fTDCAxy(0)
 ,fTDCAz(0)
@@ -74,6 +73,8 @@ AliAnalysisTaskFlowd::AliAnalysisTaskFlowd(const char* name)
 ,fTpTPC(0)
 ,fTpT(0)
 ,fTLength(0)
+,fTITSsigmad(0)
+,fTITSsigmat(0)
 ,fTTPCsigmad(0)
 ,fTTPCsigmat(0)
 ,fTFilterMap(0)
@@ -237,27 +238,28 @@ void AliAnalysisTaskFlowd::UserCreateOutputObjects()
   if(fFillTree) {
     OpenFile(2);
     fTTree = new TTree("deuterons","deuteron candidates");
-    fTTree->Branch("centrality", &fTCentrality);
-    fTTree->Branch("eta",&fTEta);
-    fTTree->Branch("TPCsignal",&fTTPCsignal);
-    fTTree->Branch("chi2NDF", &fTchi2NDF);
-    fTTree->Branch("ITSsignal", &fTITSsignal);
-    fTTree->Branch("TOFtime", &fTTOFtime);
-    fTTree->Branch("DCAxy", &fTDCAxy);
-    fTTree->Branch("DCAz", &fTDCAz);
-    fTTree->Branch("p", &fTp);
-    fTTree->Branch("pTPC", &fTpTPC);
-    fTTree->Branch("pT", &fTpT);
-    fTTree->Branch("length", &fTLength);
-    fTTree->Branch("TPCsigmad", &fTTPCsigmad);
-    fTTree->Branch("TPCsigmat", &fTTPCsigmat);
-    fTTree->Branch("FilterMap", &fTFilterMap);
-    fTTree->Branch("ITSnClust", &fTITSnClust);
-    fTTree->Branch("ITSnSignal", &fTITSnSignal);
-    fTTree->Branch("TPCnClust", &fTTPCnClust);
-    fTTree->Branch("TPCnClustShared", &fTTPCnClustShared);
-    fTTree->Branch("TPCnSignal", &fTTPCnSignal);
-    fTTree->Branch("trigger", &fTTrigger);
+    fTTree->Branch("centrality", &fTCentrality,"/F");
+    fTTree->Branch("eta",&fTEta,"/F");
+    fTTree->Branch("TPCsignal",&fTTPCsignal,"TPCsignal/F");
+    fTTree->Branch("chi2NDF", &fTchi2NDF,"chi2NDF/F");
+    fTTree->Branch("TOFtime", &fTTOFtime,"TOFtime/F");
+    fTTree->Branch("DCAxy", &fTDCAxy,"DCAxy/F");
+    fTTree->Branch("DCAz", &fTDCAz,"DCAz/F");
+    fTTree->Branch("p", &fTp,"p/F");
+    fTTree->Branch("pTPC", &fTpTPC,"pTPC/F");
+    fTTree->Branch("pT", &fTpT,"pT/F");
+    fTTree->Branch("length", &fTLength,"length/F");
+    fTTree->Branch("ITSsigmad", &fTITSsigmad,"ITSsigmad/F");
+    fTTree->Branch("ITSsigmat", &fTITSsigmat,"ITSsigmat/F");
+    fTTree->Branch("TPCsigmad", &fTTPCsigmad,"TPCsigmad/F");
+    fTTree->Branch("TPCsigmat", &fTTPCsigmat,"TPCsigmat/F");
+    fTTree->Branch("FilterMap", &fTFilterMap,"FilterMap/I");
+    fTTree->Branch("TPCnClust", &fTTPCnClust,"TPCnClust/s");
+    fTTree->Branch("TPCnClustShared", &fTTPCnClustShared,"TPCnClustShared/s");
+    fTTree->Branch("TPCnSignal", &fTTPCnSignal,"TPCnSignal/s");
+    fTTree->Branch("trigger", &fTTrigger,"trigger/s");
+    fTTree->Branch("ITSnClust", &fTITSnClust,"ITSnClust/b");
+    fTTree->Branch("ITSnSignal", &fTITSnSignal,"ITSnSignal/b");
 
     fTTree->SetAutoSave(100000000);
     PostData(2,fTTree);
@@ -432,14 +434,13 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       continue;
     
     
-    if((fAODpid->NumberOfSigmasTPC(track,AliPID::kProton) >= -3.f && ptot < 1.2f) || ptot >= 1.2f)
+    if((fAODpid->NumberOfSigmasTPC(track,AliPID::kDeuteron) >= -4.f && ptot < 1.2f) || ptot >= 1.2f)
     {
       fTEta        = track->Eta();                                                  // eta
       fTTPCnClust  = track->GetTPCNcls();                                           // TPCnClust
       fTTPCsignal  = track->GetTPCsignal();                                         // TPCsignal
       fTTPCnSignal = track->GetTPCsignalN();                                        // TPCnSignal
       fTchi2NDF    = track->Chi2perNDF();                                           // TPCchi2
-      fTITSsignal  = track->GetITSsignal();                                         // ITSsignal
       fTITSnClust  = nITS;                                                          // ITSnClust
       fTITSnSignal = nITS - nSPD;                                                   // ITSnClustPID
       fTTOFtime    = hasTOF ? time : -1.f;                                          // TOFtime
@@ -449,6 +450,8 @@ void AliAnalysisTaskFlowd::UserExec(Option_t *)
       fTpTPC       = ptot;                                                          // pTPC
       fTpT         = sign * track->Pt();                                            // pT
       fTLength     = length;                                                        // length
+      fTITSsigmad  = fAODpid->NumberOfSigmasITS(track, AliPID::kDeuteron);          // TPCsigmad
+      fTITSsigmat  = fAODpid->NumberOfSigmasITS(track, AliPID::kTriton);            // TPCsigmat
       fTTPCsigmad  = fAODpid->NumberOfSigmasTPC(track, AliPID::kDeuteron);          // TPCsigmad
       fTTPCsigmat  = fAODpid->NumberOfSigmasTPC(track, AliPID::kTriton);            // TPCsigmat
       fTFilterMap  = track->GetFilterMap();
