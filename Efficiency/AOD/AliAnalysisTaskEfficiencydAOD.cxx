@@ -105,7 +105,7 @@ void AliAnalysisTaskEfficiencydAOD::UserCreateOutputObjects(){
   fTree->Branch("ITSnClusters", &fTITSnClusters,"ITSnClusters/B");
   fTree->Branch("ITSnSignal", &fTITSnSignal,"ITSnSignal/B");
   fTree->Branch("specie", &fTParticleSpecie,"specie/B");
-  fTree->Branch("info", &fTInfo,"info/O");
+  fTree->Branch("info", &fTInfo,"info/B");
   PostData(1,fTree);
   
   
@@ -186,14 +186,14 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     }
   }
   
-  int mcEntries = stack->GetEntries();
+  int mcEntries = stack->GetEntriesFast();
   
   // Checking how many deuterons in acceptance are reconstructed well
+  int isFirst = 1;
   for (Int_t iT = 0; iT < (Int_t)ev->GetNumberOfTracks(); ++iT) {
     AliAODTrack *track = dynamic_cast<AliAODTrack*>(ev->GetTrack(iT));
     // Skip fake tracks
     if (track->GetID() <= 0) continue;
-    if (TMath::Abs(track->GetLabel()) >= mcEntries) continue;
     // Track cuts
     ULong_t status = track->GetStatus();
     if (!(status & AliVTrack::kITSrefit)) continue;
@@ -262,10 +262,13 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     fTITSnClusters = nITS;
     fTITSnSignal = nITS - nSPD;
     fTInfo = 0;
-    if (part->IsPhysicalPrimary()) fTInfo |= BIT(0);
-    if (part->IsSecondaryFromMaterial()) fTInfo |= BIT(1);
-    if (track->GetLabel() < 0) fTInfo |= BIT(2);
-    
+    if (part->IsPhysicalPrimary()) fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
+    if (track->GetLabel() < 0) fTInfo += 4;
+    if (isFirst >= 0) {
+      fTcentrality = -fTcentrality;
+      --isFirst;
+    }
     fTree->Fill();
     
     switch (isDeuteron) {
@@ -315,8 +318,8 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     fTphiMC = part->Phi();
     fTyMC = part->Y();
     fTInfo = 0;
-    if (part->IsPhysicalPrimary())       fTInfo |= BIT(0);
-    if (part->IsSecondaryFromMaterial()) fTInfo |= BIT(1);
+    if (part->IsPhysicalPrimary())       fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
     fTree->Fill();
   }
   
@@ -328,8 +331,8 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     fTphiMC = part->Phi();
     fTyMC = part->Y();
     fTInfo = 0;
-    if (part->IsPhysicalPrimary())       fTInfo |= BIT(0);
-    if (part->IsSecondaryFromMaterial()) fTInfo |= BIT(1);
+    if (part->IsPhysicalPrimary())       fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
     fTree->Fill();
   }
   //  Post output data.
