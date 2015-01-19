@@ -11,7 +11,7 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     start = 0;
     nRuns = 36;
   }
-  else if (who.Contains("vanessa",TString::kIgnoreCase)) {
+  else if (who.Contains("stefania",TString::kIgnoreCase)) {
     start = 36;
     nRuns = 36;
   }
