@@ -119,7 +119,7 @@ void RunGrid(TString runtype = "grid", // local, proof or grid
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
   AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
   
-  gROOT->LoadMacro("./AliAnalysisTaskFlowd.cxx+g");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
+  gROOT->LoadMacro("./AliAnalysisTaskFlowd.cxx++");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
   gROOT->LoadMacro("./AddTaskFlowd.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
   AliAnalysisTaskFlowd *task = AddTaskFlowd(kTRUE);//kTRUE);
   
@@ -154,7 +154,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   
   plugin->SetAPIVersion("V1.1x");
   plugin->SetROOTVersion("v5-34-08");
-  plugin->SetAliROOTVersion("vAN-20140915");
+  plugin->SetAliROOTVersion("vAN-20150101");
   plugin->SetExecutableCommand("aliroot -b -q");
   
   // Declare input data to be processed.
@@ -201,7 +201,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   //   plugin->AddDataFile("/alice/data/2008/LHC08c/000057657/raw/Run57657.Merged.RAW.tag.root");
   
   // Define alien work directory where all files will be copied. Relative to alien $HOME.
-  plugin->SetGridWorkingDir("NucleiPbPb2011test");
+  plugin->SetGridWorkingDir("NucleiPbPb2011");
   
   // Declare alien output directory. Relative to working directory.
   plugin->SetGridOutputDir("output"); // In this case will be $HOME/taskname/out
