@@ -209,9 +209,9 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     for (int i = 0; i < kNBinsTOF; ++i) {
       int j = i + kNBinsTPC;
       fSignalAD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),
-                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),50,-2.0,2.0);
+                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),75,-2.0,4.0);
       fSignalD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalD%i_%i",cent,i),
-                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),50,-2.0,2.0);
+                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),75,-2.0,4.0);
       GetOutputList()->Add(fSignalD[cent * kNBinsTOF + i]);
       GetOutputList()->Add(fSignalAD[cent * kNBinsTOF + i]);
     }
@@ -237,7 +237,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     for (int i = 0; i < kNDCAbinsTOF; ++i) {
       fDCASignal[k * kNDCAbinsTOF + i] = new TH2F(Form("fDCASignal%i_%i",k,i),
                                        ";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",
-                                       50,-2.0,2.0,160,-0.5f,0.5f);
+                                       75,-2.0,4.0,160,-0.5f,0.5f);
       GetOutputList()->Add(fDCASignal[k * kNDCAbinsTOF + i]);
     }
   }
