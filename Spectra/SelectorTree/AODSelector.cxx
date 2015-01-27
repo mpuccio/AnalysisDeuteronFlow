@@ -249,6 +249,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fTPCSignalN);
   GetOutputList()->Add(fTriggerHist);
   GetOutputList()->Add(fCentrality);
+  GetOutputList()->Add(fCentralityNoFlat);
   GetOutputList()->Add(fCentralityClass);
   GetOutputList()->Add(fBeta);
   GetOutputList()->Add(fBeta2D);
