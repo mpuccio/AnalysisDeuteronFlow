@@ -143,6 +143,7 @@ private:
   TH1F*            fdEdxTPCSignalCountsAD[kNCent];
   TH1F*            fCentrality;
   TH1F*            fCentralityClass;
+  TH1F*            fCentralityNoFlat;
   TH1F*            fGamma;
   TH2F*            fdEdxTriton;
   TH2F*            fdEdxDeuteron;

@@ -180,6 +180,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fBeta2DPt = new TH2F("fBeta2DPt","TOF; p_{T} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
   fCentrality = new TH1F("fCentrality",";Centrality;Events / 1%",100,0,100);
   fCentralityClass = new TH1F("fCentralityClass",";Centrality Class; Events / Class",kNCent,fCentralityClasses);
+  fCentralityNoFlat = new TH1F("fCentralityNoFlat",";Centrality;Events / 1%",100,0,100);
   fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
   fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
   fDCA2D = new TH2F("fDCA2D",";DCA_{xy} (cm);DCA_{z} (cm);Entries",500,-0.5f,0.5f,600,-0.6f,0.6f);
@@ -293,6 +294,7 @@ Bool_t AODSelector::Process(Long64_t entry)
       fCentralityClass->Fill(-centrality);
       fTriggerHist->Fill(Log2Int(trigger));
     }
+    fCentralityNoFlat->Fill(-centrality);
   }
   if (fSkipEvent) return kTRUE;
   
@@ -458,6 +460,11 @@ void AODSelector::Terminate()
   fCentrality = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fCentrality"));
   if (fCentrality) {
     fCentrality->Write();
+  }
+  
+  fCentralityNoFlat = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fCentralityNoFlat"));
+  if (fCentralityNoFlat) {
+    fCentralityNoFlat->Write();
   }
   
   fCentralityClass = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fCentralityClass"));
