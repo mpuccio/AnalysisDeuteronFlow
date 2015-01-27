@@ -328,8 +328,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   }
   if (TMath::Abs(TPCsigmat) < 3.) {
     fdEdxTriton->Fill(pTPC,TPCsignal);
-  } else
-    return kTRUE;
+  }
   
   if (ITSnClust - ITSnSignal <= 0) return kTRUE;
   if (TMath::Abs(DCAz) > 2.f) return kTRUE;
@@ -348,7 +347,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   const int j = GetPtBin(TMath::Abs(c_pT));
   if (pTPC < 3.5f) {
-    if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
+    if (TMath::Abs(TPCsigmat) < 3.) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
       if (TMath::Abs(c_pT) < fBins[kNBinsTPC]) {
         if (c_pT >= fBins[0]) {
