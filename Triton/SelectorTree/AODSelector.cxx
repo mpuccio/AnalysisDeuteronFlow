@@ -328,7 +328,8 @@ Bool_t AODSelector::Process(Long64_t entry)
   }
   if (TMath::Abs(TPCsigmat) < 3.) {
     fdEdxTriton->Fill(pTPC,TPCsignal);
-  }
+  } else
+    return kTRUE;
   
   if (ITSnClust - ITSnSignal <= 0) return kTRUE;
   if (TMath::Abs(DCAz) > 2.f) return kTRUE;
@@ -344,10 +345,6 @@ Bool_t AODSelector::Process(Long64_t entry)
   } else {
     c_pT += fCorrectionAD(-c_pT);
   }
-  
-  if (TMath::Abs(pT) < 0.7 && (ITSnSignal < 3 || TMath::Abs(SigmaITS(ITSsignal, p, ITSnSignal, kTRUE)) > 3.))
-    return kTRUE;
-  
   
   const int j = GetPtBin(TMath::Abs(c_pT));
   if (pTPC < 3.5f) {
