@@ -34,47 +34,6 @@
 #include <TCanvas.h>
 #include <TRandom3.h>
 
-Double_t SigmaITS(Double_t sig, Double_t p, Int_t nClust, Bool_t isDeuteron) {
-  // isDeuteron == kFALSE -> triton
-  // taken from AliITSPIDResponse
-  
-  Double_t bg = p;
-  const Double_t bbParamDeu[5] = {76.43,-34.21,113.2,-18.12,0.6019};
-  const Double_t bbParamTri[5] = {13.34,55.17,66.41,-6.601,-0.4134};
-  Double_t parResolDeu3[3]={0.06918,0.02498,1.1};
-  Double_t parResolDeu4[3]={0.06756,0.02078,1.05};
-  Double_t parResolTri3[3]={0.07239,0.0192,1.1};
-  Double_t parResolTri4[3]={0.06083,0.02579,1.15};
-  const Double_t *par,*resPar;
-  if (isDeuteron) {
-    bg /= 1.875612;
-    resPar = parResolDeu3;
-    par = bbParamDeu;
-    if (nClust == 4) {
-      resPar = parResolDeu4;
-    }
-  } else {
-    bg /= 2.808921;
-    resPar = parResolTri3;
-    par = bbParamTri;
-    if (nClust == 4) {
-      resPar = parResolTri4;
-    }
-  }
-  const Double_t beta = bg/TMath::Sqrt(1.+ bg*bg);
-  const Double_t gamma=bg / beta;
-  Double_t bb = 1.;
-  
-  if(gamma>=0. && beta>0.)
-    bb = par[0] + par[1]/bg + par[2]/(bg*bg) + par[3]/(bg*bg*bg) + par[4]/(bg*bg*bg*bg);
-  
-  const Double_t &c = resPar[2];
-  const Double_t &r = resPar[0] + resPar[1] * p;
-  
-  return (sig - bb) / (r * bb * c);
-}
-
-
 static void BinLogAxis(const TH1 *h)
 {
   //
@@ -108,10 +67,6 @@ Double_t BetheBlochAleph(Double_t bg,
   Double_t bb = TMath::Power(1. / bg,kp5);
   bb = TMath::Log(kp3 + bb);
   return (kp2 - aa - bb) * kp1 / aa;
-}
-
-Double_t GausPol0(Double_t *x, Double_t *p) {
-  return p[0] * TMath::Gaus(x[0],p[1],p[2]) + p[3];
 }
 
 Double_t DeuteronTPC(Double_t *x, Double_t *) {
@@ -347,10 +302,6 @@ Bool_t AODSelector::Process(Long64_t entry)
   } else {
     c_pT += fCorrectionAD(-c_pT);
   }
-  
-  if (TMath::Abs(pT) < 0.7 && (ITSnSignal < 3 || TMath::Abs(SigmaITS(ITSsignal, p, ITSnSignal, kTRUE)) > 3.))
-    return kTRUE;
-  
   
   const int j = GetPtBin(TMath::Abs(c_pT));
   if (pTPC < 3.5f) {
