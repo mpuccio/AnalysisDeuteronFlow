@@ -184,7 +184,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
   fDCA2D = new TH2F("fDCA2D",";DCA_{xy} (cm);DCA_{z} (cm);Entries",500,-0.5f,0.5f,600,-0.6f,0.6f);
   fDCAz = new TH1F("fDCAz",";DCA_{z} (cm);Entries",4000,-4.f,4.f);
-  fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
+  fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",1000,-10,10.,500,0,2000);
   fdEdxTPCpT = new TH2F("fdEdxTPCpT",";p_{T} (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
   fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,2000,0,2000);
   fTPCSignalN = new TH1F("fTPCSignalN",";#clusters for PID;Entries",161,-0.5f,160.5f);
@@ -208,10 +208,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   
   for (int cent = 0; cent < kNCent; ++cent) {
     for (int iB = 0; iB < kNBins; ++iB) {
-      fdEdxTPCSignalSlicesD[cent * kNBins + iB] = new TH1F(Form("fTPCSignalD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;p (GeV/c);dE/dx (a.u.)",fBins[iB],fBins[iB+1]),2500,0,2500);
-      fdEdxTPCSignalSlicesAD[cent * kNBins + iB] = new TH1F(Form("fTPCSignalAD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;p (GeV/c);dE/dx (a.u.)",fBins[iB],fBins[iB+1]),2500,0,2500);
-      fdEdxITSSignalSlicesD[cent * kNBins + iB] = new TH1F(Form("fITSSignalD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;p (GeV/c);dE/dx (a.u.)",fBins[iB],fBins[iB+1]),2500,0,2500);
-      fdEdxITSSignalSlicesAD[cent * kNBins + iB] = new TH1F(Form("fITSSignalAD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;p (GeV/c);dE/dx (a.u.)",fBins[iB],fBins[iB+1]),2500,0,2500);
+      fdEdxTPCSignalSlicesD[cent * kNBins + iB] = new TH1F(Form("fTPCSignalD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
+      fdEdxTPCSignalSlicesAD[cent * kNBins + iB] = new TH1F(Form("fTPCSignalAD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
+      fdEdxITSSignalSlicesD[cent * kNBins + iB] = new TH1F(Form("fITSSignalD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
+      fdEdxITSSignalSlicesAD[cent * kNBins + iB] = new TH1F(Form("fITSSignalAD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
       GetOutputList()->Add(fdEdxTPCSignalSlicesAD[cent * kNBins + iB]);
       GetOutputList()->Add(fdEdxTPCSignalSlicesD[cent * kNBins + iB]);
       GetOutputList()->Add(fdEdxITSSignalSlicesAD[cent * kNBins + iB]);
@@ -331,7 +331,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   fTPCSignalN->Fill(TPCnSignal);
   
   
-  fdEdxTPC->Fill(pTPC,TPCsignal);
+  fdEdxTPC->Fill((pT > 0) ? pTPC : -pTPC,TPCsignal);
   fdEdxTPCpT->Fill(TMath::Abs(pT),TPCsignal);
   fdEdxTPCproj->Fill(pTPC,TPCsignal);
   if (TMath::Abs(TPCsigmad) < 3.) {
