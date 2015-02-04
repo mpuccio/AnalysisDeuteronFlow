@@ -576,6 +576,7 @@ void AODSelector::Terminate()
       hprim->Write();
       hseco->Write();
     }
+    
     f.cd();
     f.mkdir(Form("TPCs%i",cent));
     f.mkdir(Form("ITSs%i",cent));
@@ -598,6 +599,7 @@ void AODSelector::Terminate()
       fdEdxTPCSignalSlicesAD[cent * kNBins + iB]->Write();
       f.cd();
     }
+
   }
   
   f.mkdir("TOFSignal");

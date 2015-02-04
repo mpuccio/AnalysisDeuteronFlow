@@ -6,7 +6,7 @@
   TString user[3] = {"m/mpuccio","m/masera","s/sbufalin"};
   for (int i = 0; i < 3; ++i)
   {
-    TString ddset = Form("Find;BasePath=/alice/cern.ch/user/%s/NucleiPbPb2011test/output;FileName=*/root_archive.zip;Anchor=mpuccio_Flowdnt.root;Tree=/deuterons;Mode=local",user[i].Data());
+    TString ddset = Form("Find;BasePath=/alice/cern.ch/user/%s/NucleiPbPb2011/output;FileName=*/root_archive.zip;Anchor=mpuccio_Flowdnt.root;Tree=/deuterons;Mode=local",user[i].Data());
 
     TFileCollection *fc = gProof->GetDataSet(ddset.Data());
 
