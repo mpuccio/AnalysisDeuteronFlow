@@ -152,7 +152,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fdEdxTriton = new TH2F("fdEdxTriton",";p (GeV/c);dE/dx (a.u.)",560,0.4,3.2,2000,0,2000);
   fdEdxDeuteron = new TH2F("fdEdxDeuteron",";p (GeV/c);dE/dx (a.u.)",560,0.4,3.2,2000,0,2000);
 
-  BinLogAxis(fdEdxTPC);
+  //BinLogAxis(fdEdxTPC);
 
   const Char_t* aTriggerNames[] = { "kMB", "kCentral", "kSemiCentral", "kEMCEJE", "kEMCEGA" };
   for (Int_t ii = 1; ii <= 5; ++ii)
@@ -318,11 +318,13 @@ Bool_t AODSelector::Process(Long64_t entry)
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
       if (TMath::Abs(c_pT) < fBins[kNBinsTPC]) {
         if (c_pT >= fBins[0]) {
+          fdEdxTPCSignalSlicesD[cent * kNBins + j]->Fill(TPCsignal);
           fdEdxTPCSignalCounts[cent]->Fill(c_pT);
           fDdcaXY[cent]->Fill(c_pT,DCAxy);
           fDdcaZ[cent]->Fill(c_pT,DCAz);
         } else if (c_pT <= -fBins[0]) {
           fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(c_pT));
+          fdEdxTPCSignalSlicesAD[cent * kNBins + j]->Fill(TPCsignal);
         }
       }
       if (TOFtime > 0.f && length > 0.f) {
@@ -354,6 +356,13 @@ Bool_t AODSelector::Process(Long64_t entry)
     }
   } else {
     fdEdxTPCSignal->Fill(pTPC,TPCsignal);
+    if (TMath::Abs(c_pT) < fBins[kNBinsTPC]) {
+      if (c_pT >= fBins[0]) {
+        fdEdxTPCSignalSlicesD[cent * kNBins + j]->Fill(TPCsignal);
+      } else if (c_pT <= -fBins[0]) {
+        fdEdxTPCSignalSlicesAD[cent * kNBins + j]->Fill(TPCsignal);
+      }
+    }
     if (TOFtime > 0.f && length > 0.f) {
       Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
       fBeta->Fill(beta);
