@@ -337,7 +337,6 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
   }
   
   TListIter nextT(&mcT);
-  AliAODMCParticle *part;
   while ((part = (AliAODMCParticle*)nextT())) {
     fTpMC = part->P();
     fTpTMC = part->Pt();
@@ -364,7 +363,6 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
   }
   
   TListIter nextHe(&mcHe);
-  AliAODMCParticle *part;
   while ((part = (AliAODMCParticle*)nextHe())) {
     fTpMC = part->P();
     fTpTMC = part->Pt();
