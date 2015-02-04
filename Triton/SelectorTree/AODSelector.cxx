@@ -202,7 +202,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int i = 0; i < kNBinsTOF; ++i) {
     fTOFSignal[i] = new TH1F(Form("fTOFSignal%i",i),
                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",
-                                  fBins[i+kNBinsTPC],fBins[i+1+kNBinsTPC]),50,-2.0,2.0);
+                                  fBins[i+kNBinsTPC],fBins[i+1+kNBinsTPC]),40,-1.6,1.6);
     GetOutputList()->Add(fTOFSignal[i]);
   }
   
@@ -210,19 +210,15 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     for (int iB = 0; iB < kNBins; ++iB) {
       fdEdxTPCSignalSlicesD[cent * kNBins + iB] = new TH1F(Form("fTPCSignalD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
       fdEdxTPCSignalSlicesAD[cent * kNBins + iB] = new TH1F(Form("fTPCSignalAD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
-      fdEdxITSSignalSlicesD[cent * kNBins + iB] = new TH1F(Form("fITSSignalD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
-      fdEdxITSSignalSlicesAD[cent * kNBins + iB] = new TH1F(Form("fITSSignalAD%i_%i",cent,iB),Form("%4.2f<p_{T}#leq%4.2f;dE/dx (a.u.); Entries",fBins[iB],fBins[iB+1]),2500,0,2500);
       GetOutputList()->Add(fdEdxTPCSignalSlicesAD[cent * kNBins + iB]);
       GetOutputList()->Add(fdEdxTPCSignalSlicesD[cent * kNBins + iB]);
-      GetOutputList()->Add(fdEdxITSSignalSlicesAD[cent * kNBins + iB]);
-      GetOutputList()->Add(fdEdxITSSignalSlicesD[cent * kNBins + iB]);
     }
     for (int i = 0; i < kNBinsTOF; ++i) {
       int j = i + kNBinsTPC;
       fSignalAD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),
-                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),75,-2.0,4.0);
+                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),40,-1.6,1.6);
       fSignalD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalD%i_%i",cent,i),
-                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),75,-2.0,4.0);
+                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),40,-1.6,1.6);
       GetOutputList()->Add(fSignalD[cent * kNBinsTOF + i]);
       GetOutputList()->Add(fSignalAD[cent * kNBinsTOF + i]);
     }
@@ -357,15 +353,6 @@ Bool_t AODSelector::Process(Long64_t entry)
   }
   
   const int j = GetPtBin(TMath::Abs(c_pT));
-  if (TMath::Abs(TPCsigmat) < 3.) {
-    if (c_pT > 0) {
-      fdEdxITSSignalSlicesD[cent * kNBins + j]->Fill(ITSsignal);
-      fdEdxTPCSignalSlicesD[cent * kNBins + j]->Fill(ITSsignal);
-    } else {
-      fdEdxITSSignalSlicesAD[cent * kNBins + j]->Fill(ITSsignal);
-      fdEdxTPCSignalSlicesAD[cent * kNBins + j]->Fill(ITSsignal);
-    }
-  }
   
   if (pTPC < 3.5f) {
     if (TMath::Abs(TPCsigmat) < 3.) {
@@ -581,20 +568,13 @@ void AODSelector::Terminate()
     f.mkdir(Form("TPCs%i",cent));
     f.mkdir(Form("ITSs%i",cent));
     for (int iB = 0; iB < kNBins; ++iB) {
-      fdEdxITSSignalSlicesD[cent * kNBins + iB] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fITSSignalD%i_%i",cent,iB)));
-      fdEdxITSSignalSlicesAD[cent * kNBins + iB] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fITSSignalAD%i_%i",cent,iB)));
       fdEdxTPCSignalSlicesD[cent * kNBins + iB] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fTPCSignalD%i_%i",cent,iB)));
       fdEdxTPCSignalSlicesAD[cent * kNBins + iB] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fTPCSignalAD%i_%i",cent,iB)));
-      if (!fdEdxITSSignalSlicesD[cent * kNBins + iB] || !fdEdxITSSignalSlicesAD[cent * kNBins + iB] ||
-          !fdEdxTPCSignalSlicesD[cent * kNBins + iB] || !fdEdxTPCSignalSlicesAD[cent * kNBins + iB] ) {
+      if (!fdEdxTPCSignalSlicesD[cent * kNBins + iB] || !fdEdxTPCSignalSlicesAD[cent * kNBins + iB] ) {
         cout << "Missing TPC/ITS signal " << cent << "\t" << iB << endl;
         continue;
       }
-      f.cd(Form("ITSs%i",cent));
-      fdEdxITSSignalSlicesD[cent * kNBins + iB]->Write();
-      fdEdxITSSignalSlicesAD[cent * kNBins + iB]->Write();
-      f.cd();
-      f.mkdir(Form("TPCs%i",cent));
+      f.cd(Form("TPCs%i",cent));
       fdEdxTPCSignalSlicesD[cent * kNBins + iB]->Write();
       fdEdxTPCSignalSlicesAD[cent * kNBins + iB]->Write();
       f.cd();

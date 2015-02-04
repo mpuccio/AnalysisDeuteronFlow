@@ -143,8 +143,6 @@ private:
   TH1F*            fdEdxTPCSignalCountsAD[kNCent];
   TH1F*            fdEdxTPCSignalSlicesD[kNCent * kNBins];
   TH1F*            fdEdxTPCSignalSlicesAD[kNCent * kNBins];
-  TH1F*            fdEdxITSSignalSlicesD[kNCent * kNBins];
-  TH1F*            fdEdxITSSignalSlicesAD[kNCent * kNBins];
   TH1F*            fCentrality;
   TH1F*            fCentralityClass;
   TH1F*            fGamma;
