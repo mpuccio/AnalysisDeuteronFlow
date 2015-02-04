@@ -38,50 +38,52 @@ class AODSelector : public TSelector {
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   
   // Declaration of leaf types
-  Float_t         pMC;
-  Float_t         pTMC;
-  Float_t         etaMC;
-  Float_t         phiMC;
-  Float_t         yMC;
-  Float_t         p;
-  Float_t         pT;
+  Float_t         centrality;
   Float_t         eta;
-  Float_t         phi;
-  Float_t         beta;
+  Float_t         TPCsignal;
+  Float_t         chi2NDF;
+  Float_t         TOFtime;
   Float_t         DCAxy;
   Float_t         DCAz;
-  Float_t         chi2;
-  Float_t         centrality;
-  UShort_t        TPCnClusters;
-  UShort_t        TPCnSharedClusters;
+  Float_t         p;
+  Float_t         pTPC;
+  Float_t         pT;
+  Float_t         length;
+  Float_t         ITSsigmad;
+  Float_t         ITSsigmat;
+  Float_t         TPCsigmad;
+  Float_t         TPCsigmat;
+  Int_t           FilterMap;
+  UShort_t        TPCnClust;
+  UShort_t        TPCnClustShared;
   UShort_t        TPCnSignal;
-  Char_t          ITSnClusters;
-  Char_t          ITSnSignal;
-  Char_t          specie;
-  Char_t          info;
+  UShort_t        trigger;
+  UChar_t         ITSnClust;
+  UChar_t         ITSnSignal;
   
   // List of branches
-  TBranch        *b_pMC;   //!
-  TBranch        *b_pTMC;   //!
-  TBranch        *b_etaMC;   //!
-  TBranch        *b_phiMC;   //!
-  TBranch        *b_yMC;   //!
-  TBranch        *b_p;   //!
-  TBranch        *b_pT;   //!
+  TBranch        *b_centrality;   //!
   TBranch        *b_eta;   //!
-  TBranch        *b_phi;   //!
-  TBranch        *b_beta;   //!
+  TBranch        *b_TPCsignal;   //!
+  TBranch        *b_chi2NDF;   //!
+  TBranch        *b_TOFtime;   //!
   TBranch        *b_DCAxy;   //!
   TBranch        *b_DCAz;   //!
-  TBranch        *b_chi2;   //!
-  TBranch        *b_centrality;   //!
-  TBranch        *b_TPCnClusters;   //!
-  TBranch        *b_TPCnSharedClusters;   //!
+  TBranch        *b_p;   //!
+  TBranch        *b_pTPC;   //!
+  TBranch        *b_pT;   //!
+  TBranch        *b_length;   //!
+  TBranch        *b_ITSsigmad;   //!
+  TBranch        *b_ITSsigmat;   //!
+  TBranch        *b_TPCsigmad;   //!
+  TBranch        *b_TPCsigmat;   //!
+  TBranch        *b_FilterMap;   //!
+  TBranch        *b_TPCnClust;   //!
+  TBranch        *b_TPCnClustShared;   //!
   TBranch        *b_TPCnSignal;   //!
-  TBranch        *b_ITSnClusters;   //!
+  TBranch        *b_trigger;   //!
+  TBranch        *b_ITSnClust;   //!
   TBranch        *b_ITSnSignal;   //!
-  TBranch        *b_specie;   //!
-  TBranch        *b_info;   //!
   
   AODSelector(TTree * /*tree*/ =0) : fChain(0),
   fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10),
@@ -187,27 +189,28 @@ void AODSelector::Init(TTree *tree)
   fChain = tree;
   fChain->SetMakeClass(1);
   
-  fChain->SetBranchAddress("pMC", &pMC, &b_pMC);
-  fChain->SetBranchAddress("pTMC", &pTMC, &b_pTMC);
-  fChain->SetBranchAddress("etaMC", &etaMC, &b_etaMC);
-  fChain->SetBranchAddress("phiMC", &phiMC, &b_phiMC);
-  fChain->SetBranchAddress("yMC", &yMC, &b_yMC);
-  fChain->SetBranchAddress("p", &p, &b_p);
-  fChain->SetBranchAddress("pT", &pT, &b_pT);
+  fChain->SetBranchAddress("centrality", &centrality, &b_centrality);
   fChain->SetBranchAddress("eta", &eta, &b_eta);
-  fChain->SetBranchAddress("phi", &phi, &b_phi);
-  fChain->SetBranchAddress("beta", &beta, &b_beta);
+  fChain->SetBranchAddress("TPCsignal", &TPCsignal, &b_TPCsignal);
+  fChain->SetBranchAddress("chi2NDF", &chi2NDF, &b_chi2NDF);
+  fChain->SetBranchAddress("TOFtime", &TOFtime, &b_TOFtime);
   fChain->SetBranchAddress("DCAxy", &DCAxy, &b_DCAxy);
   fChain->SetBranchAddress("DCAz", &DCAz, &b_DCAz);
-  fChain->SetBranchAddress("chi2", &chi2, &b_chi2);
-  fChain->SetBranchAddress("centrality", &centrality, &b_centrality);
-  fChain->SetBranchAddress("TPCnClusters", &TPCnClusters, &b_TPCnClusters);
-  fChain->SetBranchAddress("TPCnSharedClusters", &TPCnSharedClusters, &b_TPCnSharedClusters);
+  fChain->SetBranchAddress("p", &p, &b_p);
+  fChain->SetBranchAddress("pTPC", &pTPC, &b_pTPC);
+  fChain->SetBranchAddress("pT", &pT, &b_pT);
+  fChain->SetBranchAddress("length", &length, &b_length);
+  fChain->SetBranchAddress("ITSsigmad", &ITSsigmad, &b_ITSsigmad);
+  fChain->SetBranchAddress("ITSsigmat", &ITSsigmat, &b_ITSsigmat);
+  fChain->SetBranchAddress("TPCsigmad", &TPCsigmad, &b_TPCsigmad);
+  fChain->SetBranchAddress("TPCsigmat", &TPCsigmat, &b_TPCsigmat);
+  fChain->SetBranchAddress("FilterMap", &FilterMap, &b_FilterMap);
+  fChain->SetBranchAddress("TPCnClust", &TPCnClust, &b_TPCnClust);
+  fChain->SetBranchAddress("TPCnClustShared", &TPCnClustShared, &b_TPCnClustShared);
   fChain->SetBranchAddress("TPCnSignal", &TPCnSignal, &b_TPCnSignal);
-  fChain->SetBranchAddress("ITSnClusters", &ITSnClusters, &b_ITSnClusters);
+  fChain->SetBranchAddress("trigger", &trigger, &b_trigger);
+  fChain->SetBranchAddress("ITSnClust", &ITSnClust, &b_ITSnClust);
   fChain->SetBranchAddress("ITSnSignal", &ITSnSignal, &b_ITSnSignal);
-  fChain->SetBranchAddress("specie", &specie, &b_specie);
-  fChain->SetBranchAddress("info", &info, &b_info);
 }
 
 Bool_t AODSelector::Notify()
