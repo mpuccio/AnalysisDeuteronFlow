@@ -24,7 +24,7 @@ class TF1;
 #define M2D MD*MD
 #define kNCent 5
 #define kNBins 16
-#define kNBinsTPC 3
+#define kNBinsTPC 2
 #define kNDCABins 9
 #define kNBinsTOF (kNBins - kNBinsTPC)
 #define kNDCAbinsTOF (kNDCABins - kNBinsTPC)
