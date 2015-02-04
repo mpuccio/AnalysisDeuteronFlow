@@ -145,7 +145,8 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   
   plugin->SetAPIVersion("V1.1x");
   plugin->SetROOTVersion("v5-34-08");
-  plugin->SetAliROOTVersion("vAN-20150128");
+  plugin->SetAliROOTVersion("v5-06-00");
+  plugin->SetAliPhysicsVersion("vAN-20150120");
   plugin->SetExecutableCommand("aliroot -b -q");
   
   // Declare input data to be processed.
