@@ -15,12 +15,10 @@ void GetRunList(TString who = "all", Int_t &start, Int_t &nRuns) {
     start = 36;
     nRuns = 36;
   }
-
   else if (who.Contains("massimo",TString::kIgnoreCase)) {
     start = 72;
     nRuns = 36;
   }
-
   else {
     start = 0;
     nRuns = 108;
@@ -58,7 +56,7 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
   // Load analysis specific libraries
   //=====================================================================
   
-  gSystem->SetIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/ITS -I$ALICE_ROOT/TPC -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER/STEER -I$ALICE_ROOT/STEER/STEERBase -I$ALICE_ROOT/STEER/ESD -I$ALICE_ROOT/STEER/AOD -I$ALICE_ROOT/TRD -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS  -I$ALICE_ROOT/OADB -I$ALICE_ROOT/PWGHF -I$ALICE_ROOT/PWGHF/base -I$ALICE_ROOT/PWGHF/vertexingHF -I$ALICE_ROOT/PWG/FLOW/Base -I$ALICE_ROOT/PWG/FLOW/Tasks -g");
+  gSystem->SetIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/ITS -I$ALICE_ROOT/TPC -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER/STEER -I$ALICE_ROOT/STEER/STEERBase -I$ALICE_ROOT/STEER/ESD -I$ALICE_ROOT/STEER/AOD -I$ALICE_ROOT/TRD -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS  -I$ALICE_ROOT/OADB -I$ALICE_PHYSICS/PWGHF -I$ALICE_PHYSICS/PWGHF/base -I$ALICE_PHYSICS/PWGHF/vertexingHF -I$ALICE_PHYSICS/PWG/FLOW/Base -I$ALICE_PHYSICS/PWG/FLOW/Tasks -I$ALICE_PHYSICS/include -g");
   
   gSystem->Load("libTree.so");
   gSystem->Load("libGeom.so");
@@ -147,7 +145,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   
   plugin->SetAPIVersion("V1.1x");
   plugin->SetROOTVersion("v5-34-08");
-  plugin->SetAliROOTVersion("vAN-20140915");
+  plugin->SetAliROOTVersion("vAN-20150128");
   plugin->SetExecutableCommand("aliroot -b -q");
   
   // Declare input data to be processed.

@@ -335,6 +335,61 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     if (part->IsSecondaryFromMaterial()) fTInfo += 2;
     fTree->Fill();
   }
+  
+  TListIter nextT(&mcT);
+  AliAODMCParticle *part;
+  while ((part = (AliAODMCParticle*)nextT())) {
+    fTpMC = part->P();
+    fTpTMC = part->Pt();
+    fTetaMC = part->Eta();
+    fTphiMC = part->Phi();
+    fTyMC = part->Y();
+    fTInfo = 0;
+    if (part->IsPhysicalPrimary())       fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
+    fTree->Fill();
+  }
+  
+  TListIter nextTbar(&mcTbar);
+  while ((part = (AliAODMCParticle*)nextTbar())) {
+    fTpMC = part->P();
+    fTpTMC = -part->Pt();
+    fTetaMC = part->Eta();
+    fTphiMC = part->Phi();
+    fTyMC = part->Y();
+    fTInfo = 0;
+    if (part->IsPhysicalPrimary())       fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
+    fTree->Fill();
+  }
+  
+  TListIter nextHe(&mcHe);
+  AliAODMCParticle *part;
+  while ((part = (AliAODMCParticle*)nextHe())) {
+    fTpMC = part->P();
+    fTpTMC = part->Pt();
+    fTetaMC = part->Eta();
+    fTphiMC = part->Phi();
+    fTyMC = part->Y();
+    fTInfo = 0;
+    if (part->IsPhysicalPrimary())       fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
+    fTree->Fill();
+  }
+  
+  TListIter nextHebar(&mcHebar);
+  while ((part = (AliAODMCParticle*)nextHebar())) {
+    fTpMC = part->P();
+    fTpTMC = -part->Pt();
+    fTetaMC = part->Eta();
+    fTphiMC = part->Phi();
+    fTyMC = part->Y();
+    fTInfo = 0;
+    if (part->IsPhysicalPrimary())       fTInfo += 1;
+    if (part->IsSecondaryFromMaterial()) fTInfo += 2;
+    fTree->Fill();
+  }
+
   //  Post output data.
   PostData(1,fTree);
 }
