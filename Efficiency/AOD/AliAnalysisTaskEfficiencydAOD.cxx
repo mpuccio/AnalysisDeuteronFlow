@@ -22,7 +22,6 @@
 // ALIROOT includes
 #include "AliAnalysisManager.h"
 #include "AliCentrality.h"
-#include "AliPhysicsSelection.h"
 #include "AliTPCPIDResponse.h"
 #include "AliTOFPIDResponse.h"
 #include "AliVTrack.h"
@@ -186,7 +185,7 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     }
   }
   
-  int mcEntries = stack->GetEntriesFast();
+  //int mcEntries = stack->GetEntriesFast();
   
   // Checking how many deuterons in acceptance are reconstructed well
   int isFirst = 1;
@@ -248,7 +247,8 @@ void AliAnalysisTaskEfficiencydAOD::UserExec(Option_t *){
     if (hasTOF) {
       const float len = track->GetIntegratedLength();
       const float tim = track->GetTOFsignal() - fPIDResponse->GetTOFResponse().GetStartTime(fTp);
-      fTbeta = len / (2.99792457999999984e-02 * tim);
+      if (tim < len / 2.99792457999999984e-02) fTbeta = -1.f;
+      else fTbeta = len / (2.99792457999999984e-02 * tim);
     } else
       fTbeta = -1.f;
     Double_t dca[2],cov[3];
