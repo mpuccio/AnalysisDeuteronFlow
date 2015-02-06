@@ -52,11 +52,10 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
   gROOT->ProcessLine(".include $ALICE_ROOT/include");
   
   gSystem->AddIncludePath("-I$ALICE_ROOT/include");
-  gSystem->AddIncludePath("-I$ALICE_ROOT/PWGHF/vertexingHF");
+  gSystem->AddIncludePath("-I$ALICE_PHYSICS/include");
+  
   // Load analysis specific libraries
   //=====================================================================
-  
-  gSystem->SetIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/ITS -I$ALICE_ROOT/TPC -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER/STEER -I$ALICE_ROOT/STEER/STEERBase -I$ALICE_ROOT/STEER/ESD -I$ALICE_ROOT/STEER/AOD -I$ALICE_ROOT/TRD -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS  -I$ALICE_ROOT/OADB -I$ALICE_PHYSICS/PWGHF -I$ALICE_PHYSICS/PWGHF/base -I$ALICE_PHYSICS/PWGHF/vertexingHF -I$ALICE_PHYSICS/PWG/FLOW/Base -I$ALICE_PHYSICS/PWG/FLOW/Tasks -I$ALICE_PHYSICS/include -g");
   
   gSystem->Load("libTree.so");
   gSystem->Load("libGeom.so");
@@ -84,7 +83,7 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
     plugin = CreateAlienHandler(who,taskname, gridmode.Data(), proofcluster, proofdataset);
     if(!plugin) return;
   } else {
-    gROOT->LoadMacro("$ALICE_ROOT/PWG/EMCAL/macros/CreateAODChain.C");
+    gROOT->LoadMacro("$ALICE_PHYSICS/PWG/EMCAL/macros/CreateAODChain.C");
     chain = CreateAODChain("AODs.txt");
   }
   
@@ -110,9 +109,9 @@ void RunGridAOD(TString runtype = "grid", // local, proof or grid
   gROOT->LoadMacro("$ALICE_ROOT/ANALYSIS/macros/AddTaskPIDqa.C");
   AliAnalysisTaskPIDqa *pidQATask = AddTaskPIDqa();
   
-  gROOT->LoadMacro("./AliAnalysisTaskEfficiencydAOD.cxx+");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/AliAnalysisTaskCheckCascadePbPb.cxx++g");
-  gROOT->LoadMacro("./AddTaskEfficiencydAOD.C");//$ALICE_ROOT/PWGLF/STRANGENESS/Cascades/macros/AddTaskCheckCascadePbPb.C");
-  AliAnalysisTaskEfficiencydAOD *task = AddTaskEfficiencydAOD();//kTRUE);
+  gROOT->LoadMacro("./AliAnalysisTaskEfficiencydAOD.cxx+");
+  gROOT->LoadMacro("./AddTaskEfficiencydAOD.C");
+  AliAnalysisTaskEfficiencydAOD *task = AddTaskEfficiencydAOD();
   if(!task) ::Error("Task uninitialized.");
 
   
@@ -144,7 +143,7 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   // Set versions of used packages
   
   plugin->SetAPIVersion("V1.1x");
-  plugin->SetROOTVersion("v5-34-08");
+  plugin->SetROOTVersion("v5-34-08-7");
   plugin->SetAliROOTVersion("v5-06-00");
   plugin->SetAliPhysicsVersion("vAN-20150120");
   plugin->SetExecutableCommand("aliroot -b -q");
@@ -153,10 +152,6 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   
   // Method 1: Create automatically XML collections using alien 'find' command.
   // Define production directory LFN
-  //    plugin->SetGridDataDir("/alice/data/2010/LHC10h");
-  
-  // plugin->SetGridDataDir(" /alice/data/2011/LHC11h_2/"); //sim
-  // plugin->SetDataPattern("pass2/*AliAOD.root"); // sim
   
   plugin->SetGridDataDir("/alice/sim/2014/LHC14a6/"); //sim
   //plugin->SetGridDataDir("/alice/sim/2012/LHC12d3/"); //sim
@@ -175,26 +170,6 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
     170308, 168826, 169587, 170309, 168988, 169588, 170311, 168992, 169590, 170312,
     169035, 169591, 170313, 169040, 169835, 170315, 169044, 169837, 170387, 169045,
     169838, 170388, 169091, 169846, 170572, 169094, 169855, 170593                  // LHC14a6
-//    137161, 137162, 137231, 137232, 137235, 137236, 137243, 137366, 137431, 137432,
-//    137434, 137439, 137440, 137441, 137443, 137530, 137531, 137539, 137541, 137544,
-//    137546, 137549, 137595, 137608, 137638, 137639, 137685, 137686, 137691, 137692,
-//    137693, 137704, 137718, 137722, 137724, 137751, 137752, 137844, 137848, 138190,
-//    138192, 138197, 138201, 138225, 138275, 138364, 138396, 138438, 138439, 138442,
-//    138469, 138534, 138578, 138579, 138582, 138583, 138621, 138638, 138652, 138653,
-//    138662, 138666, 138730, 138732, 138837, 138870, 138871, 138872, 139028, 139029,
-//    139036, 139037, 139038, 139105, 139107, 139173, 139309, 139310, 139314, 139328,
-//    139329, 139360, 139437, 139438, 139465, 139503, 139505, 139507, 139510
-//    167915, 167920, 167985, 167987, 167988, 168069, 168076, 168105, 168107, 168108,
-//    168115, 168310, 168311, 168322, 168325, 168341, 168342, 168361, 168362, 168458,
-//    168460, 168464, 168467, 168511, 168512, 168514, 168777, 168826, 168988, 168992,
-//    169035, 169040, 169044, 169045, 169091, 169094, 169099, 169138, 169144, 169145,
-//    169148, 169156, 169160, 169167, 169238, 169411, 169415, 169417, 169418, 169419,
-//    169420, 169475, 169498, 169504, 169506, 169512, 169515, 169550, 169553, 169554,
-//    169555, 169557, 169586, 169587, 169588, 169590, 169591, 169835, 169837, 169838,
-//    169846, 169855, 169858, 169859, 169923, 169965, 170027, 170040, 170081, 170083,
-//    170084, 170085, 170088, 170089, 170091, 170155, 170159, 170163, 170193, 170203,
-//    170204, 170207, 170228, 170230, 170268, 170269, 170270, 170306, 170308, 170309,
-//    170311, 170312, 170313, 170315, 170387, 170388, 170572, 170593                  // LHC12d3
   };
   
   Int_t start = 0, nrun = 0;
@@ -217,17 +192,11 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   // Declare alien output directory. Relative to working directory.
   plugin->SetGridOutputDir("output"); // In this case will be $HOME/taskname/out
   
-//  plugin->SetAdditionalLibs("libTree.so libGeom.so libPhysics.so libVMC.so libMinuit.so libSTEERBase.so libESD.so libAOD.so  libANALYSIS.so libOADB.so libANALYSISalice.so libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
-  
-  // plugin->SetAdditionalLibs("libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
-  
-  plugin->SetAnalysisSource("AliAnalysisTaskEfficiencydAOD.cxx");
-  //plugin->SetAdditionalLibs("AliAnalysisTaskEfficiencyd.h AliAnalysisTaskEfficiencyd.cxx ");
   cout<<"-->>>>>>>>>>>>>>>>>>>>>>>>> 1"<<endl;
   
   // Declare the analysis source files names separated by blancs. To be compiled runtime
   // using ACLiC on the worker nodes.
-  //plugin->SetAdditionalLibs("libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so AliAODMuonReplicator0.so");
+  plugin->SetAnalysisSource("AliAnalysisTaskEfficiencydAOD.cxx");
   
   cout<<"-->>>>>>>>>>>>>>>>>>>>>>>>> 2"<<endl;
   // plugin->SetAdditionalLibs("libTree.so libGeom.so libPhysics.so libVMC.so libMinuit.so libSTEERBase.so libESD.so libAOD.so libANALYSIS.so libOADB.so libANALYSISalice.so libCORRFW.so libPWGHFbase.so libPWGflowBase.so libPWGflowTasks.so libPWGHFvertexingHF.so");
@@ -235,26 +204,9 @@ AliAnalysisGrid* CreateAlienHandler(TString &who,const char *taskname, const cha
   // plugin->SetAnalysisSource("AliAnalysisTaskESDMuonFilterO.cxx");
   //plugin->SetAnalysisSource("AliAODMuonReplicator0.cxx");
   
-  // Declare all libraries (other than the default ones for the framework. These will be
-  // loaded by the generated analysis macro. Add all extra files (task .cxx/.h) here.
-  // plugin->SetAdditionalLibs("AliAODMuonReplicator0_cxx.so");
-  // plugin->SetAdditionalLibs("AliAnalysisTaskESDMuonFilterO_cxx.so");
-  
   //questo
-  plugin->SetAdditionalLibs("libSTEERBase.so libESD.so AliAnalysisTaskEfficiencydAOD.h AliAnalysisTaskEfficiencydAOD.cxx libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so");
-  plugin->AddIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_ROOT/include -I$ALICE_ROOT/ITS -I$ALICE_ROOT/TPC -I$ALICE_ROOT/CONTAINERS -I$ALICE_ROOT/STEER/STEER -I$ALICE_ROOT/STEER/STEERBase -I$ALICE_ROOT/STEER/ESD -I$ALICE_ROOT/STEER/AOD -I$ALICE_ROOT/TRD -I$ALICE_ROOT/macros -I$ALICE_ROOT/ANALYSIS  -I$ALICE_ROOT/OADB -I$ALICE_ROOT/PWGHF -I$ALICE_ROOT/PWGHF/base -I$ALICE_ROOT/PWGHF/vertexingHF -I$ALICE_ROOT/PWG/FLOW/Base -I$ALICE_ROOT/PWG/FLOW/Tasks -g");
-  
-  
-  // plugin->SetAdditionalLibs("AliAODMuonReplicator0.h AliAODMuonReplicator0.cxx");
-  // plugin->SetAdditionalLibs("AliAnalysisTaskESDMuonFilterO.h AliAnalysisTaskESDMuonFilterO.cxx");
-  
-  //plugin->SetAdditionalLibs("AliAODMuonReplicator0.h AliAODMuonReplicator0.cxx AliAnalysisTaskESDMuonFilterO.h AliAnalysisTaskESDMuonFilterO.cxx");
-  
-  cout<<"-->>>>>>>>>>>>>>>>>>>>>>>>> 3"<<endl;
-	
-  // plugin->SetAdditionalLibs("AliAODMuonReplicator0.h AliAODMuonReplicator0.cxx");
-  
-  // plugin->SetAdditionalLibs("AliAnalysisTaskESDMuonFilterO.h AliAnalysisTaskESDMuonFilterO.cxx");
+  plugin->SetAdditionalLibs("libSTEERBase.so libESD.so AliAnalysisTaskEfficiencydAOD.h AliAnalysisTaskEfficiencydAOD.cxx libPWGflowBase.so libPWGflowTasks.so libPWGHFbase.so libPWGHFvertexingHF.so libOADB.so");
+  plugin->AddIncludePath("-I. -I$ROOTSYS/include -I$ALICE_ROOT -I$ALICE_PHYSICS/include -g");
   
   // Declare the output file names separated by blancs.
   // (can be like: file.root or file.root@ALICE::Niham::File)
