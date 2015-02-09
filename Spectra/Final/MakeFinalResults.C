@@ -21,6 +21,7 @@
 #include <TList.h>
 #include <TFractionFitter.h>
 #include <TVirtualFitter.h>
+#include <TVirtualPad.h>
 #include "RooGlobalFunc.h"
 #include <RooDataHist.h>
 #include <RooGExpModel.h>
@@ -50,13 +51,9 @@ using namespace RooFit;
 #pragma mark Helper functions declaration
 enum { kDeuteron, kAntideuteron };
 Float_t  CorrectForMaterial(TH1F* data, TObjArray &obj, TFile* output); //!< Function used to return the primary fraction in a pT bin
+Float_t  CorrectForMaterial(TH1F* data, TObjArray &obj, TVirtualPad *cv); //!< Function used to return the primary fraction in a pT bin
 void     CorrectForEfficiency(TH1F* rawcounts, TF1* eff, TF1* effTOF);
 void     CorrectForEfficiency(TH1F* rawcounts, TEfficiency* eff, TEfficiency* effTOF);
-Double_t FitTemplateLowPt(Double_t *x_, Double_t *p);
-Double_t FitTemplateHighPt(Double_t *x_, Double_t *p);
-Double_t ExpoPdf(Double_t *x_, Double_t *p);
-Double_t DoubleExpoPdf(Double_t *x_, Double_t *p);
-Double_t TailedGausPdf(Double_t *x_, Double_t *p);
 
 TH1F*    HistoFromFunction(TString title,Double_t (*func)(Double_t*,Double_t*),Double_t *par);
 TH1F*    HistoFromFunction(TString title,TF1 *func);
@@ -66,19 +63,20 @@ const TString kMCFile = "EfficiencyOutput.root";
 const TString kDataFile = "AODSelector.root";
 const TString kOutputFile = "FinalResults.root";
 const double kBins[] = {
-  0.4f,0.5f,0.6f,
+  //0.4f,0.5f,0.6f,
   0.7f,0.8f,0.9f,1.0f,1.1f,1.2f,1.4f,
   1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
   3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f
 };
-const int kTPCsize = 3;
+const int kTPCsize = 0;
 const int kTPCTOFsize = 23;
 const int kNBins = kTPCsize + kTPCTOFsize;
-const int kNBinsSecondaries = 8; // TODO: automatic counting of the bins below 1.2 GeV/c
+const int kNBinsSecondaries = 5; // TODO: automatic counting of the bins below 1.2 GeV/c
 const int kNCentralities = 4;
 const float kEfficiencyTolerance = 0.05f;
 const float kExpoPdfShift = -2.f;
 const int kNBinsLowPt = 4;
+const int kNBinsReallyLowPt = 2;
 const int kRebin = 8;
 const TString kTitles[kNCentralities] = {"Centrality 0-10%","Centrality 10-20%","Centrality 20-40%","Centrality 40-60%"};//,"Centrality 60-80%"};
 const Color_t kColors[kNCentralities] = {kBlue-4,kGreen-3,kOrange,kOrange+8};//,kRed};
@@ -107,6 +105,7 @@ void MakeFinalResults() {
   fOUTPUT->mkdir("Deuteron/Summary");
   fOUTPUT->mkdir("Deuteron/Summary/Fit");
   fOUTPUT->mkdir("Deuteron/Summary/SB");
+  fOUTPUT->mkdir("Deuteron/Summary/Fractions");
   fOUTPUT->mkdir("Deuteron/Fractions");
   fOUTPUT->mkdir("Deuteron/Fractions/Fit");
   fOUTPUT->mkdir("Deuteron/Fractions/debug");
@@ -133,11 +132,14 @@ void MakeFinalResults() {
   RooRealVar tau2("tau2","#tau_{2}",-1.5,0.);
   RooRealVar cbkg("cbkg","Background coefficient",0.,1.);
   RooRealVar csig("csig","Signal coefficient",0.,1.);
-  RooRealVar fbkg("fbkg","Background fraction",5000.,0.,500000.);
+  RooRealVar alpha("alpha","alpha",-2.,-1.);
+  RooRealVar n("n","n",1.,10.);
+  RooRealVar fbkg("fbkg","Background fraction",5000.,0.,700000.);
   RooRealVar fsig("fsig","Signal Fraction",5000.,0.,500000.);
 //  RooCBShape sig("signal", "signal", m, mu, s, alpha, n);
   RooGaussian sig1("sig1", "sig1", m, mu, s1);
   RooGaussian sig2("sig2", "sig2", m, mu, s2);
+  RooCBShape  sig3("sig3", "sig3", m, mu, s1, alpha, n);
   RooAddPdf sig0("signal","signal",RooArgList(sig1,sig2),csig);
 
   RooExponential bkg1("background1","background1",m,tau1);
@@ -145,7 +147,8 @@ void MakeFinalResults() {
   RooAddPdf bkg0("background","background",RooArgList(bkg1,bkg2),cbkg);
   RooAddPdf model1("model1","model1",RooArgList(sig0,bkg2),RooArgList(fsig,fbkg));
   RooAddPdf model2("model2","model2",RooArgList(sig2,bkg0),RooArgList(fsig,fbkg));
-  
+  RooAddPdf model3("model3","model3",RooArgList(sig3,bkg2),RooArgList(fsig,fbkg));
+
 #pragma mark Taking all Monte Carlo information
   TF1 *dEff[4],*adEff[4],*dEffTOF[4],*adEffTOF[4];
   for (int iC = 0; iC < 4; ++iC) {
@@ -242,6 +245,8 @@ void MakeFinalResults() {
       return;
     }
     TCanvas *summaryCv[3], *sbCv[3];
+    TCanvas *fractionsCv = new TCanvas(Form("fractions%i",iC));
+    fractionsCv->Divide(3,2);
     for (int i = 0; i < 3; ++i) {
       summaryCv[i] = new TCanvas(Form("keynoted%i_%i",iC,i));
       summaryCv[i]->Divide(3,3);
@@ -275,11 +280,11 @@ void MakeFinalResults() {
         plot->SetTitle(Form("%1.1f #leq p_{T} < %1.1f",kBins[iB],kBins[iB + 1]));
         plot->SetName(Form("d%i_%i",iC,iB - kTPCsize));
         RooFitResult *res = model.fitTo(data,Extended());
-        data.plotOn(plot);
-        model.plotOn(plot);
+        data.plotOn(plot,Name("data"));
+        model.plotOn(plot,Name("model"));
         model.plotOn(plot,Components(bkg),LineStyle(kDashed));
         model.plotOn(plot,Components(sig),LineStyle(kDotted));
-        model.paramOn(plot,Label(Form("#chi^{2}/NDF = %2.4f",plot->chiSquare())));
+        model.paramOn(plot,Label(Form("#chi^{2}/NDF = %2.4f",plot->chiSquare("model","data"))));
         plot->Draw();
         
         hRawCounts[iC].SetBinContent(iB + 1, fsig.getVal());
@@ -328,7 +333,8 @@ void MakeFinalResults() {
       Float_t prim = 1.f;
       obj.Add(&hMCPrimaries[kNBinsSecondaries * iC + iB]);
       obj.Add(&hMCSecondaries[kNBinsSecondaries * iC + iB]);
-      prim = CorrectForMaterial(hd, obj, fOUTPUT);
+      hd->SetTitle(Form("%4.1f < p_{T} #leq %4.1f",kBins[iB],kBins[iB + 1]));
+      prim = CorrectForMaterial(hd, obj, fractionsCv->cd(iB + 1));
       fOUTPUT->mkdir(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
       fOUTPUT->cd(Form("Deuteron/Fractions/debug/%i_%i",iC,iB));
       hd->Write();
@@ -340,6 +346,8 @@ void MakeFinalResults() {
       hRawCounts[iC].SetBinContent(iB + 1, prim * hRawCounts[iC].GetBinContent(iB + 1));
       if (iB >= kNTPCSecondaries) delete hd;
     }
+    fOUTPUT->cd("Deuteron/Summary/Fractions");
+    fractionsCv->Write();
     
     fOUTPUT->cd("Deuteron/Fractions");
     hFractions[iC].Write();
@@ -404,20 +412,33 @@ void MakeFinalResults() {
           if (n == 1) shift = 9 - 1;
           else if (n == 2) shift = 18 -1;
           summaryCv[n]->cd(iB - kTPCsize - shift);
-          
-          RooAddPdf &model = (kBins[iB + 1] > 1.4) ? model2 : model1;
-          RooAbsPdf &bkg = (kBins[iB + 1] > 1.4) ? static_cast<RooAbsPdf&>(bkg0) : static_cast<RooAbsPdf&>(bkg2);
-          RooAbsPdf &sig = (kBins[iB + 1] > 1.4) ? static_cast<RooAbsPdf&>(sig2) : static_cast<RooAbsPdf&>(sig0);
+          RooAbsPdf *model,*bkg,*sig;
+          if (iB < kNBinsReallyLowPt) {
+            model = static_cast<RooAbsPdf*>(&model3);
+            bkg = static_cast<RooAbsPdf*>(&bkg2);
+            sig = static_cast<RooAbsPdf*>(&sig3);
+          } else if (iB < kNBinsLowPt) {
+            model = static_cast<RooAbsPdf*>(&model1);
+            bkg = static_cast<RooAbsPdf*>(&bkg2);
+            sig = static_cast<RooAbsPdf*>(&sig0);
+          } else {
+            model = static_cast<RooAbsPdf*>(&model2);
+            bkg = static_cast<RooAbsPdf*>(&bkg0);
+            sig = static_cast<RooAbsPdf*>(&sig2);
+          }
+//          RooAddPdf &model = *modelPtr;
+//          RooAbsPdf &bkg = *bkgPtr; //(kBins[iB + 1] > 1.4) ? static_cast<RooAbsPdf&>(bkg0) : static_cast<RooAbsPdf&>(bkg2);
+//          RooAbsPdf &sig = *sigPtr; //(kBins[iB + 1] > 1.4) ? static_cast<RooAbsPdf&>(sig2) : static_cast<RooAbsPdf&>(sig0);
           RooDataHist data("data","data",RooArgList(m),Import(*dat));
           RooPlot *plot = m.frame();
           plot->SetTitle(Form("%1.1f #leq p_{T} < %1.1f",kBins[iB],kBins[iB + 1]));
           plot->SetName(Form("d%i_%i",iC,iB - kTPCsize));
-          RooFitResult *res = model.fitTo(data,Extended());
-          data.plotOn(plot);
-          model.plotOn(plot);
-          model.plotOn(plot,Components(bkg),LineStyle(kDashed));
-          model.plotOn(plot,Components(sig),LineStyle(kDotted));
-          model.paramOn(plot,Label(Form("#chi^{2}/NDF = %2.4f",plot->chiSquare())));
+          RooFitResult *res = (*model).fitTo(data,Extended());
+          data.plotOn(plot,Name("data"));
+          (*model).plotOn(plot,Name("model"));
+          (*model).plotOn(plot,Components(*bkg),LineStyle(kDashed));
+          (*model).plotOn(plot,Components(*sig),LineStyle(kDotted));
+          (*model).paramOn(plot,Label(Form("#chi^{2}/NDF = %2.4f",plot->chiSquare("model","data"))));
           plot->Draw();
           
           hRawCounts[iC].SetBinContent(iB + 1, fsig.getVal());
@@ -501,7 +522,7 @@ Float_t CorrectForMaterial(TH1F* hd, TObjArray &obj, TFile* output) {
     hd->SetMarkerStyle(20);
     hd->SetMarkerSize(0.5);
     hd->SetMarkerColor(kBlack);
-    hd->Draw("e");
+    hd->DrawCopy("e");
     
     hfit->DrawCopy("same");
     hs->SetLineColor(kRed);
@@ -510,6 +531,48 @@ Float_t CorrectForMaterial(TH1F* hd, TObjArray &obj, TFile* output) {
     hp->DrawCopy("same");
     output->cd("Deuteron/Fractions/Fit");
     cv.Write();
+  }
+  return yieldPri;
+}
+
+//__________________________________________________________________________________________________
+Float_t CorrectForMaterial(TH1F* hd, TObjArray &obj, TVirtualPad* cv) {
+  //  TVirtualFitter::SetMaxIterations(10000000);
+  hd->Rebin(kRebin);
+  ((TH1F*)obj[0])->Rebin(kRebin);
+  ((TH1F*)obj[1])->Rebin(kRebin);
+  Int_t binLow = ((TH1F*)obj[0])->FindBin(-0.5);
+  Int_t binUp = ((TH1F*)obj[0])->FindBin(0.5);
+  TFractionFitter fitter(hd,&obj);
+  fitter.SetRangeX(binLow,binUp);
+  fitter.Constrain(0,0.,1.);
+  fitter.Constrain(1,0.,0.8);
+  Int_t result = fitter.Fit();
+  Double_t yieldSec = 0., yieldPri = 1., error = 0.;
+  if (result == 0) {
+    TH1F* hp = (TH1F*)fitter.GetMCPrediction(0);
+    TH1F* hs = (TH1F*)fitter.GetMCPrediction(1);
+    fitter.GetResult(0, yieldPri, error);
+    fitter.GetResult(1, yieldSec, error);
+    TH1F* hfit = (TH1F*)fitter.GetPlot();
+    Float_t dataIntegral = hfit->Integral();
+    hfit->SetLineColor(kGreen + 1);
+    hfit->SetLineWidth(3);
+//    hs->Scale(1. / hs->Integral());
+//    hp->Scale(1. / hp->Integral());
+    hs->Scale(yieldSec);
+    hp->Scale(yieldPri);
+    cv->cd();
+    hd->SetMarkerStyle(20);
+    hd->SetMarkerSize(0.5);
+    hd->SetMarkerColor(kBlack);
+    hd->DrawCopy("e");
+    
+    hfit->DrawCopy("same");
+    hs->SetLineColor(kRed);
+    hp->SetLineColor(kBlue);
+    hs->DrawCopy("same");
+    hp->DrawCopy("same");
   }
   return yieldPri;
 }
@@ -557,36 +620,4 @@ TH1F * HistoFromFunction(TString title,TF1 *func) {
     a->SetBinContent(i,func->Eval(x));
   }
   return a;
-}
-
-//__________________________________________________________________________________________________
-Double_t FitTemplateLowPt(Double_t *x_, Double_t *p) { // 5 parameters
-  return p[0] * TailedGausPdf(x_, &p[1]) + p[3] * ExpoPdf(x_, &p[4]);
-}
-
-//__________________________________________________________________________________________________
-Double_t FitTemplateHighPt(Double_t *x_, Double_t *p) { // 8 parameters
-  return p[0] * TailedGausPdf(x_, &p[1]) + p[3] * DoubleExpoPdf(x_, &p[4]);
-}
-
-//__________________________________________________________________________________________________
-Double_t ExpoPdf(Double_t *x_, Double_t *p) {
-  Double_t x = x_[0] + kExpoPdfShift;
-  return p[0] * TMath::Exp(-p[0] * x);
-}
-
-//__________________________________________________________________________________________________
-Double_t DoubleExpoPdf(Double_t *x_, Double_t *p) {
-  return (p[2] * ExpoPdf(x_, p) + p[3] * ExpoPdf(x_, &p[1])) / (p[2] + p[3]);
-}
-
-//__________________________________________________________________________________________________
-Double_t TailedGausPdf(Double_t *x_, Double_t *p) {
-  Double_t &x = x_[0];
-  Double_t norm = 1.f / (Sqrt(TMath::PiOver2()) * p[0] * (1. + TMath::Erf(p[1] / Sqrt2())) +
-                         p[0] * exp(-0.5 * p[1] * p[1]) / p[1]);
-  if (x >= p[0] * p[1])
-    return norm * exp(-p[1] * (x - 0.5 * p[0] * p[1])/p[0]);
-  else
-    return norm * exp(- x * x / (2 * p[0] * p[0]));
 }
