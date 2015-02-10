@@ -202,7 +202,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int k = 0; k < kNCent; ++k) {
     for (int i = 0; i < kNDCAbinsTOF; ++i) {
       fDCASignal[k * kNDCAbinsTOF + i] = new TH2F(Form("fDCASignal%i_%i",k,i),
-                                       ";m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",
+                                       Form("%4.2f < p_{T} #leq %4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",fBins[kNBinsTPC + i],fBins[kNBinsTPC + i +1]),
                                        75,-2.0,4.0,160,-0.5f,0.5f);
       GetOutputList()->Add(fDCASignal[k * kNDCAbinsTOF + i]);
     }
@@ -564,7 +564,7 @@ void AODSelector::Terminate()
   f.cd("DCASignal");
   for (int k = 0; k < kNCent; ++k) {
     for (int i = 0; i < kNDCAbinsTOF; ++i) {
-      fDCASignal[k * kNDCAbinsTOF + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",i,k)));
+      fDCASignal[k * kNDCAbinsTOF + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",k,i)));
       if (fDCASignal[k * kNDCAbinsTOF + i]) {
         fDCASignal[k * kNDCAbinsTOF + i]->Write();
       }

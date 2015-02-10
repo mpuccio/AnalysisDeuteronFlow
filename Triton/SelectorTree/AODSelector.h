@@ -22,10 +22,10 @@ class TF1;
 #define EPSILON 1E-16
 #define MD 2.808921f
 #define M2D MD*MD
-#define kNCent 5
+#define kNCent 3
 #define kNBins 16
 #define kNBinsTPC 3
-#define kNDCABins 9
+#define kNDCABins 10
 #define kNBinsTOF (kNBins - kNBinsTPC)
 #define kNDCAbinsTOF (kNDCABins - kNBinsTPC)
 
@@ -94,7 +94,7 @@ class AODSelector : public TSelector {
     };
     for (int i = 0; i < kNBins + 1; ++i) fBins[i] = bins[i];
     
-    double cent[kNCent + 1] = {0.,10.,20.,40.,60.,80.};
+    double cent[kNCent + 1] = {0.,10.,30.,50.};
     for (int i = 0; i < kNCent + 1; ++i) fCentralityClasses[i] = cent[i];
     
     fCorrectionAD.SetParameters(-2.10154e-03,-4.53472e-01,-3.01246e+00);
