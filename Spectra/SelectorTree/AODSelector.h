@@ -25,7 +25,7 @@ class TF1;
 #define kNCent 5
 #define kNBins 28
 #define kNBinsTPC 3
-#define kNDCABins 9
+#define kNDCABins 10
 #define kNBinsTOF (kNBins - kNBinsTPC)
 #define kNDCAbinsTOF (kNDCABins - kNBinsTPC)
 
