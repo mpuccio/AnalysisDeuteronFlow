@@ -289,7 +289,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   }
   
   if (ITSnClust - ITSnSignal <= 0) return kTRUE;
-  if (TMath::Abs(DCAz) > 2.f) return kTRUE;
+  if (TMath::Abs(DCAz) > 1.f) return kTRUE;
   fDCAxy->Fill(DCAxy);
   fDCAz->Fill(DCAz);
   fDCA2D->Fill(DCAxy,DCAz);
