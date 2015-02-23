@@ -183,9 +183,11 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fdEdxTPCpT);
   GetOutputList()->Add(fdEdxTPCSignal);
   for (int i = 0; i < kNCent; ++i) {
-    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",kNBinsTPC,fBins);
+    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",kNBins,
+                                       fBins);
     GetOutputList()->Add(fdEdxTPCSignalCounts[i]);
-    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",kNBinsTPC,fBins);
+    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",kNBins,
+                                         fBins);
     GetOutputList()->Add(fdEdxTPCSignalCountsAD[i]);
   }
   
@@ -307,15 +309,14 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (pTPC < 3.5f) {
     if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
       fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      if (TMath::Abs(c_pT) < fBins[kNBinsTPC]) {
-        if (c_pT >= fBins[0]) {
-          fdEdxTPCSignalCounts[cent]->Fill(c_pT);
-          fDdcaXY[cent]->Fill(c_pT,DCAxy);
-          fDdcaZ[cent]->Fill(c_pT,DCAz);
-        } else if (c_pT <= -fBins[0]) {
-          fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(c_pT));
-        }
+      if (c_pT >= fBins[0]) {
+        fdEdxTPCSignalCounts[cent]->Fill(c_pT);
+        fDdcaXY[cent]->Fill(c_pT,DCAxy);
+        fDdcaZ[cent]->Fill(c_pT,DCAz);
+      } else if (c_pT <= -fBins[0]) {
+        fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(c_pT));
       }
+      
       if (TOFtime > 0.f && length > 0.f) {
         Float_t beta = length / (2.99792457999999984e-02f * TOFtime);
         fBeta->Fill(beta);
@@ -332,8 +333,6 @@ Bool_t AODSelector::Process(Long64_t entry)
           if(c_pT > 0.) {
             fTOFSignal[j - kNBinsTPC]->Fill(dm);
             fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
-            fDdcaXY[cent]->Fill(c_pT, DCAxy);
-            fDdcaZ[cent]->Fill(c_pT, DCAz);
             if (j - kNBinsTPC < kNDCAbinsTOF) {
               fDCASignal[cent * kNDCAbinsTOF + j - kNBinsTPC]->Fill(dm, DCAxy);
             }
