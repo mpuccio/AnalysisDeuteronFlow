@@ -302,7 +302,7 @@ void AODSelector::Terminate()
   l.SetOwner(kTRUE);
   l.SetName(kName);
   l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fCentrality"))->Clone());
-  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fFlattenedCentrality"))->Clone());
+  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Clone());
   l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Clone());
   l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Clone());
   l.Add((TH2F*)((TH2F*)GetOutputList()->FindObject("fATPCcounts"))->Clone());
