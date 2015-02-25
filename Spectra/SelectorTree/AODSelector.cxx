@@ -301,15 +301,15 @@ void AODSelector::Terminate()
   TList l;
   l.SetOwner(kTRUE);
   l.SetName(kName);
-  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fCentrality"))->Clone());
-  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Clone());
-  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Clone());
-  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Clone());
-  l.Add((TH2F*)((TH2F*)GetOutputList()->FindObject("fATPCcounts"))->Clone());
-  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fMDCAxy"))->Clone());
-  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fMDCAz"))->Clone());
-  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Clone());
-  l.Add((TH2F*)((TH2F*)GetOutputList()->FindObject("fMTPCcounts"))->Clone());
+  l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentrality")));
+  l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fFlattenCentrality")));
+  l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentralityClasses")));
+  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fATOFsignal")));
+  l.Add(new TH2F(*(TH2F*)GetOutputList()->FindObject("fATPCcounts")));
+  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMDCAxy")));
+  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMDCAz")));
+  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMTOFsignal")));
+  l.Add(new TH2F(*(TH2F*)GetOutputList()->FindObject("fMTPCcounts")));
   l.Write();
   f.Close();
 }
