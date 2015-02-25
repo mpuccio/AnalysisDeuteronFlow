@@ -298,7 +298,18 @@ void AODSelector::Terminate()
   
   TFile f("nuclei.root","update");
   f.cd();
-  TList *l = (TList*)GetOutputList()->Clone(kName.Data());
-  l->Write();
+  TList l;
+  l.SetOwner(kTRUE);
+  l.SetName(kName);
+  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fCentrality"))->Clone());
+  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fFlattenedCentrality"))->Clone());
+  l.Add((TH1F*)((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Clone());
+  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Clone());
+  l.Add((TH2F*)((TH2F*)GetOutputList()->FindObject("fATPCcounts"))->Clone());
+  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fMDCAxy"))->Clone());
+  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fMDCAz"))->Clone());
+  l.Add((TH3F*)((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Clone());
+  l.Add((TH2F*)((TH2F*)GetOutputList()->FindObject("fMTPCcounts"))->Clone());
+  l.Write();
   f.Close();
 }
