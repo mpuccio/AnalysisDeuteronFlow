@@ -29,6 +29,7 @@
 #include <TMath.h>
 #include <TAxis.h>
 #include <TH2F.h>
+#include <TH3F.h>
 #include <TH1F.h>
 #include <TF1.h>
 #include <TCanvas.h>
@@ -77,7 +78,7 @@ Double_t DeuteronTPC(Double_t *x, Double_t *) {
 unsigned int Log2Int(const unsigned int v) {
   // Taken from https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
   static const unsigned int b[] = {0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000};
-  register unsigned int r = (v & b[0]) != 0;
+  unsigned int r = (v & b[0]) != 0;
   r |= ((v & b[4]) != 0) << 4;
   r |= ((v & b[3]) != 0) << 3;
   r |= ((v & b[2]) != 0) << 2;
@@ -96,10 +97,10 @@ void AODSelector::Begin(TTree * /*tree*/)
 }
 
 Int_t AODSelector::GetCentBin(float cent) {
-  if (cent < fCentralityClasses[0]) return -1;
+  if (cent < fCentralityBins[0]) return -1;
 
   for (int i = 0; i < kNCent; ++i)
-    if (cent <= fCentralityClasses[i + 1])
+    if (cent <= fCentralityBins[i + 1])
       return i;
   
   return -1;
@@ -130,92 +131,59 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   // The tree argument is deprecated (on PROOF 0 is passed).
   
   TString option = GetOption();
-  fBeta = new TH1F("fBeta",";#beta;Entries",100,0.f,1.f);
-  fBeta2D = new TH2F("fBeta2D","TOF; #frac{p}{z} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
-  fBeta2DPt = new TH2F("fBeta2DPt","TOF; p_{T} (GeV/c); #beta", 1000,0.01,10.,2250,0.1,1.);
-  fCentrality = new TH1F("fCentrality",";Centrality;Events / 1%",100,0,100);
-  fCentralityClass = new TH1F("fCentralityClass",";Centrality Class; Events / Class",kNCent,fCentralityClasses);
-  fCentralityNoFlat = new TH1F("fCentralityNoFlat",";Centrality;Events / 1%",100,0,100);
-  fGamma = new TH1F("fGamma",";#gamma;Entries",1000,1.f,1000.f);
-  fDCAxy = new TH1F("fDCAxy",";DCA_{xy} (cm);Entries",4000,-4.f,4.f);
-  fDCA2D = new TH2F("fDCA2D",";DCA_{xy} (cm);DCA_{z} (cm);Entries",500,-0.5f,0.5f,600,-0.6f,0.6f);
-  fDCAz = new TH1F("fDCAz",";DCA_{z} (cm);Entries",4000,-4.f,4.f);
-  fdEdxTPC = new TH2F("fdEdxTPC",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
-  fdEdxTPCpT = new TH2F("fdEdxTPCpT",";p_{T} (GeV/c);dE/dx (a.u.)",1000,0.1,10.,500,0,2000);
-  fdEdxTPCSignal = new TH2F("fdEdxTPCSignal",";p (GeV/c);dE/dx (a.u.)",1000,0.1,10.,2000,0,2000);
-  fTPCSignalN = new TH1F("fTPCSignalN",";#clusters for PID;Entries",161,-0.5f,160.5f);
-  fTriggerHist = new TH1F("fTriggerHist",";Trigger;Entries",5,-0.5,4.5);
-  fdEdxTPCproj = new TH2F("fdEdxTPCproj",";p (GeV/c);dE/dx (a.u.)",93,0.4,3.2,2000,0,2000);
-  fdEdxTriton = new TH2F("fdEdxTriton",";p (GeV/c);dE/dx (a.u.)",560,0.4,3.2,2000,0,2000);
-  fdEdxDeuteron = new TH2F("fdEdxDeuteron",";p (GeV/c);dE/dx (a.u.)",560,0.4,3.2,2000,0,2000);
-  BinLogAxis(fdEdxTPC);
-
-  const Char_t* aTriggerNames[] = { "kMB", "kCentral", "kSemiCentral", "kEMCEJE", "kEMCEGA" };
-  for (Int_t ii = 1; ii <= 5; ++ii)
-    fTriggerHist->GetXaxis()->SetBinLabel(ii, aTriggerNames[ii - 1]);
   
-  for (int i = 0; i < kNBinsTOF; ++i) {
-    fTOFSignal[i] = new TH1F(Form("fTOFSignal%i",i),
-                             Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",
-                                  fBins[i+kNBinsTPC],fBins[i+1+kNBinsTPC]),50,-2.0,2.0);
-    GetOutputList()->Add(fTOFSignal[i]);
-  }
+  const Int_t nPtBins = kNBins;
+  const Int_t nCentBins = kNCent;
+  const Double_t *pTbins = fBins;
+  const Double_t *centBins = fCentralityBins;
   
-  for (int cent = 0; cent < kNCent; ++cent) {
-    for (int i = 0; i < kNBinsTOF; ++i) {
-      int j = i + kNBinsTPC;
-      fSignalAD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalAD%i_%i",cent,i),
-                                               Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),75,-2.0,4.0);
-      fSignalD[cent * kNBinsTOF + i] = new TH1F(Form("fSignalD%i_%i",cent,i),
-                                              Form("%4.2f<p_{T}#leq%4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};Entries",fBins[j],fBins[j+1]),75,-2.0,4.0);
-      GetOutputList()->Add(fSignalD[cent * kNBinsTOF + i]);
-      GetOutputList()->Add(fSignalAD[cent * kNBinsTOF + i]);
-    }
-    fDdcaXY[cent] = new TH2F(Form("fDdcaXY%i",cent),";p_{T} (GeV/c); DCA_{xy} (cm)",
-                             10,fBins,160,-0.5f,0.5f);
-    fDdcaZ[cent] = new TH2F(Form("fDdcaZ%i",cent),";p_{T} (GeV/c); DCA_{z} (cm)",
-                            10,fBins,160,-0.5f,0.5f);
-    GetOutputList()->Add(fDdcaXY[cent]);
-    GetOutputList()->Add(fDdcaZ[cent]);
-  }
+  const Int_t nDCAbins = 80;
+  const Float_t range = 0.5;
+  Double_t dcaBins[nDCAbins+1];
+  for (int i = 0; i <= nDCAbins; ++i)
+    dcaBins[i] = i * range * 2 / nDCAbins - range;
   
-  GetOutputList()->Add(fdEdxTPC);
-  GetOutputList()->Add(fdEdxTPCpT);
-  GetOutputList()->Add(fdEdxTPCSignal);
-  for (int i = 0; i < kNCent; ++i) {
-    fdEdxTPCSignalCounts[i] = new TH1F(Form("fdEdxTPCSignalCounts%i",i),";p_{T};Entries",kNBins,
-                                       fBins);
-    GetOutputList()->Add(fdEdxTPCSignalCounts[i]);
-    fdEdxTPCSignalCountsAD[i] = new TH1F(Form("fdEdxTPCSignalCountsAD%i",i),";p_{T};Entries",kNBins,
-                                         fBins);
-    GetOutputList()->Add(fdEdxTPCSignalCountsAD[i]);
-  }
-  
-  for (int k = 0; k < kNCent; ++k) {
-    for (int i = 0; i < kNDCAbinsTOF; ++i) {
-      fDCASignal[k * kNDCAbinsTOF + i] = new TH2F(Form("fDCASignal%i_%i",k,i),
-                                       Form("%4.2f < p_{T} #leq %4.2f;m^{2} - m^{2}_{PDG} (GeV/c)^{2};DCA_{z} (cm);Entries",fBins[kNBinsTPC + i],fBins[kNBinsTPC + i +1]),
-                                       75,-2.0,4.0,160,-0.5f,0.5f);
-      GetOutputList()->Add(fDCASignal[k * kNDCAbinsTOF + i]);
-    }
-  }
-  
-  GetOutputList()->Add(fdEdxTPCproj);
-  GetOutputList()->Add(fdEdxTriton);
-  GetOutputList()->Add(fdEdxDeuteron);
-  GetOutputList()->Add(fTPCSignalN);
-  GetOutputList()->Add(fTriggerHist);
+  fCentrality = new TH1F("fCentrality",";Centrality (%);Events / 1%;",100,0.,100.);
+  fCentralityClasses = new TH1F("fCentralityClasses",";Centrality classes(%);Events / Class;",nCentBins,centBins);
+  fFlattenedCentrality = new TH1F("fFlattenCentrality","Centrality distribution after the flattening;Centrality (%);Events / 1%;",100,0.,100.);
   GetOutputList()->Add(fCentrality);
-  GetOutputList()->Add(fCentralityNoFlat);
-  GetOutputList()->Add(fCentralityClass);
-  GetOutputList()->Add(fBeta);
-  GetOutputList()->Add(fBeta2D);
-  GetOutputList()->Add(fBeta2DPt);
-  GetOutputList()->Add(fGamma);
-  GetOutputList()->Add(fDCAxy);
-  GetOutputList()->Add(fDCAz);
-  GetOutputList()->Add(fDCA2D);
+  GetOutputList()->Add(fCentralityClasses);
+  GetOutputList()->Add(fFlattenedCentrality);
   
+  const int tofNbins = 75;
+  const float tofLowBoundary = -2.4,tofHighBoundary = 3.6;
+  Double_t tofBins[tofNbins + 1];
+  const float deltaTOF = (tofHighBoundary - tofLowBoundary) / tofNbins;
+  for (int i = 0; i <= tofNbins; ++i)
+    tofBins[i] = i * deltaTOF + tofLowBoundary;
+  const int dcaZnBins = 400;
+  const float dcaZlimit = 10.;
+  Double_t dcazBins[dcaZnBins + 1];
+  const float deltaDCAz = 2.f * dcaZlimit / dcaZnBins;
+  for (int i = 0; i <= dcaZnBins; ++i)
+    dcazBins[i] = i * deltaDCAz - dcaZlimit;
+  
+  
+  fATOFsignal = new TH3F("fATOFsignal",
+                         ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
+                         nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
+  fATPCcounts = new TH2F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); TPC counts",
+                         nCentBins,centBins,nPtBins,pTbins);
+  fMDCAxy = new TH3F("fMDCAxy",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
+                     nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
+  fMDCAz = new TH3F("fMDCAz",";Centrality (%);p_{T} (GeV/c); DCA_{z} (cm)",
+                    nCentBins,centBins,nPtBins,pTbins,dcaZnBins,dcazBins);
+  fMTOFsignal = new TH3F("fMTOFsignal",
+                         ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
+                         nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
+  fMTPCcounts = new TH2F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); TPC counts",
+                         nCentBins,centBins,nPtBins,pTbins);
+  GetOutputList()->Add(fATOFsignal);
+  GetOutputList()->Add(fATPCcounts);
+  GetOutputList()->Add(fMDCAxy);
+  GetOutputList()->Add(fMDCAz);
+  GetOutputList()->Add(fMTOFsignal);
+  GetOutputList()->Add(fMTPCcounts);
   
   fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
 }
@@ -248,11 +216,10 @@ Bool_t AODSelector::Process(Long64_t entry)
       fSkipEvent = Flatten(-centrality);
     
     if (!fSkipEvent) {
-      fCentrality->Fill(-centrality);
-      fCentralityClass->Fill(-centrality);
-      fTriggerHist->Fill(Log2Int(trigger));
+      fFlattenedCentrality->Fill(-centrality);
+      fCentralityClasses->Fill(-centrality);
     }
-    fCentralityNoFlat->Fill(-centrality);
+    fCentrality->Fill(-centrality);
   }
   if (fSkipEvent) return kTRUE;
   
@@ -264,7 +231,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (TMath::Abs(eta) > 0.8)
     return kTRUE;
   
-  if (TMath::Abs(chi2NDF) > 6)
+  if (TMath::Abs(chi2NDF) > kChi2Cut)
     return kTRUE;
   
   Double_t pz = TMath::Sqrt(p * p - pT * pT);
@@ -274,27 +241,12 @@ Bool_t AODSelector::Process(Long64_t entry)
     return kTRUE;
   }
   
-  if (TPCnSignal < 70)
+  if (TPCnSignal < kTPCsig)
     return kTRUE;
   
-  fTPCSignalN->Fill(TPCnSignal);
-  
-  
-  fdEdxTPC->Fill(pTPC,TPCsignal);
-  fdEdxTPCpT->Fill(TMath::Abs(pT),TPCsignal);
-  fdEdxTPCproj->Fill(pTPC,TPCsignal);
-  if (TMath::Abs(TPCsigmad) < 3.) {
-    fdEdxDeuteron->Fill(pTPC,TPCsignal);
-  }
-  if (TMath::Abs(TPCsigmat) < 3.) {
-    fdEdxTriton->Fill(pTPC,TPCsignal);
-  }
   
   if (ITSnClust - ITSnSignal <= 0) return kTRUE;
-  if (TMath::Abs(DCAz) > 1.f) return kTRUE;
-  fDCAxy->Fill(DCAxy);
-  fDCAz->Fill(DCAz);
-  fDCA2D->Fill(DCAxy,DCAz);
+  if (TMath::Abs(DCAz) > kDCAz) return kTRUE;
   
   if (TMath::Abs(DCAxy) > 0.5f) return kTRUE;
   
@@ -305,68 +257,28 @@ Bool_t AODSelector::Process(Long64_t entry)
     c_pT += fCorrectionAD(-c_pT);
   }
   
-  const int j = GetPtBin(TMath::Abs(c_pT));
-  if (pTPC < 3.5f) {
-    if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
-      fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-      if (c_pT >= fBins[0]) {
-        fdEdxTPCSignalCounts[cent]->Fill(c_pT);
-        fDdcaXY[cent]->Fill(c_pT,DCAxy);
-        fDdcaZ[cent]->Fill(c_pT,DCAz);
-      } else if (c_pT <= -fBins[0]) {
-        fdEdxTPCSignalCountsAD[cent]->Fill(TMath::Abs(c_pT));
-      }
-      
-      if (TOFtime > 0.f && length > 0.f) {
-        Float_t beta = length / (2.99792457999999984e-02f * TOFtime);
-        fBeta->Fill(beta);
-        fBeta2D->Fill(pTPC,beta);
-        fBeta2DPt->Fill(TMath::Abs(c_pT),beta);
-        if (beta < (1.f - EPSILON)) {
-          Float_t gamma = 1. / TMath::Sqrt(1.f - (beta * beta));
-          fGamma->Fill(gamma);
-          const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-          if (j < kNBinsTPC) {
-            return kTRUE;
-          }
-          
-          if(c_pT > 0.) {
-            fTOFSignal[j - kNBinsTPC]->Fill(dm);
-            fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
-            if (j - kNBinsTPC < kNDCAbinsTOF) {
-              fDCASignal[cent * kNDCAbinsTOF + j - kNBinsTPC]->Fill(dm, DCAxy);
-            }
-          } else {
-            fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
-          }
-        }
-      }
+  if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
+    if(c_pT > 0.) {
+      fMTPCcounts->Fill(centrality,c_pT);
+      fMDCAxy->Fill(centrality,c_pT,DCAxy);
+      fMDCAz->Fill(centrality,c_pT,DCAz);
+    } else {
+      fATPCcounts->Fill(centrality,-c_pT);
     }
-  } else {
-    fdEdxTPCSignal->Fill(pTPC,TPCsignal);
-    if (TOFtime > 0.f && length > 0.f) {
-      Float_t beta = length / (2.99792457999999984e-02 * TOFtime);
-      fBeta->Fill(beta);
-      fBeta2D->Fill(pTPC,beta);
-      fBeta2DPt->Fill(TMath::Abs(c_pT),beta);
+    if (TOFtime > 0.f && length > 350.f) {
+      Float_t beta = length / (2.99792457999999984e-02f * TOFtime);
       if (beta < (1.f - EPSILON)) {
-        Float_t gamma = 1 / TMath::Sqrt(1 - (beta * beta));
-        fGamma->Fill(gamma);
+        Float_t gamma = 1. / TMath::Sqrt(1.f - (beta * beta));
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
-        if (j < kNBinsTPC) {
-          return kTRUE;
-        }
-        
-        if(c_pT > 0) {
-          fSignalD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
-          fTOFSignal[j - kNBinsTPC]->Fill(dm);
+        if(c_pT > 0.) {
+          fMTOFsignal->Fill(centrality,c_pT,dm);
         } else {
-          fSignalAD[cent * kNBinsTOF + j - kNBinsTPC]->Fill(dm);
+          fATOFsignal->Fill(centrality,-c_pT,dm);
         }
-        
       }
     }
   }
+  
   return kTRUE;
 }
 
@@ -383,163 +295,10 @@ void AODSelector::Terminate()
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
-  TFile f("AODSelector.root","recreate");
-  fdEdxTPC = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPC"));
-  if (fdEdxTPC) {
-    fdEdxTPC->Write();
-  }
   
-  fdEdxTPCpT = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPCpT"));
-  if (fdEdxTPCpT) {
-    fdEdxTPCpT->Write();
-  }
-  
-  fdEdxTPCSignal = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPCSignal"));
-  if (fdEdxTPCSignal) {
-    fdEdxTPCSignal->Write();
-  }
-  
-  for (int i = 0; i < kNCent; ++i) {
-    fdEdxTPCSignalCounts[i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fdEdxTPCSignalCounts%i",i)));
-    fdEdxTPCSignalCountsAD[i] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fdEdxTPCSignalCountsAD%i",i)));
-    if (fdEdxTPCSignalCounts[i])
-      fdEdxTPCSignalCounts[i]->Write();
-    if (fdEdxTPCSignalCountsAD[i])
-      fdEdxTPCSignalCountsAD[i]->Write();
-  }
-  
-  fCentrality = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fCentrality"));
-  if (fCentrality) {
-    fCentrality->Write();
-  }
-  
-  fCentralityNoFlat = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fCentralityNoFlat"));
-  if (fCentralityNoFlat) {
-    fCentralityNoFlat->Write();
-  }
-  
-  fCentralityClass = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fCentralityClass"));
-  if (fCentralityClass) {
-    fCentralityClass->Write();
-  }
-  
-  fdEdxTPCproj = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTPCproj"));
-  if (fdEdxTPCproj) {
-    fdEdxTPCproj->Write();
-  }
-  
-  fdEdxTriton = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxTriton"));
-  if (fdEdxTriton) {
-    fdEdxTriton->Write();
-  }
-  
-  fdEdxDeuteron = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fdEdxDeuteron"));
-  if (fdEdxDeuteron) {
-    fdEdxDeuteron->Write();
-  }
-  
-  fTPCSignalN = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTPCSignalN"));
-  if (fTPCSignalN) {
-    fTPCSignalN->Write();
-  }
-  
-  fTriggerHist = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fTriggerHist"));
-  if (fTriggerHist) {
-    fTriggerHist->Write();
-  }
-  
-  
-  fBeta = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fBeta"));
-  if (fBeta) {
-    fBeta->Write();
-  }
-  
-  fGamma = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fGamma"));
-  if (fGamma) {
-    fGamma->Write();
-  }
-  
-  fBeta2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2D"));
-  if (fBeta2D) {
-    fBeta2D->Write();
-  }
-  
-  fBeta2DPt = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fBeta2DPt"));
-  if (fBeta2DPt) {
-    fBeta2DPt->Write();
-  }
-  
-  fDCAz = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fDCAz"));
-  if (fDCAz) {
-    fDCAz->Write();
-  }
-  
-  fDCAxy = dynamic_cast<TH1F*>(GetOutputList()->FindObject("fDCAxy"));
-  if (fDCAxy) {
-    fDCAxy->Write();
-  }
-  
-  fDCA2D = dynamic_cast<TH2F*>(GetOutputList()->FindObject("fDCA2D"));
-  if (fDCA2D) {
-    fDCA2D->Write();
-  }
-  
-  
+  TFile f("nuclei.root","update");
   f.cd();
-  f.mkdir("MassSpectra");
-  f.mkdir("MassdEdx");
-  for (int cent = 0; cent < kNCent; ++cent) {
-    f.cd();
-    f.mkdir(Form("Signal%i",cent));
-    f.cd(Form("Signal%i",cent));
-    for (int j = 0; j < kNBinsTOF; ++j) {
-      fSignalAD[cent * kNBinsTOF + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalAD%i_%i",cent,j)));
-      if (fSignalAD[cent * kNBinsTOF + j]) {
-        fSignalAD[cent * kNBinsTOF + j]->Write();
-      }
-      
-      fSignalD[cent * kNBinsTOF + j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fSignalD%i_%i",cent,j)));
-      if (fSignalD[cent * kNBinsTOF + j]) {
-        fSignalD[cent * kNBinsTOF + j]->Write();
-      }
-    }
-    fDdcaXY[cent] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaXY%i",cent)));
-    fDdcaZ[cent] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDdcaZ%i",cent)));
-    if (!fDdcaXY[cent] || !fDdcaZ[cent]) {f.Close(); return;}
-    f.mkdir(Form("DCA%i",cent));
-    f.cd(Form("DCA%i",cent));
-    
-    for (int i = 0; i < kNDCABins; ++i) {
-      TH1D *hprim = fDdcaXY[cent]->ProjectionY(Form("dcaxy_%i",i),i + 1, i + 1);
-      TH1D *hseco = fDdcaZ[cent]->ProjectionY(Form("dcaz_%i",i),i + 1, i + 1);
-      hprim->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{xy} (cm);Entries",fBins[i],fBins[i + 1]));
-      hseco->SetTitle(Form("%4.2f < p_{T} #leq %4.2f;DCA_{z} (cm);Entries",fBins[i],fBins[i + 1]));
-      hprim->Write();
-      hseco->Write();
-    }
-
-  }
-  
-  f.mkdir("TOFSignal");
-  f.cd("TOFSignal");
-  for (int j = 0; j < kNBinsTOF; ++j) {
-    fTOFSignal[j] = dynamic_cast<TH1F*>(GetOutputList()->FindObject(Form("fTOFSignal%i",j)));
-    if (fTOFSignal[j]) {
-      fTOFSignal[j]->Write();
-    }
-  }
-    
-  f.cd();
-  f.mkdir("DCASignal");
-  f.cd("DCASignal");
-  for (int k = 0; k < kNCent; ++k) {
-    for (int i = 0; i < kNDCAbinsTOF; ++i) {
-      fDCASignal[k * kNDCAbinsTOF + i] = dynamic_cast<TH2F*>(GetOutputList()->FindObject(Form("fDCASignal%i_%i",k,i)));
-      if (fDCASignal[k * kNDCAbinsTOF + i]) {
-        fDCASignal[k * kNDCAbinsTOF + i]->Write();
-      }
-    }
-  }
-
+  TList *l = (TList*)GetOutputList()->Clone(kName.Data());
+  l->Write();
   f.Close();
 }

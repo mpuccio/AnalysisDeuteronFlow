@@ -13,21 +13,31 @@
 #include <TFile.h>
 #include <TSelector.h>
 #include <TF1.h>
+#include <TString.h>
 
 class TH1F;
 class TH2F;
-class TF1;
+class TH3F;
 
 
 #define EPSILON 1E-16
 #define MD 1.875612859f
 #define M2D MD*MD
-#define kNCent 3
+#define kNCent 4
 #define kNBins 28
-#define kNBinsTPC 3
-#define kNDCABins 10
-#define kNBinsTOF (kNBins - kNBinsTPC)
-#define kNDCAbinsTOF (kNDCABins - kNBinsTPC)
+const double kChi2Cut = 4.0f;
+const double kDCAz = 1.0f;
+const int kTPCsig = 70;
+const TString kName = "deuteron4cent";
+
+const double kCent[kNCent + 1] = {0.,10.,20.,40.,60.};
+const double kBins[kNBins + 1] = {
+  0.4f,0.5f,0.6f,0.7f,0.8f,0.9f,1.0f,1.1f,1.2f,1.4f,
+  1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
+  3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
+};
+
+
 
 // Header file for the classes stored in the TTree if any.
 
@@ -89,15 +99,8 @@ class AODSelector : public TSelector {
   AODSelector(TTree * /*tree*/ =0) : fChain(0),
   fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10),
   fCorrectionD("fCorrectionD","[0]+[1]*exp([2]*x)",0,10) {
-    float bins[kNBins + 1] = {
-      0.4f,0.5f,0.6f,0.7f,0.8f,0.9f,1.0f,1.1f,1.2f,1.4f,
-      1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
-      3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
-    };
-    for (int i = 0; i < kNBins + 1; ++i) fBins[i] = bins[i];
-    
-    double cent[kNCent + 1] = {0.,10.,30.,50.};
-    for (int i = 0; i < kNCent + 1; ++i) fCentralityClasses[i] = cent[i];
+    for (int i = 0; i < kNBins + 1; ++i) fBins[i] = kBins[i];
+    for (int i = 0; i < kNCent + 1; ++i) fCentralityBins[i] = kCent[i];
     
     fCorrectionAD.SetParameters(-2.10154e-03,-4.53472e-01,-3.01246e+00);
     fCorrectionD.SetParameters(-2.00277e-03,-4.93461e-01,-3.05463e+00);
@@ -123,36 +126,20 @@ private:
   Int_t            GetPtBin(float pt);
   Bool_t           Flatten(float cent);
   
-  TH1F*            fBeta;
-  TH2F*            fBeta2D;
-  TH2F*            fBeta2DPt;
   Double_t         fBins[kNBins + 1];      // length = fkNBins + 1
-  Double_t         fCentralityClasses[kNCent + 1];
-  TH1F*            fDCAxy;
-  TH1F*            fDCAz;
-  TH2F*            fDCA2D;
-  TH1F*            fSignalAD[kNBinsTOF * kNCent]; // length = nbinstof x 5
-  TH1F*            fSignalD[kNBinsTOF * kNCent];  // length = nbinstof x 5
-  TH1F*            fTOFSignal[kNBinsTOF];
+  Double_t         fCentralityBins[kNCent + 1];
   TF1*             fDeutBB;
-  TH1F*            fTPCSignalN;
-  TH1F*            fTriggerHist;
-  TH2F*            fdEdxTPC;
-  TH2F*            fdEdxTPCpT;
-  TH2F*            fdEdxTPCproj;
-  TH2F*            fdEdxTPCSignal;
-  TH1F*            fdEdxTPCSignalCounts[kNCent];
-  TH1F*            fdEdxTPCSignalCountsAD[kNCent];
-  TH1F*            fCentrality;
-  TH1F*            fCentralityClass;
-  TH1F*            fCentralityNoFlat;
-  TH1F*            fGamma;
-  TH2F*            fdEdxTriton;
-  TH2F*            fdEdxDeuteron;
   
-  TH2F            *fDdcaXY[kNCent];
-  TH2F            *fDdcaZ[kNCent];
-  TH2F            *fDCASignal[kNDCAbinsTOF * kNCent];  // length = fkNDCAbinsTOF x 5
+  TH1F            *fCentrality;            //!< Events centrality distribution
+  TH1F            *fFlattenedCentrality;   //!< Events centrality distribution after the flattening
+  TH1F            *fCentralityClasses;     //!< Events statistics per centrality classes
+  
+  TH3F            *fATOFsignal;            //!<
+  TH2F            *fATPCcounts;            //!<
+  TH3F            *fMDCAxy;                //!<
+  TH3F            *fMDCAz;                 //!<
+  TH3F            *fMTOFsignal;            //!<
+  TH2F            *fMTPCcounts;            //!<
   
   TF1              fCorrectionAD;
   TF1              fCorrectionD;
