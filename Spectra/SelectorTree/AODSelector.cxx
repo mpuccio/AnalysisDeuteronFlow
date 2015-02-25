@@ -297,10 +297,9 @@ void AODSelector::Terminate()
   // the results graphically or save the results to file.
   
   TFile f("nuclei.root","update");
-  f.cd();
+  f.mkdir(kName.Data());
+  f.cd(kName.Data());
   TList l;
-  l.SetOwner(kTRUE);
-  l.SetName(kName);
   l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentrality")));
   l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fFlattenCentrality")));
   l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentralityClasses")));
