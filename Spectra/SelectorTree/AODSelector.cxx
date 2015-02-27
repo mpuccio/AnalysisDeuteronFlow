@@ -318,5 +318,6 @@ void AODSelector::Terminate()
   
   fTPCSignal = (TH2F*)GetOutputList()->FindObject("fTPCSignal");
   fTPCSignal->Draw("colz");
+  fDeutBB = new TF1("deutTPC",DeuteronTPC,0.4,6,0);
   fDeutBB->Draw("same");
 }
