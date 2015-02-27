@@ -163,6 +163,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int i = 0; i <= dcaZnBins; ++i)
     dcazBins[i] = i * deltaDCAz - dcaZlimit;
   
+  fTPCSignal = new TH2F("fTPCSignal","p_{T} (GeV/c);dE/dx (a.u.)",nPtBins,pTbins,500,0,2500);
   
   fATOFsignal = new TH3F("fATOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
@@ -184,6 +185,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fMDCAz);
   GetOutputList()->Add(fMTOFsignal);
   GetOutputList()->Add(fMTPCcounts);
+  GetOutputList()->Add(fTPCSignal);
   
   fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
 }
@@ -256,6 +258,8 @@ Bool_t AODSelector::Process(Long64_t entry)
   } else {
     c_pT += fCorrectionAD(-c_pT);
   }
+
+  fTPCSignal->Fill(pTPC, TPCsignal);
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     if(c_pT > 0.) {
@@ -311,4 +315,8 @@ void AODSelector::Terminate()
   l.Add(new TH2F(*(TH2F*)GetOutputList()->FindObject("fMTPCcounts")));
   l.Write();
   f.Close();
+  
+  fTPCSignal = (TH2F*)GetOutputList()->FindObject("fTPCSignal");
+  fTPCSignal->Draw("colz");
+  fDeutBB->Draw("same");
 }

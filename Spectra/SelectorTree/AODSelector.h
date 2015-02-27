@@ -129,6 +129,7 @@ private:
   Double_t         fBins[kNBins + 1];      // length = fkNBins + 1
   Double_t         fCentralityBins[kNCent + 1];
   TF1*             fDeutBB;
+  TH2F*            fTPCSignal;
   
   TH1F            *fCentrality;            //!< Events centrality distribution
   TH1F            *fFlattenedCentrality;   //!< Events centrality distribution after the flattening
