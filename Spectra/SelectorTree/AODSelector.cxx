@@ -173,7 +173,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fATOFsignal = new TH3F("fATOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.); Entries",
+  fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.)",
                          nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   fMDCAxy = new TH3F("fMDCAxy",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
                      nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
@@ -182,7 +182,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fMTOFsignal = new TH3F("fMTOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fMTPCcounts = new TH3F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.); Entries",
+  fMTPCcounts = new TH3F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.)",
                          nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   GetOutputList()->Add(fATOFsignal);
   GetOutputList()->Add(fATPCcounts);
@@ -308,17 +308,15 @@ void AODSelector::Terminate()
   TFile f("nuclei.root","update");
   f.mkdir(kName.Data());
   f.cd(kName.Data());
-  TList l;
-  l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentrality")));
-  l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fFlattenCentrality")));
-  l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentralityClasses")));
-  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fATOFsignal")));
-  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fATPCcounts")));
-  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMDCAxy")));
-  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMDCAz")));
-  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMTOFsignal")));
-  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMTPCcounts")));
-  l.Write();
+  ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
+  ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
+  ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
+  ((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Write();
+  ((TH3F*)GetOutputList()->FindObject("fATPCcounts"))->Write();
+  ((TH3F*)GetOutputList()->FindObject("fMDCAxy"))->Write();
+  ((TH3F*)GetOutputList()->FindObject("fMDCAz"))->Write();
+  ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
+  ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
   f.Close();
   
   fTPCSignal = (TH2F*)GetOutputList()->FindObject("fTPCSignal");
