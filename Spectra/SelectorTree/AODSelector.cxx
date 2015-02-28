@@ -162,9 +162,9 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   const float deltaDCAz = 2.f * dcaZlimit / dcaZnBins;
   for (int i = 0; i <= dcaZnBins; ++i)
     dcazBins[i] = i * deltaDCAz - dcaZlimit;
-  const int nTpcBins = 501;
-  Double_t tpcBins[nTpcBins];
-  for (int i = 0; i < nTpcBins; ++i) {
+  const int nTpcBins = 500;
+  Double_t tpcBins[nTpcBins + 1];
+  for (int i = 0; i <= nTpcBins; ++i) {
     tpcBins[i] = i * 5;
   }
   
