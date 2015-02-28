@@ -162,14 +162,19 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   const float deltaDCAz = 2.f * dcaZlimit / dcaZnBins;
   for (int i = 0; i <= dcaZnBins; ++i)
     dcazBins[i] = i * deltaDCAz - dcaZlimit;
+  const int nTpcBins = 501;
+  Double_t tpcBins[nTpcBins];
+  for (int i = 0; i < nTpcBins; ++i) {
+    tpcBins[i] = i * 5;
+  }
   
   fTPCSignal = new TH2F("fTPCSignal","p_{T} (GeV/c);dE/dx (a.u.)",nPtBins,pTbins,500,0,2500);
   
   fATOFsignal = new TH3F("fATOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fATPCcounts = new TH2F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); TPC counts",
-                         nCentBins,centBins,nPtBins,pTbins);
+  fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.); Entries",
+                         nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   fMDCAxy = new TH3F("fMDCAxy",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
                      nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
   fMDCAz = new TH3F("fMDCAz",";Centrality (%);p_{T} (GeV/c); DCA_{z} (cm)",
@@ -177,8 +182,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fMTOFsignal = new TH3F("fMTOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fMTPCcounts = new TH2F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); TPC counts",
-                         nCentBins,centBins,nPtBins,pTbins);
+  fMTPCcounts = new TH3F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.); Entries",
+                         nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   GetOutputList()->Add(fATOFsignal);
   GetOutputList()->Add(fATPCcounts);
   GetOutputList()->Add(fMDCAxy);
@@ -263,11 +268,11 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     if(c_pT > 0.) {
-      fMTPCcounts->Fill(centrality,c_pT);
+      fMTPCcounts->Fill(centrality,c_pT,TPCsignal);
       fMDCAxy->Fill(centrality,c_pT,DCAxy);
       fMDCAz->Fill(centrality,c_pT,DCAz);
     } else {
-      fATPCcounts->Fill(centrality,-c_pT);
+      fATPCcounts->Fill(centrality,-c_pT,TPCsignal);
     }
     if (TOFtime > 0.f && length > 350.f) {
       Float_t beta = length / (2.99792457999999984e-02f * TOFtime);

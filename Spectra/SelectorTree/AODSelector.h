@@ -136,11 +136,11 @@ private:
   TH1F            *fCentralityClasses;     //!< Events statistics per centrality classes
   
   TH3F            *fATOFsignal;            //!<
-  TH2F            *fATPCcounts;            //!<
+  TH3F            *fATPCcounts;            //!<
   TH3F            *fMDCAxy;                //!<
   TH3F            *fMDCAz;                 //!<
   TH3F            *fMTOFsignal;            //!<
-  TH2F            *fMTPCcounts;            //!<
+  TH3F            *fMTPCcounts;            //!<
   
   TF1              fCorrectionAD;
   TF1              fCorrectionD;
