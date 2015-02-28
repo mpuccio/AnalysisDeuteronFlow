@@ -313,11 +313,11 @@ void AODSelector::Terminate()
   l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fFlattenCentrality")));
   l.Add(new TH1F(*(TH1F*)GetOutputList()->FindObject("fCentralityClasses")));
   l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fATOFsignal")));
-  l.Add(new TH2F(*(TH2F*)GetOutputList()->FindObject("fATPCcounts")));
+  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fATPCcounts")));
   l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMDCAxy")));
   l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMDCAz")));
   l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMTOFsignal")));
-  l.Add(new TH2F(*(TH2F*)GetOutputList()->FindObject("fMTPCcounts")));
+  l.Add(new TH3F(*(TH3F*)GetOutputList()->FindObject("fMTPCcounts")));
   l.Write();
   f.Close();
   
