@@ -267,6 +267,9 @@ Bool_t AODSelector::Process(Long64_t entry)
   fTPCSignal->Fill(pTPC, TPCsignal);
   
   if (TPCsignal > 0.76f * fDeutBB->Eval(pTPC) && TPCsignal < 1.24f * fDeutBB->Eval(pTPC)) {
+    if (pTPC < 1.4 && TMath::Abs(ITSsigmad) > 3.) {
+      return kTRUE;
+    }
     if(c_pT > 0.) {
       fMTPCcounts->Fill(centrality,c_pT,TPCsignal);
       fMDCAxy->Fill(centrality,c_pT,DCAxy);
