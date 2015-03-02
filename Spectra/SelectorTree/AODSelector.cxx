@@ -162,10 +162,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   const float deltaDCAz = 2.f * dcaZlimit / dcaZnBins;
   for (int i = 0; i <= dcaZnBins; ++i)
     dcazBins[i] = i * deltaDCAz - dcaZlimit;
-  const int nTpcBins = 500;
+  const int nTpcBins = 40;
   Double_t tpcBins[nTpcBins + 1];
   for (int i = 0; i <= nTpcBins; ++i) {
-    tpcBins[i] = i * 5;
+    tpcBins[i] = -4.f + i * 0.2f;
   }
   
   fTPCSignal = new TH2F("fTPCSignal","p_{T} (GeV/c);dE/dx (a.u.)",nPtBins,pTbins,500,0,2500);
@@ -173,7 +173,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fATOFsignal = new TH3F("fATOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.)",
+  fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); ITS ##sigma",
                          nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   fMDCAxy = new TH3F("fMDCAxy",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
                      nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
@@ -182,7 +182,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fMTOFsignal = new TH3F("fMTOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fMTPCcounts = new TH3F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); TPC dE/dx (a.u.)",
+  fMTPCcounts = new TH3F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); ITS ##sigma",
                          nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   GetOutputList()->Add(fATOFsignal);
   GetOutputList()->Add(fATPCcounts);
@@ -267,15 +267,12 @@ Bool_t AODSelector::Process(Long64_t entry)
   fTPCSignal->Fill(pTPC, TPCsignal);
   
   if (TPCsignal > 0.76f * fDeutBB->Eval(pTPC) && TPCsignal < 1.24f * fDeutBB->Eval(pTPC)) {
-    if (pTPC < 1.4 && TMath::Abs(ITSsigmad) > 3.) {
-      return kTRUE;
-    }
     if(c_pT > 0.) {
-      fMTPCcounts->Fill(centrality,c_pT,TPCsignal);
+      fMTPCcounts->Fill(centrality,c_pT,ITSsigmad);
       fMDCAxy->Fill(centrality,c_pT,DCAxy);
       fMDCAz->Fill(centrality,c_pT,DCAz);
     } else {
-      fATPCcounts->Fill(centrality,-c_pT,TPCsignal);
+      fATPCcounts->Fill(centrality,-c_pT,ITSsigmad);
     }
     if (TOFtime > 0.f && length > 350.f) {
       Float_t beta = length / (2.99792457999999984e-02f * TOFtime);

@@ -26,7 +26,7 @@ class TH3F;
 #define kNCent 4
 #define kNBins 28
 const double kChi2Cut = 4.0f;
-const double kDCAz = 1.0f;
+const double kDCAz = 0.5f;
 const int kTPCsig = 70;
 const TString kName = "deuteron4cent";
 
