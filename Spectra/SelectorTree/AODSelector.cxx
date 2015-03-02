@@ -279,7 +279,8 @@ Bool_t AODSelector::Process(Long64_t entry)
         Float_t gamma = 1. / TMath::Sqrt(1.f - (beta * beta));
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
         if(c_pT > 0.) {
-          fMDCAxy->Fill(centrality,c_pT,DCAxy);
+          if (TMath::Abs(dm) < 2.) 
+            fMDCAxy->Fill(centrality,c_pT,DCAxy);
           fMDCAz->Fill(centrality,c_pT,DCAz);
           fMTOFsignal->Fill(centrality,c_pT,dm);
         } else {
