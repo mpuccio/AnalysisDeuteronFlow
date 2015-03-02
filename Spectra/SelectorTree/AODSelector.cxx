@@ -269,8 +269,7 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (TPCsignal > 0.76f * fDeutBB->Eval(pTPC) && TPCsignal < 1.24f * fDeutBB->Eval(pTPC)) {
     if(c_pT > 0.) {
       fMTPCcounts->Fill(centrality,c_pT,ITSsigmad);
-      fMDCAxy->Fill(centrality,c_pT,DCAxy);
-      fMDCAz->Fill(centrality,c_pT,DCAz);
+      
     } else {
       fATPCcounts->Fill(centrality,-c_pT,ITSsigmad);
     }
@@ -280,6 +279,8 @@ Bool_t AODSelector::Process(Long64_t entry)
         Float_t gamma = 1. / TMath::Sqrt(1.f - (beta * beta));
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
         if(c_pT > 0.) {
+          fMDCAxy->Fill(centrality,c_pT,DCAxy);
+          fMDCAz->Fill(centrality,c_pT,DCAz);
           fMTOFsignal->Fill(centrality,c_pT,dm);
         } else {
           fATOFsignal->Fill(centrality,-c_pT,dm);
