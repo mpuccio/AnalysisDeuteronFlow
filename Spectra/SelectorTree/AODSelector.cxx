@@ -133,6 +133,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   cout << "Maximum chi2 " << fRequireMaxChi2 << endl;
   cout << "Maximum DCAs (xy and z) " << fRequireMaxDCAxy << " " << fRequireMaxDCAz << endl;
   cout << "============================" << endl;
+  cout << "\n======= BINS SUMMARY =======" << endl;
+  h2->Print("base");
+  cout << "============================" << endl;
+
   
   
   const Int_t nPtBins = fBins.GetSize() - 1;

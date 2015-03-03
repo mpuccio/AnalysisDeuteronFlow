@@ -32,7 +32,7 @@
   enum cutsName {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
   double cutsA[9] = {-0.8,0.8,-0.5,0.5,70,4.,1,0.5,1};
   for (int i = 1; i < 10; ++i) {
-    hCuts->SetBinContent(i,cutsA[i]);
+    hCuts->SetBinContent(i,cutsA[i - 1]);
   }
   gProof->AddInput(hBins);
   gProof->AddInput(hCuts);
