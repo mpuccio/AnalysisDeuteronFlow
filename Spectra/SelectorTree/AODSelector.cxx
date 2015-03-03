@@ -34,6 +34,7 @@
 #include <TF1.h>
 #include <TCanvas.h>
 #include <TRandom3.h>
+#include <Riostream.h>
 
 Double_t BetheBlochAleph(Double_t bg,
                          Double_t kp1,
@@ -124,6 +125,14 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fRequireSPDrecPoints = cuts->GetBinContent(kSPDrec);
   fRequireMaxDCAxy = cuts->GetBinContent(kDCAxy);
   fRequireMaxDCAz = cuts->GetBinContent(kDCAz);
+  
+  cout << "======= CUTS SUMMARY =======" << endl;
+  cout << "Eta range " << fRequireEtaMin << " " << fRequireEtaMax << endl;
+  cout << "Y range " << fRequireYmin << " " << fRequireYmax << endl;
+  cout << "Minimum number of TPC clusters " << fRequireTPCsignal << endl;
+  cout << "Maximum chi2 " << fRequireMaxChi2 << endl;
+  cout << "Maximum DCAs (xy and z) " << fRequireMaxDCAxy << " " << fRequireMaxDCAz << endl;
+  cout << "============================" << endl;
   
   
   const Int_t nPtBins = fBins.GetSize() - 1;
