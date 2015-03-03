@@ -21,7 +21,10 @@
     }
   }
 
+  gSystem->Load("AODSelector.cxx++g");
+  AODSelector *sel = new AODSelector();
+  sel->SetOutputOption("deuterons3cent",kTRUE);
   // Process the TDset
-  gProof->Process(manual_dset, "AODSelector.cxx++g");
+  gProof->Process(manual_dset, sel);
 
 }

@@ -235,27 +235,27 @@ Bool_t AODSelector::Process(Long64_t entry)
     return kTRUE;
 
   
-  if (TMath::Abs(eta) > 0.8)
+  if (eta < fRequireEtaMin || eta > fRequireEtaMax)
     return kTRUE;
   
-  if (TMath::Abs(chi2NDF) > kChi2Cut)
+  if (TMath::Abs(chi2NDF) > fRequireMaxChi2)
     return kTRUE;
   
   Double_t pz = TMath::Sqrt(p * p - pT * pT);
   Double_t e = TMath::Sqrt(p * p + M2D);
   Double_t y = 0.5 * TMath::Log((e + pz) / (e - pz));
-  if (TMath::Abs(y) > 0.5) {
+  if (y < fRequireYmin || y > fRequireYmax) {
     return kTRUE;
   }
   
-  if (TPCnSignal < kTPCsig)
+  if (TPCnSignal < fRequireTPCsignal)
     return kTRUE;
   
   
-  if (ITSnClust - ITSnSignal <= 0) return kTRUE;
-  if (TMath::Abs(DCAz) > kDCAz) return kTRUE;
+  if (ITSnClust - ITSnSignal < fRequireSPDrecPoints) return kTRUE;
+  if (TMath::Abs(DCAz) > fRequireMaxDCAz) return kTRUE;
   
-  if (TMath::Abs(DCAxy) > 0.5f) return kTRUE;
+  if (TMath::Abs(DCAxy) > fRequireMaxDCAxy) return kTRUE;
   
   Float_t c_pT = pT;
   if (c_pT > 0) {
@@ -266,7 +266,7 @@ Bool_t AODSelector::Process(Long64_t entry)
 
   fTPCSignal->Fill(pTPC, TPCsignal);
   
-  if (TPCsignal > 0.76f * fDeutBB->Eval(pTPC) && TPCsignal < 1.24f * fDeutBB->Eval(pTPC)) {
+  if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     if(c_pT > 0.) {
       fMTPCcounts->Fill(centrality,c_pT,ITSsigmad);
       
@@ -307,9 +307,9 @@ void AODSelector::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
   
-  TFile f("nuclei.root","update");
-  f.mkdir(kName.Data());
-  f.cd(kName.Data());
+  TFile f("nuclei.root",(fRecreate) ? "recreate" : "update");
+  f.mkdir(fTaskName.Data());
+  f.cd(fTaskName.Data());
   ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
   ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
   ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();

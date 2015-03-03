@@ -47,6 +47,20 @@ class AODSelector : public TSelector {
   public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   
+  void SetRequireITSrecPoints (int rec = 4) { fRequireITSrecPoints = rec; }
+  void SetRequireITSsignal (int sig = 3) { fRequireITSsignal = sig; }
+  void SetRequireTPCrecPoints (int rec = 70) { fRequireITSrecPoints = rec; }
+  void SetRequireTPCsignal (int sig = 70) { fRequireITSsignal = sig; }
+  void SetRequireSPDrecPoints (int rec = 1) { fRequireSPDrecPoints = rec; }
+  void SetEtaRange (float emin, float emax) { fRequireEtaMin = emin; fRequireEtaMax = emax; }
+  void SetYRange (float ymin, float ymax) { fRequireYmin = ymin; fRequireYmax = ymax; }
+  void SetRequireMaxChi2 (float maxChi2 = 4.f) { fRequireMaxChi2 = maxChi2; }
+  void SetRequireMaxDCAxy (float maxDCA) { fRequireMaxDCAxy = maxDCA; }
+  void SetRequireMaxDCAz (float maxDCA) { fRequireMaxDCAz = maxDCA; }
+  void SetRequireTPCpidSigmas (float sig) { fRequireTPCpidSigmas = (sig > 0) ? sig : -sig; }
+  void SetRequireITSpidSigmas (float sig) { fRequireITSpidSigmas = sig; }
+  
+  void SetOutputOption(TString name, Bool_t rec = kFALSE) { fTaskName = name; fRecreate = rec; }
   // Declaration of leaf types
   Float_t         centrality;
   Float_t         eta;
@@ -96,9 +110,26 @@ class AODSelector : public TSelector {
   TBranch        *b_ITSnSignal;   //!
   
   
-  AODSelector(TTree * /*tree*/ =0) : fChain(0),
-  fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10),
-  fCorrectionD("fCorrectionD","[0]+[1]*exp([2]*x)",0,10) {
+  AODSelector(TTree * /*tree*/ =0) : fChain(0)
+  ,fTaskName("standardname")
+  ,fRecreate(kTRUE)
+  ,fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10)
+  ,fCorrectionD("fCorrectionD","[0]+[1]*exp([2]*x)",0,10)
+  ,fRequireITSrecPoints(2u)
+  ,fRequireITSsignal(0u)
+  ,fRequireSPDrecPoints(1u)
+  ,fRequireTPCrecPoints(70u)
+  ,fRequireTPCsignal(70u)
+  ,fRequireEtaMin(-0.8f)
+  ,fRequireEtaMax(0.8f)
+  ,fRequireYmin(-0.5f)
+  ,fRequireYmax(0.5f)
+  ,fRequireMaxChi2(4.f)
+  ,fRequireMaxDCAxy(0.5f)
+  ,fRequireMaxDCAz(1.f)
+  ,fRequireTPCpidSigmas(3.f)
+  ,fRequireITSpidSigmas(-1.f)
+  {
     for (int i = 0; i < kNBins + 1; ++i) fBins[i] = kBins[i];
     for (int i = 0; i < kNCent + 1; ++i) fCentralityBins[i] = kCent[i];
     
@@ -126,10 +157,31 @@ private:
   Int_t            GetPtBin(float pt);
   Bool_t           Flatten(float cent);
   
+  TString          fTaskName;
+  Bool_t           fRecreate;
   Double_t         fBins[kNBins + 1];      // length = fkNBins + 1
   Double_t         fCentralityBins[kNCent + 1];
   TF1*             fDeutBB;
   TH2F*            fTPCSignal;
+  
+  Bool_t           fRequireITSrefit;       ///< Cut on tracks: set true to require ITS refit
+  Bool_t           fRequireTPCrefit;       ///< Cut on tracks: set true to require TPC refit
+  Bool_t           fRequireNoKinks;        ///< Cut on tracks: set true to exclude tracks from kink vertices
+  UShort_t         fRequireITSrecPoints;   ///< Cut on tracks: minimum number of required ITS recpoints
+  UShort_t         fRequireITSsignal;      ///< Cut on tracks: minimum number of required ITS PID recpoints
+  UShort_t         fRequireSPDrecPoints;   ///< Cut on tracks: minimum number of required SPD recpoints
+  UShort_t         fRequireTPCrecPoints;   ///< Cut on tracks: minimum number of required TPC recpoints
+  UShort_t         fRequireTPCsignal;      ///< Cut on tracks: minimum number of required TPC PID recpoints
+  Float_t          fRequireEtaMin;         ///< Cut on tracks: minimum eta for the track
+  Float_t          fRequireEtaMax;         ///< Cut on tracks: maximum eta for the track
+  Float_t          fRequireYmin;           ///< Cut on tracks: mimimum y for the track (using PDG mass)
+  Float_t          fRequireYmax;           ///< Cut on tracks: maximum y for the track (using PDG mass)
+  Float_t          fRequireMaxChi2;        ///< Cut on tracks: maximum TPC \f$\chi^{2}/NDF\f$
+  Float_t          fRequireMaxDCAxy;       ///< Cut on tracks: maximum \f$DCA_{xy}\f$ for the track
+  Float_t          fRequireMaxDCAz;        ///< Cut on tracks: maximum \f$DCA_{z}\f$ for the track
+  Float_t          fRequireTPCpidSigmas;   ///< Cut on TPC PID number of sigmas
+  Float_t          fRequireITSpidSigmas;
+
   
   TH1F            *fCentrality;            //!< Events centrality distribution
   TH1F            *fFlattenedCentrality;   //!< Events centrality distribution after the flattening
