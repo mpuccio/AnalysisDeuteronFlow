@@ -99,7 +99,7 @@ void AODSelector::Begin(TTree * /*tree*/)
 Int_t AODSelector::GetCentBin(float cent) {
   if (cent < fCentralityBins[0]) return -1;
 
-  for (int i = 0; i < kNCent; ++i)
+  for (int i = 0; i < fCentralityBins.GetSize() - 1; ++i)
     if (cent <= fCentralityBins[i + 1])
       return i;
   
@@ -107,7 +107,7 @@ Int_t AODSelector::GetCentBin(float cent) {
 }
 
 Int_t AODSelector::GetPtBin(float pt) {
-  for (int i = 0; i < kNBins; ++i) {
+  for (int i = 0; i < fBins.GetSize() - 1; ++i) {
     if (pt < fBins[i+1] && pt >= fBins[i]) {
       return i;
     }
@@ -132,10 +132,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   
   TString option = GetOption();
   
-  const Int_t nPtBins = kNBins;
-  const Int_t nCentBins = kNCent;
-  const Double_t *pTbins = fBins;
-  const Double_t *centBins = fCentralityBins;
+  const Int_t nPtBins = fBins.GetSize() - 1;
+  const Int_t nCentBins = fCentralityBins.GetSize() - 1;
+  const Double_t *pTbins = fBins.GetArray();
+  const Double_t *centBins = fCentralityBins.GetArray();
   
   const Int_t nDCAbins = 80;
   const Float_t range = 0.5;

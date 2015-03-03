@@ -14,6 +14,7 @@
 #include <TSelector.h>
 #include <TF1.h>
 #include <TString.h>
+#include <TArrayD.h>
 
 class TH1F;
 class TH2F;
@@ -23,19 +24,7 @@ class TH3F;
 #define EPSILON 1E-16
 #define MD 1.875612859f
 #define M2D MD*MD
-#define kNCent 4
-#define kNBins 28
-const double kChi2Cut = 4.0f;
-const double kDCAz = 0.5f;
-const int kTPCsig = 70;
-const TString kName = "deuteron4cent";
 
-const double kCent[kNCent + 1] = {0.,10.,20.,40.,60.};
-const double kBins[kNBins + 1] = {
-  0.4f,0.5f,0.6f,0.7f,0.8f,0.9f,1.0f,1.1f,1.2f,1.4f,
-  1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
-  3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
-};
 
 
 
@@ -47,6 +36,9 @@ class AODSelector : public TSelector {
   public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   
+  void SetPtBins(Int_t n, Double_t *arr) { fBins.Set(n, arr); }
+  void SetCentBins(Int_t n, Double_t *arr) { fCentralityBins.Set(n, arr); }
+
   void SetRequireITSrecPoints (int rec = 4) { fRequireITSrecPoints = rec; }
   void SetRequireITSsignal (int sig = 3) { fRequireITSsignal = sig; }
   void SetRequireTPCrecPoints (int rec = 70) { fRequireITSrecPoints = rec; }
@@ -159,8 +151,8 @@ private:
   
   TString          fTaskName;
   Bool_t           fRecreate;
-  Double_t         fBins[kNBins + 1];      // length = fkNBins + 1
-  Double_t         fCentralityBins[kNCent + 1];
+  TArrayD          fBins;
+  TArrayD          fCentralityBins;
   TF1*             fDeutBB;
   TH2F*            fTPCSignal;
   
