@@ -25,9 +25,6 @@ class TH3F;
 #define MD 1.875612859f
 #define M2D MD*MD
 
-
-
-
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -151,8 +148,8 @@ private:
   Bool_t           fRecreate;
   TArrayD          fBins;
   TArrayD          fCentralityBins;
-  TF1*             fDeutBB;
-  TH2F*            fTPCSignal;
+  TF1*             fDeutBB;                //!<
+  TH2F*            fTPCSignal;             //!<
   
   Bool_t           fRequireITSrefit;       ///< Cut on tracks: set true to require ITS refit
   Bool_t           fRequireTPCrefit;       ///< Cut on tracks: set true to require TPC refit

@@ -109,6 +109,21 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   // The tree argument is deprecated (on PROOF 0 is passed).
   
   TString option = GetOption();
+  enum cName {kEtaMin=0,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
+  TList *l = GetInputList();
+  fBins = *(TArrayD*)l->FindObject("ptbins");
+  fCentralityBins = *(TArrayD*)l->FindObject("centbins");
+  TArrayD *cuts = (TArrayD*)l->FindObject("cuts");
+  fRequireEtaMin = (*cuts)[cName::kEtaMin];
+  fRequireEtaMax = (*cuts)[cName::kEtaMax];
+  fRequireYmin = (*cuts)[cName::kYMin];
+  fRequireYmax = (*cuts)[cName::kYMax];
+  fRequireTPCsignal = (*cuts)[cName::kTPCsig];
+  fRequireMaxChi2 = (*cuts)[cName::kTPCchi2];
+  fRequireSPDrecPoints = (*cuts)[cName::kSPDrec];
+  fRequireMaxDCAxy = (*cuts)[cName::kDCAxy];
+  fRequireMaxDCAz = (*cuts)[cName::kDCAz];
+  
   
   const Int_t nPtBins = fBins.GetSize() - 1;
   const Int_t nCentBins = fCentralityBins.GetSize() - 1;

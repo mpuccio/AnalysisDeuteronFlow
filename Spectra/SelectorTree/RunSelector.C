@@ -21,7 +21,7 @@
     }
   }
 
-  gROOT->LoadMacro("AODSelector.cxx++g");
+  gROOT->LoadMacro("AODSelector.cxx+g");
 
   const double kCent[5] = {0.,10.,20.,40.,60.};
   const double kBins[29] = {
@@ -29,11 +29,19 @@
     1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
     3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
   };
-  AODSelector *sel = new AODSelector();
-  sel->SetPtBins(29,kBins);
-  sel->SetCentBins(5,kCent);
-  sel->SetOutputOption("deuterons3cent",kTRUE);
+  enum cutsName {kEtaMin=0,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
+  double cuts[9] = {-0.8,0.8,-0.5,0.5,70,4.,1,0.5,1};
+  TArrayD *ptBins = new TArrayD(5,kCent);
+  TArrayD *centBins = new TArrayD(29,kBins);
+  TArrayD *cuts = new TArrayD(9,cutsName);
+  ptBins->SetName("ptbins");
+  centBins->SetName("centbins");
+  cuts->SetName("cuts");
+  gProof->AddInput(ptBins);
+  gProof->AddInput(centBins);
+  gProof->AddInput(cuts);
+  
   // Process the TDset
-  gProof->Process(manual_dset, sel);
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
 
 }
