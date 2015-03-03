@@ -33,7 +33,7 @@
   double cuts[9] = {-0.8,0.8,-0.5,0.5,70,4.,1,0.5,1};
   TArrayD *ptBins = new TArrayD(5,kCent);
   TArrayD *centBins = new TArrayD(29,kBins);
-  TArrayD *cuts = new TArrayD(9,cutsName);
+  TArrayD *cuts = new TArrayD(9,cuts);
   ptBins->SetName("ptbins");
   centBins->SetName("centbins");
   cuts->SetName("cuts");
