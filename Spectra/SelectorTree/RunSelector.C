@@ -21,7 +21,7 @@
     }
   }
 
-  gSystem->Load("AODSelector.cxx++g");
+  gROOT->LoadMacro("AODSelector.cxx++g");
 
   const double kCent[5] = {0.,10.,20.,40.,60.};
   const double kBins[29] = {
