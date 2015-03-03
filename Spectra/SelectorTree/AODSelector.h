@@ -105,8 +105,6 @@ class AODSelector : public TSelector {
   AODSelector(TTree * /*tree*/ =0) : fChain(0)
   ,fTaskName("standardname")
   ,fRecreate(kTRUE)
-  ,fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10)
-  ,fCorrectionD("fCorrectionD","[0]+[1]*exp([2]*x)",0,10)
   ,fRequireITSrecPoints(2u)
   ,fRequireITSsignal(0u)
   ,fRequireSPDrecPoints(1u)
@@ -121,9 +119,9 @@ class AODSelector : public TSelector {
   ,fRequireMaxDCAz(1.f)
   ,fRequireTPCpidSigmas(3.f)
   ,fRequireITSpidSigmas(-1.f)
+  ,fCorrectionAD("fCorrectionAD","[0]+[1]*exp([2]*x)",0,10)
+  ,fCorrectionD("fCorrectionD","[0]+[1]*exp([2]*x)",0,10)
   {
-    for (int i = 0; i < kNBins + 1; ++i) fBins[i] = kBins[i];
-    for (int i = 0; i < kNCent + 1; ++i) fCentralityBins[i] = kCent[i];
     
     fCorrectionAD.SetParameters(-2.10154e-03,-4.53472e-01,-3.01246e+00);
     fCorrectionD.SetParameters(-2.00277e-03,-4.93461e-01,-3.05463e+00);
