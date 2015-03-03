@@ -35,28 +35,6 @@
 #include <TCanvas.h>
 #include <TRandom3.h>
 
-static void BinLogAxis(const TH1 *h)
-{
-  //
-  // Method for the correct logarithmic binning of histograms
-  //
-  TAxis *axis = const_cast<TAxis*>(h->GetXaxis());
-  const Int_t bins = axis->GetNbins();
-  
-  const Double_t from = axis->GetXmin();
-  const Double_t to = axis->GetXmax();
-  Double_t *newBins = new Double_t[bins + 1];
-  
-  newBins[0] = from;
-  Double_t factor = pow(to / from, 1. / bins);
-  
-  for (Int_t i = 1; i <= bins; i++) {
-    newBins[i] = factor * newBins[i - 1];
-  }
-  axis->Set(bins, newBins);
-  delete [] newBins;
-}
-
 Double_t BetheBlochAleph(Double_t bg,
                          Double_t kp1,
                          Double_t kp2,
