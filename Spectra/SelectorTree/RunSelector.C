@@ -30,10 +30,10 @@
     3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
   };
   enum cutsName {kEtaMin=0,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
-  double cuts[9] = {-0.8,0.8,-0.5,0.5,70,4.,1,0.5,1};
+  double cutsA[9] = {-0.8,0.8,-0.5,0.5,70,4.,1,0.5,1};
   TArrayD *ptBins = new TArrayD(5,kCent);
   TArrayD *centBins = new TArrayD(29,kBins);
-  TArrayD *cuts = new TArrayD(9,cuts);
+  TArrayD *cuts = new TArrayD(9,cutsA);
   ptBins->SetName("ptbins");
   centBins->SetName("centbins");
   cuts->SetName("cuts");
