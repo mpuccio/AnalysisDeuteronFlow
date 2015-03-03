@@ -109,20 +109,21 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   // The tree argument is deprecated (on PROOF 0 is passed).
   
   TString option = GetOption();
-  enum {kEtaMin=0,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
+  enum {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
   TList *l = GetInputList();
-  fBins = *(TArrayD*)l->FindObject("ptbins");
-  fCentralityBins = *(TArrayD*)l->FindObject("centbins");
-  TArrayD *cuts = (TArrayD*)l->FindObject("cuts");
-  fRequireEtaMin = (*cuts)[kEtaMin];
-  fRequireEtaMax = (*cuts)[kEtaMax];
-  fRequireYmin = (*cuts)[kYMin];
-  fRequireYmax = (*cuts)[kYMax];
-  fRequireTPCsignal = (*cuts)[kTPCsig];
-  fRequireMaxChi2 = (*cuts)[kTPCchi2];
-  fRequireSPDrecPoints = (*cuts)[kSPDrec];
-  fRequireMaxDCAxy = (*cuts)[kDCAxy];
-  fRequireMaxDCAz = (*cuts)[kDCAz];
+  TH2F *h2 = (TH2F*)l->FindObject("hBins");
+  fBins = *(h2->GetYaxis()->GetXbins());
+  fCentralityBins = *(h2->GetXaxis()->GetXbins());
+  TH1D *cuts = (TH1D*)l->FindObject("hCuts");
+  fRequireEtaMin = cuts->GetBinContent(kEtaMin);
+  fRequireEtaMax = cuts->GetBinContent(kEtaMax);
+  fRequireYmin = cuts->GetBinContent(kYMin);
+  fRequireYmax = cuts->GetBinContent(kYMax);
+  fRequireTPCsignal = cuts->GetBinContent(kTPCsig);
+  fRequireMaxChi2 = cuts->GetBinContent(kTPCchi2);
+  fRequireSPDrecPoints = cuts->GetBinContent(kSPDrec);
+  fRequireMaxDCAxy = cuts->GetBinContent(kDCAxy);
+  fRequireMaxDCAz = cuts->GetBinContent(kDCAz);
   
   
   const Int_t nPtBins = fBins.GetSize() - 1;

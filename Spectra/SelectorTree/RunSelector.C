@@ -29,17 +29,15 @@
     1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
     3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
   };
-  enum cutsName {kEtaMin=0,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
+  TH2F *hBins = new TH2F("hBins","hBins",4,kCent,28,kBins);
+  TH1D *hCuts = new TH1D("hCuts","hCuts",9,0,9);
+  enum cutsName {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
   double cutsA[9] = {-0.8,0.8,-0.5,0.5,70,4.,1,0.5,1};
-  TArrayD *ptBins = new TArrayD(5,kCent);
-  TArrayD *centBins = new TArrayD(29,kBins);
-  TArrayD *cuts = new TArrayD(9,cutsA);
-  ptBins->SetName("ptbins");
-  centBins->SetName("centbins");
-  cuts->SetName("cuts");
-  gProof->AddInput(ptBins);
-  gProof->AddInput(centBins);
-  gProof->AddInput(cuts);
+  for (int i = 1; i < 10; ++i) {
+    hCuts->SetBinContent(i,cutsA[i]);
+  }
+  gProof->AddInput(hBins);
+  gProof->AddInput(hCuts);
   
   // Process the TDset
   gProof->Process(manual_dset, "AODSelector.cxx+g");
