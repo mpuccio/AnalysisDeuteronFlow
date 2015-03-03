@@ -288,15 +288,25 @@ void AODSelector::Terminate()
   TFile f("nuclei.root",(fRecreate) ? "recreate" : "update");
   f.mkdir(fTaskName.Data());
   f.cd(fTaskName.Data());
-  ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
-  ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
-  ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
-  ((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Write();
-  ((TH3F*)GetOutputList()->FindObject("fATPCcounts"))->Write();
-  ((TH3F*)GetOutputList()->FindObject("fMDCAxy"))->Write();
-  ((TH3F*)GetOutputList()->FindObject("fMDCAz"))->Write();
-  ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
-  ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
+  if (GetOutputList()->FindObject("fCentrality") &&
+      GetOutputList()->FindObject("fFlattenCentrality") &&
+      GetOutputList()->FindObject("fCentralityClasses") &&
+      GetOutputList()->FindObject("fATOFsignal") &&
+      GetOutputList()->FindObject("fATPCcounts") &&
+      GetOutputList()->FindObject("fMDCAxy") &&
+      GetOutputList()->FindObject("fMDCAz") &&
+      GetOutputList()->FindObject("fMTOFsignal") &&
+      GetOutputList()->FindObject("fMTPCcounts")) {
+    ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
+    ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
+    ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fATPCcounts"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMDCAxy"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMDCAz"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
+  }
   f.Close();
   
   fTPCSignal = (TH2F*)GetOutputList()->FindObject("fTPCSignal");
