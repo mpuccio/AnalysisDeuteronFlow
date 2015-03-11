@@ -110,9 +110,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   // The tree argument is deprecated (on PROOF 0 is passed).
   
   TString option = GetOption();
-  enum {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz};
+  enum {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz,kRecreate};
   TList *l = GetInputList();
   TH2F *h2 = (TH2F*)l->FindObject("hBins");
+  TNamed *name = (TNamed*)l->FindObject("taskName");
   fBins = *(h2->GetYaxis()->GetXbins());
   fCentralityBins = *(h2->GetXaxis()->GetXbins());
   TH1D *cuts = (TH1D*)l->FindObject("hCuts");
@@ -125,6 +126,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fRequireSPDrecPoints = cuts->GetBinContent(kSPDrec);
   fRequireMaxDCAxy = cuts->GetBinContent(kDCAxy);
   fRequireMaxDCAz = cuts->GetBinContent(kDCAz);
+  fRecreate = cuts->GetBinContent(kRecreate) > 0.5;
+  fTaskName = name->GetTitle();
   
   cout << "======= CUTS SUMMARY =======" << endl;
   cout << "Eta range " << fRequireEtaMin << " " << fRequireEtaMax << endl;
@@ -150,13 +153,6 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int i = 0; i <= nDCAbins; ++i)
     dcaBins[i] = i * range * 2 / nDCAbins - range;
   
-  fCentrality = new TH1F("fCentrality",";Centrality (%);Events / 1%;",100,0.,100.);
-  fCentralityClasses = new TH1F("fCentralityClasses",";Centrality classes(%);Events / Class;",nCentBins,centBins);
-  fFlattenedCentrality = new TH1F("fFlattenCentrality","Centrality distribution after the flattening;Centrality (%);Events / 1%;",100,0.,100.);
-  GetOutputList()->Add(fCentrality);
-  GetOutputList()->Add(fCentralityClasses);
-  GetOutputList()->Add(fFlattenedCentrality);
-  
   const int tofNbins = 75;
   const float tofLowBoundary = -2.4,tofHighBoundary = 3.6;
   Double_t tofBins[tofNbins + 1];
@@ -174,6 +170,13 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   for (int i = 0; i <= nTpcBins; ++i) {
     tpcBins[i] = -4.f + i * 0.2f;
   }
+  
+  fCentrality = new TH1F("fCentrality",";Centrality (%);Events / 1%;",100,0.,100.);
+  fCentralityClasses = new TH1F("fCentralityClasses",";Centrality classes(%);Events / Class;",nCentBins,centBins);
+  fFlattenedCentrality = new TH1F("fFlattenCentrality","Centrality distribution after the flattening;Centrality (%);Events / 1%;",100,0.,100.);
+  GetOutputList()->Add(fCentrality);
+  GetOutputList()->Add(fCentralityClasses);
+  GetOutputList()->Add(fFlattenedCentrality);
   
   fTPCSignal = new TH2F("fTPCSignal","p_{T} (GeV/c);dE/dx (a.u.)",nPtBins,pTbins,500,0,2500);
   
