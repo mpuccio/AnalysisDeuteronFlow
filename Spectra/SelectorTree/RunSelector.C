@@ -44,9 +44,55 @@
   
   // Other cuts
   hCuts->SetBinContent(10,0.);
-  hCuts->SetBinContent(5,60);
-  taskTitle.SetTitle("deuteron3cent_chi0");
+  // chi2
+  hCuts->SetBinContent(5,3.5);
+  taskTitle->SetTitle("deuteron3cent_chi0");
   gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(5,4.5);
+  taskTitle->SetTitle("deuteron3cent_chi1");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(5,5);
+  taskTitle->SetTitle("deuteron3cent_chi2");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(5,5.5);
+  taskTitle->SetTitle("deuteron3cent_chi3");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(5,6.);
+  taskTitle->SetTitle("deuteron3cent_chi4");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(5,4.);
+  // dca_z
+  hCuts->SetBinContent(9,0.5);
+  taskTitle->SetTitle("deuteron3cent_dcaz0");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(9,0.75);
+  taskTitle->SetTitle("deuteron3cent_dcaz1");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(9,1.5);
+  taskTitle->SetTitle("deuteron3cent_dcaz2");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(9,2.);
+  taskTitle->SetTitle("deuteron3cent_dcaz3");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(9,1.);
+  // tpc
+  hCuts->SetBinContent(4,60);
+  taskTitle->SetTitle("deuteron3cent_tpc0");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(4,65);
+  taskTitle->SetTitle("deuteron3cent_tpc1");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(4,75);
+  taskTitle->SetTitle("deuteron3cent_tpc2");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+  hCuts->SetBinContent(4,80);
+  taskTitle->SetTitle("deuteron3cent_tpc3");
+  gProof->Process(manual_dset, "AODSelector.cxx+g");
+
+
+
+
+
 
 
 }
