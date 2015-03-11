@@ -27,7 +27,7 @@
     1.6f,1.8f,2.0f,2.2f,2.4f,2.6f,2.8f,3.0f,3.2f,3.4f,
     3.6f,3.8f,4.0f,4.2f,4.4f,5.0f,6.0f,8.0f,10.f
   };
-  TH2F *hBins = new TH2F("hBins","hBins",4,kCent,28,kBins);
+  TH2F *hBins = new TH2F("hBins","hBins",3,kCent,28,kBins);
   TH1D *hCuts = new TH1D("hCuts","hCuts",10,0,10);
   TNamed *taskTitle = new TNamed("taskName","deuteron3cent");
   enum cutsName {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz,kRecreate};
