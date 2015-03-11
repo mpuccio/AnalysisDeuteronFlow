@@ -113,7 +113,6 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   enum {kEtaMin=1,kEtaMax,kYMin,kYMax,kTPCsig,kTPCchi2,kSPDrec,kDCAxy,kDCAz,kRecreate};
   TList *l = GetInputList();
   TH2F *h2 = (TH2F*)l->FindObject("hBins");
-  TNamed *name = (TNamed*)l->FindObject("taskName");
   fBins = *(h2->GetYaxis()->GetXbins());
   fCentralityBins = *(h2->GetXaxis()->GetXbins());
   TH1D *cuts = (TH1D*)l->FindObject("hCuts");
@@ -126,8 +125,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fRequireSPDrecPoints = cuts->GetBinContent(kSPDrec);
   fRequireMaxDCAxy = cuts->GetBinContent(kDCAxy);
   fRequireMaxDCAz = cuts->GetBinContent(kDCAz);
-  fRecreate = cuts->GetBinContent(kRecreate) > 0.5;
-  fTaskName = name->GetTitle();
+
   
   cout << "======= CUTS SUMMARY =======" << endl;
   cout << "Eta range " << fRequireEtaMin << " " << fRequireEtaMax << endl;
@@ -316,6 +314,11 @@ void AODSelector::Terminate()
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
+  TList *l = GetInputList();
+  TNamed *name = (TNamed*)l->FindObject("taskName");
+  TH1D *cuts = (TH1D*)l->FindObject("hCuts");
+  fRecreate = cuts->GetBinContent(10) > 0.5;
+  fTaskName = name->GetTitle();
   
   TFile f("nuclei.root",(fRecreate) ? "recreate" : "update");
   f.mkdir(fTaskName.Data());
