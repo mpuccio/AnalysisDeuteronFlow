@@ -143,6 +143,7 @@ private:
   Int_t            GetCentBin(float cent);
   Int_t            GetPtBin(float pt);
   Bool_t           Flatten(float cent);
+  void             BinLogAxis(const TH1 *h);
   
   TString          fTaskName;
   Bool_t           fRecreate;

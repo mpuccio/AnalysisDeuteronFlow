@@ -65,6 +65,29 @@ unsigned int Log2Int(const unsigned int v) {
   return r;
 }
 
+void AODSelector::BinLogAxis(const TH1 *h) {
+  //
+  // Method for the correct logarithmic binning of histograms
+  //
+  TAxis *axis = const_cast<TAxis*>(h->GetXaxis());
+  const Int_t bins = axis->GetNbins();
+  
+  const Double_t from = axis->GetXmin();
+  const Double_t to = axis->GetXmax();
+  Double_t *newBins = new Double_t[bins + 1];
+  
+  newBins[0] = from;
+  Double_t factor = pow(to / from, 1. / bins);
+  
+  for (Int_t i = 1; i <= bins; i++) {
+    newBins[i] = factor * newBins[i - 1];
+  }
+  axis->Set(bins, newBins);
+  delete [] newBins;
+  
+}
+
+
 void AODSelector::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
@@ -176,7 +199,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fCentralityClasses);
   GetOutputList()->Add(fFlattenedCentrality);
   
-  fTPCSignal = new TH2F("fTPCSignal","p_{T} (GeV/c);dE/dx (a.u.)",nPtBins,pTbins,500,0,2500);
+  fTPCSignal = new TH2F("fTPCSignal","p_{T} (GeV/c);dE/dx (a.u.)",290,0.1,3.,500,0,2500);
+  BinLogAxis(fTPCSignal);
   
   fATOFsignal = new TH3F("fATOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
@@ -354,12 +378,11 @@ void AODSelector::Terminate()
     ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
   }
-  f.Close();
   
   if (GetOutputList()->FindObject("fTPCSignal")) {
     fTPCSignal = (TH2F*)GetOutputList()->FindObject("fTPCSignal");
-    fTPCSignal->Draw("colz");
-    fDeutBB = new TF1("deutTPC",DeuteronTPC,0.4,6,0);
-    fDeutBB->Draw("same");
+    fTPCSignal->Write();
   }
+  f.Close();
+
 }
