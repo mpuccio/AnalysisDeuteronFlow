@@ -176,8 +176,10 @@ private:
   
   TH3F            *fATOFsignal;            //!<
   TH3F            *fATPCcounts;            //!<
-  TH3F            *fMDCAxy;                //!<
-  TH3F            *fMDCAz;                 //!<
+  TH3F            *fMDCAxyTPC;             //!<
+  TH3F            *fMDCAzTPC;              //!<
+  TH3F            *fMDCAxyTOF;             //!<
+  TH3F            *fMDCAzTOF;              //!<
   TH3F            *fMTOFsignal;            //!<
   TH3F            *fMTPCcounts;            //!<
   

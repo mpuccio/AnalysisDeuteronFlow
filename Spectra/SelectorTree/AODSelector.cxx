@@ -183,10 +183,14 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
   fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); ITS ##sigma",
                          nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
-  fMDCAxy = new TH3F("fMDCAxy",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
-                     nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
-  fMDCAz = new TH3F("fMDCAz",";Centrality (%);p_{T} (GeV/c); DCA_{z} (cm)",
-                    nCentBins,centBins,nPtBins,pTbins,dcaZnBins,dcazBins);
+  fMDCAxyTPC = new TH3F("fMDCAxyTPC",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
+                        nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
+  fMDCAzTPC = new TH3F("fMDCAzTPC",";Centrality (%);p_{T} (GeV/c); DCA_{z} (cm)",
+                       nCentBins,centBins,nPtBins,pTbins,dcaZnBins,dcazBins);
+  fMDCAxyTOF = new TH3F("fMDCAxyTOF",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
+                        nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
+  fMDCAzTOF = new TH3F("fMDCAzTOF",";Centrality (%);p_{T} (GeV/c); DCA_{z} (cm)",
+                       nCentBins,centBins,nPtBins,pTbins,dcaZnBins,dcazBins);
   fMTOFsignal = new TH3F("fMTOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
@@ -194,8 +198,10 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
                          nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
   GetOutputList()->Add(fATOFsignal);
   GetOutputList()->Add(fATPCcounts);
-  GetOutputList()->Add(fMDCAxy);
-  GetOutputList()->Add(fMDCAz);
+  GetOutputList()->Add(fMDCAxyTPC);
+  GetOutputList()->Add(fMDCAzTPC);
+  GetOutputList()->Add(fMDCAxyTOF);
+  GetOutputList()->Add(fMDCAzTOF);
   GetOutputList()->Add(fMTOFsignal);
   GetOutputList()->Add(fMTPCcounts);
   GetOutputList()->Add(fTPCSignal);
@@ -277,7 +283,8 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     if(c_pT > 0.) {
       fMTPCcounts->Fill(centrality,c_pT,ITSsigmad);
-      
+      fMDCAxyTPC->Fill(centrality,c_pT,DCAxy);
+      fMDCAzTPC->Fill(centrality,c_pT,DCAz);
     } else {
       fATPCcounts->Fill(centrality,-c_pT,ITSsigmad);
     }
@@ -287,9 +294,10 @@ Bool_t AODSelector::Process(Long64_t entry)
         Float_t gamma = 1. / TMath::Sqrt(1.f - (beta * beta));
         const float dm = p * p / (beta * beta * gamma * gamma) - M2D;
         if(c_pT > 0.) {
-          if (TMath::Abs(dm) < 2.) 
-            fMDCAxy->Fill(centrality,c_pT,DCAxy);
-          fMDCAz->Fill(centrality,c_pT,DCAz);
+          if (TMath::Abs(dm) < 2.) {
+            fMDCAxyTOF->Fill(centrality,c_pT,DCAxy);
+            fMDCAzTOF->Fill(centrality,c_pT,DCAz);
+          }
           fMTOFsignal->Fill(centrality,c_pT,dm);
         } else {
           fATOFsignal->Fill(centrality,-c_pT,dm);
@@ -328,8 +336,10 @@ void AODSelector::Terminate()
       GetOutputList()->FindObject("fCentralityClasses") &&
       GetOutputList()->FindObject("fATOFsignal") &&
       GetOutputList()->FindObject("fATPCcounts") &&
-      GetOutputList()->FindObject("fMDCAxy") &&
-      GetOutputList()->FindObject("fMDCAz") &&
+      GetOutputList()->FindObject("fMDCAxyTPC") &&
+      GetOutputList()->FindObject("fMDCAzTPC") &&
+      GetOutputList()->FindObject("fMDCAxyTOF") &&
+      GetOutputList()->FindObject("fMDCAzTOF") &&
       GetOutputList()->FindObject("fMTOFsignal") &&
       GetOutputList()->FindObject("fMTPCcounts")) {
     ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
@@ -337,8 +347,10 @@ void AODSelector::Terminate()
     ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fATPCcounts"))->Write();
-    ((TH3F*)GetOutputList()->FindObject("fMDCAxy"))->Write();
-    ((TH3F*)GetOutputList()->FindObject("fMDCAz"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMDCAxyTPC"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMDCAzTPC"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMDCAxyTOF"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fMDCAzTOF"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
   }
