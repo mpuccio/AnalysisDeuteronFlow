@@ -151,6 +151,9 @@ private:
   TArrayD          fCentralityBins;
   TF1*             fDeutBB;                //!<
   TH2F*            fTPCSignal;             //!<
+  TH3F*            fTPCstudyClusters;
+  TH3F*            fTPCstudyChi2;
+  TH3F*            fTPCstudyDCAz;
   
   Bool_t           fRequireITSrefit;       ///< Cut on tracks: set true to require ITS refit
   Bool_t           fRequireTPCrefit;       ///< Cut on tracks: set true to require TPC refit

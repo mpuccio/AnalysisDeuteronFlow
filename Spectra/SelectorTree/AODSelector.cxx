@@ -192,6 +192,16 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
     tpcBins[i] = -4.f + i * 0.2f;
   }
   
+  Double_t dcaBB[6] = {0.,0.5,0.75,1.,1.5,2};
+  Double_t tpcBB[6] = {0,60.5,65.5,70.5,75.5,80.5};
+  Double_t chiBB[7] = {0,3.5,4.,4.5,5.,5.5,6.};
+  fTPCstudyClusters = new TH3F("fTPCstudyClusters",";TPC clusters;p_{T}",nCentBins,centBins,5,tpcBB,8,pTbins);
+  fTPCstudyChi2 = new TH3F("fTPCstudyChi2",";TPC #chi^{2}/NDF;p_{T}",nCentBins,centBins,6,chiBB,8,pTbins);
+  fTPCstudyDCAz = new TH3F("fTPCstudyDCAz",";DCA_{z} (cm);p_{T}",nCentBins,centBins,5,dcaBB,8,pTbins);
+  GetOutputList()->Add(fTPCstudyChi2);
+  GetOutputList()->Add(fTPCstudyClusters);
+  GetOutputList()->Add(fTPCstudyDCAz);
+  
   fCentrality = new TH1F("fCentrality",";Centrality (%);Events / 1%;",100,0.,100.);
   fCentralityClasses = new TH1F("fCentralityClasses",";Centrality classes(%);Events / Class;",nCentBins,centBins);
   fFlattenedCentrality = new TH1F("fFlattenCentrality","Centrality distribution after the flattening;Centrality (%);Events / 1%;",100,0.,100.);
@@ -276,9 +286,6 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (eta < fRequireEtaMin || eta > fRequireEtaMax)
     return kTRUE;
   
-  if (TMath::Abs(chi2NDF) > fRequireMaxChi2)
-    return kTRUE;
-  
   Double_t pz = TMath::Sqrt(p * p - pT * pT);
   Double_t e = TMath::Sqrt(p * p + M2D);
   Double_t y = 0.5 * TMath::Log((e + pz) / (e - pz));
@@ -286,14 +293,26 @@ Bool_t AODSelector::Process(Long64_t entry)
     return kTRUE;
   }
   
+  if (TMath::Abs(DCAxy) > fRequireMaxDCAxy) return kTRUE;
+  if (ITSnClust - ITSnSignal < fRequireSPDrecPoints) return kTRUE;
+  
+  if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
+    if (TMath::Abs(DCAz) >= fRequireMaxDCAz && TPCnSignal >= fRequireTPCsignal)
+      fTPCstudyChi2->Fill(centrality, TMath::Abs(chi2NDF), pT);
+    if (TMath::Abs(chi2NDF) <= fRequireMaxChi2 && TPCnSignal >= fRequireTPCsignal)
+      fTPCstudyDCAz->Fill(centrality, TMath::Abs(DCAz), pT);
+    if (TMath::Abs(chi2NDF) <= fRequireMaxChi2 && TMath::Abs(DCAz) >= fRequireMaxDCAz)
+      fTPCstudyClusters->Fill(centrality, TMath::Abs(TPCnSignal), pT);
+  }
+  
   if (TPCnSignal < fRequireTPCsignal)
     return kTRUE;
   
+  if (TMath::Abs(DCAz) > fRequireMaxDCAz)
+    return kTRUE;
   
-  if (ITSnClust - ITSnSignal < fRequireSPDrecPoints) return kTRUE;
-  if (TMath::Abs(DCAz) > fRequireMaxDCAz) return kTRUE;
-  
-  if (TMath::Abs(DCAxy) > fRequireMaxDCAxy) return kTRUE;
+  if (TMath::Abs(chi2NDF) > fRequireMaxChi2)
+    return kTRUE;
   
   Float_t c_pT = pT;
   if (c_pT > 0) {
@@ -365,7 +384,10 @@ void AODSelector::Terminate()
       GetOutputList()->FindObject("fMDCAxyTOF") &&
       GetOutputList()->FindObject("fMDCAzTOF") &&
       GetOutputList()->FindObject("fMTOFsignal") &&
-      GetOutputList()->FindObject("fMTPCcounts")) {
+      GetOutputList()->FindObject("fMTPCcounts") &&
+      GetOutputList()->FindObject("fTPCstudyClusters") &&
+      GetOutputList()->FindObject("fTPCstudyDCAz") &&
+      GetOutputList()->FindObject("fTPCstudyChi2")) {
     ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
@@ -377,6 +399,9 @@ void AODSelector::Terminate()
     ((TH3F*)GetOutputList()->FindObject("fMDCAzTOF"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fTPCstudyClusters"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fTPCstudyDCAz"))->Write();
+    ((TH3F*)GetOutputList()->FindObject("fTPCstudyChi2"))->Write();
   }
   
   if (GetOutputList()->FindObject("fTPCSignal")) {
