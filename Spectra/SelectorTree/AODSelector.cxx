@@ -195,9 +195,9 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   Double_t dcaBB[6] = {0.,0.5,0.75,1.,1.5,2};
   Double_t tpcBB[6] = {0,60.5,65.5,70.5,75.5,80.5};
   Double_t chiBB[7] = {0,3.5,4.,4.5,5.,5.5,6.};
-  fTPCstudyClusters = new TH3F("fTPCstudyClusters",";TPC clusters;p_{T}",nCentBins,centBins,5,tpcBB,8,pTbins);
-  fTPCstudyChi2 = new TH3F("fTPCstudyChi2",";TPC #chi^{2}/NDF;p_{T}",nCentBins,centBins,6,chiBB,8,pTbins);
-  fTPCstudyDCAz = new TH3F("fTPCstudyDCAz",";DCA_{z} (cm);p_{T}",nCentBins,centBins,5,dcaBB,8,pTbins);
+  fTPCstudyClusters = new TH3F("fTPCstudyClusters",";Centrality;TPC clusters;p_{T}",nCentBins,centBins,5,tpcBB,8,pTbins);
+  fTPCstudyChi2 = new TH3F("fTPCstudyChi2",";Centrality;TPC #chi^{2}/NDF;p_{T}",nCentBins,centBins,6,chiBB,8,pTbins);
+  fTPCstudyDCAz = new TH3F("fTPCstudyDCAz",";Centrality;DCA_{z} (cm);p_{T}",nCentBins,centBins,5,dcaBB,8,pTbins);
   GetOutputList()->Add(fTPCstudyChi2);
   GetOutputList()->Add(fTPCstudyClusters);
   GetOutputList()->Add(fTPCstudyDCAz);
@@ -297,11 +297,11 @@ Bool_t AODSelector::Process(Long64_t entry)
   if (ITSnClust - ITSnSignal < fRequireSPDrecPoints) return kTRUE;
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
-    if (TMath::Abs(DCAz) >= fRequireMaxDCAz && TPCnSignal >= fRequireTPCsignal)
+    if (TMath::Abs(DCAz) <= fRequireMaxDCAz && TPCnSignal >= fRequireTPCsignal)
       fTPCstudyChi2->Fill(centrality, TMath::Abs(chi2NDF), pT);
     if (TMath::Abs(chi2NDF) <= fRequireMaxChi2 && TPCnSignal >= fRequireTPCsignal)
       fTPCstudyDCAz->Fill(centrality, TMath::Abs(DCAz), pT);
-    if (TMath::Abs(chi2NDF) <= fRequireMaxChi2 && TMath::Abs(DCAz) >= fRequireMaxDCAz)
+    if (TMath::Abs(chi2NDF) <= fRequireMaxChi2 && TMath::Abs(DCAz) <= fRequireMaxDCAz)
       fTPCstudyClusters->Fill(centrality, TMath::Abs(TPCnSignal), pT);
   }
   
