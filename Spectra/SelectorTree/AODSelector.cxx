@@ -215,8 +215,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fATOFsignal = new TH3F("fATOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fATPCcounts = new TH3F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); ITS ##sigma",
-                         nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
+  fATPCcounts = new TH2F("fATPCcounts",";Centrality (%);p_{T} (GeV/c); Entries",
+                         nCentBins,centBins,nPtBins,pTbins);
   fMDCAxyTPC = new TH3F("fMDCAxyTPC",";Centrality (%);p_{T} (GeV/c); DCA_{xy} (cm)",
                         nCentBins,centBins,nPtBins,pTbins,nDCAbins,dcaBins);
   fMDCAzTPC = new TH3F("fMDCAzTPC",";Centrality (%);p_{T} (GeV/c); DCA_{z} (cm)",
@@ -228,8 +228,8 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   fMTOFsignal = new TH3F("fMTOFsignal",
                          ";Centrality (%);p_{T} (GeV/c);m_{TOF}^{2}-m_{PDG}^{2} (GeV/c^{2})^{2}",
                          nCentBins,centBins,nPtBins,pTbins,tofNbins,tofBins);
-  fMTPCcounts = new TH3F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); ITS ##sigma",
-                         nCentBins,centBins,nPtBins,pTbins,nTpcBins,tpcBins);
+  fMTPCcounts = new TH2F("fMTPCcounts",";Centrality (%);p_{T} (GeV/c); Entries",
+                         nCentBins,centBins,nPtBins,pTbins);
   GetOutputList()->Add(fATOFsignal);
   GetOutputList()->Add(fATPCcounts);
   GetOutputList()->Add(fMDCAxyTPC);
@@ -325,11 +325,11 @@ Bool_t AODSelector::Process(Long64_t entry)
   
   if (TPCsignal > 0.7f * fDeutBB->Eval(pTPC) && TPCsignal < 1.3f * fDeutBB->Eval(pTPC)) {
     if(c_pT > 0.) {
-      fMTPCcounts->Fill(centrality,c_pT,ITSsigmad);
+      fMTPCcounts->Fill(centrality,c_pT);
       fMDCAxyTPC->Fill(centrality,c_pT,DCAxy);
       fMDCAzTPC->Fill(centrality,c_pT,DCAz);
     } else {
-      fATPCcounts->Fill(centrality,-c_pT,ITSsigmad);
+      fATPCcounts->Fill(centrality,-c_pT);
     }
     if (TOFtime > 0.f && length > 350.f) {
       Float_t beta = length / (2.99792457999999984e-02f * TOFtime);
@@ -392,13 +392,13 @@ void AODSelector::Terminate()
     ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fATOFsignal"))->Write();
-    ((TH3F*)GetOutputList()->FindObject("fATPCcounts"))->Write();
+    ((TH2F*)GetOutputList()->FindObject("fATPCcounts"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMDCAxyTPC"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMDCAzTPC"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMDCAxyTOF"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMDCAzTOF"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fMTOFsignal"))->Write();
-    ((TH3F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
+    ((TH2F*)GetOutputList()->FindObject("fMTPCcounts"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fTPCstudyClusters"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fTPCstudyDCAz"))->Write();
     ((TH3F*)GetOutputList()->FindObject("fTPCstudyChi2"))->Write();

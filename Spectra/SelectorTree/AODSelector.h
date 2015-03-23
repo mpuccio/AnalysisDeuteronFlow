@@ -179,13 +179,13 @@ private:
   TH1F            *fCentralityClasses;     //!< Events statistics per centrality classes
   
   TH3F            *fATOFsignal;            //!<
-  TH3F            *fATPCcounts;            //!<
+  TH2F            *fATPCcounts;            //!<
   TH3F            *fMDCAxyTPC;             //!<
   TH3F            *fMDCAzTPC;              //!<
   TH3F            *fMDCAxyTOF;             //!<
   TH3F            *fMDCAzTOF;              //!<
   TH3F            *fMTOFsignal;            //!<
-  TH3F            *fMTPCcounts;            //!<
+  TH2F            *fMTPCcounts;            //!<
   
   TF1              fCorrectionAD;
   TF1              fCorrectionD;
