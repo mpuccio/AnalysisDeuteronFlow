@@ -389,7 +389,7 @@ void AODSelector::Terminate()
       GetOutputList()->FindObject("fTPCstudyClusters") &&
       GetOutputList()->FindObject("fTPCstudyDCAz") &&
       GetOutputList()->FindObject("fTPCstudyChi2")) {
-    ((TH1F*)GetOutputList()->FindObject("hCuts"))->Write();
+    ((TH1D*)GetOutputList()->FindObject("hCuts"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
