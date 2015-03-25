@@ -239,6 +239,7 @@ void AODSelector::SlaveBegin(TTree * /*tree*/)
   GetOutputList()->Add(fMTOFsignal);
   GetOutputList()->Add(fMTPCcounts);
   GetOutputList()->Add(fTPCSignal);
+  GetOutputList()->Add(cuts);
   
   fDeutBB = new TF1("fDeutBB",DeuteronTPC,0.3,6,0);
 }
@@ -388,6 +389,7 @@ void AODSelector::Terminate()
       GetOutputList()->FindObject("fTPCstudyClusters") &&
       GetOutputList()->FindObject("fTPCstudyDCAz") &&
       GetOutputList()->FindObject("fTPCstudyChi2")) {
+    ((TH1F*)GetOutputList()->FindObject("hCuts"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fFlattenCentrality"))->Write();
     ((TH1F*)GetOutputList()->FindObject("fCentralityClasses"))->Write();
